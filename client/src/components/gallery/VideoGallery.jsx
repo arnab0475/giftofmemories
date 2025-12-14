@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
-
-// Using filters for thumbnails temporarily to simulate video thumbnails
 import galleryEvent1 from "../../assets/images/gallery-event-1.png";
 import galleryWedding1 from "../../assets/images/gallery-wedding-1.png";
 

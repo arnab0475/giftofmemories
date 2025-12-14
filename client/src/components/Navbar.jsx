@@ -20,7 +20,7 @@ const Navbar = () => {
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },
     { name: "Gallery", path: "/gallery" },
-    { name: "About", path: "/#about" },
+    { name: "About", path: "/about" },
   ];
 
   return (
@@ -55,12 +55,12 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
-          <a
-            href="#contact"
+          <Link
+            to="/contact"
             className="px-6 py-2.5 bg-charcoal-black text-warm-ivory font-inter text-sm uppercase tracking-widest hover:bg-gold-accent transition-colors duration-300"
           >
             Book Now
-          </a>
+          </Link>
         </div>
 
         {/* Mobile Menu Toggle */}

@@ -1,7 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import ServiceCard from "./ServiceCard";
-
-// Using placeholders initially, will update with generated images
 import serviceHero from "../../assets/images/service-hero.png";
 import gallery1 from "../../assets/images/gallery-1.png";
 import gallery2 from "../../assets/images/gallery-2.png";

@@ -8,7 +8,6 @@ import gallery2 from "../../assets/images/gallery-2.png";
 import gallery3 from "../../assets/images/gallery-3.png";
 import hero1 from "../../assets/images/hero-1.png";
 import hero2 from "../../assets/images/hero-2.png";
-// Will import new generated images once moved
 import galleryHero from "../../assets/images/gallery-hero.png";
 
 const initialImages = [
