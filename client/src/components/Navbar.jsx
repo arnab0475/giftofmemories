@@ -19,7 +19,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },
-    { name: "Portfolio", path: "/#portfolio" }, // Hash links for now
+    { name: "Gallery", path: "/gallery" },
     { name: "About", path: "/#about" },
   ];
 
