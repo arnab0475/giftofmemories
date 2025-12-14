@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,10 +17,10 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#" },
-    { name: "Portfolio", href: "#portfolio" },
-    { name: "Services", href: "#services" },
-    { name: "About", href: "#about" },
+    { name: "Home", path: "/" },
+    { name: "Services", path: "/services" },
+    { name: "Portfolio", path: "/#portfolio" }, // Hash links for now
+    { name: "About", path: "/#about" },
   ];
 
   return (
@@ -31,23 +33,27 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
         {/* Logo */}
-        <a
-          href="#"
+        <Link
+          to="/"
           className="font-playfair text-2xl md:text-3xl font-bold text-charcoal-black tracking-tighter"
         >
           Lumina<span className="text-gold-accent">.</span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
-              className="font-inter text-sm uppercase tracking-widest text-charcoal-black/80 hover:text-gold-accent transition-colors duration-300"
+              to={link.path}
+              className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 ${
+                location.pathname === link.path
+                  ? "text-gold-accent"
+                  : "text-charcoal-black/80 hover:text-gold-accent"
+              }`}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
           <a
             href="#contact"
@@ -76,14 +82,14 @@ const Navbar = () => {
             className="md:hidden absolute top-full left-0 w-full bg-warm-ivory flex flex-col items-center justify-center space-y-8 overflow-hidden"
           >
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
-                href={link.href}
+                to={link.path}
                 className="font-playfair text-3xl text-charcoal-black hover:text-gold-accent transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             <a
               href="#contact"
