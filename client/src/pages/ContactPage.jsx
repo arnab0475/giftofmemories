@@ -17,10 +17,7 @@ const ContactPage = () => {
 
       <div className="container mx-auto px-6 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Left: Form */}
           <ContactForm />
-
-          {/* Right: Info */}
           <ContactInfo />
         </div>
       </div>

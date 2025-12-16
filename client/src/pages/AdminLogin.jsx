@@ -17,7 +17,6 @@ const AdminLogin = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate network request
     setTimeout(() => {
       if (email === "admin@gmail.com" && password === "admin1234") {
         setIsLoading(false);
@@ -36,7 +35,7 @@ const AdminLogin = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row font-inter overflow-hidden">
-      {/* LEFT PANEL - BRAND IDENTITY */}
+    
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -57,7 +56,6 @@ const AdminLogin = () => {
             strokeWidth={1.5}
           />
         </motion.div>
-        {/* Vertical Gold Line Decoration - "Thin vertical gold line" option */}
         <motion.div
           initial={{ height: 0 }}
           animate={{ height: "100px" }}

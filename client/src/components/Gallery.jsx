@@ -5,7 +5,6 @@ import { X } from "lucide-react";
 import gallery1 from "../assets/images/gallery-1.png";
 import gallery2 from "../assets/images/gallery-2.png";
 import gallery3 from "../assets/images/gallery-3.png";
-// Re-using hero images for more content
 import hero1 from "../assets/images/hero-1.png";
 import hero2 from "../assets/images/hero-2.png";
 import hero3 from "../assets/images/hero-3.png";
