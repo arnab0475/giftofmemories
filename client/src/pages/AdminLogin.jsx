@@ -13,29 +13,49 @@ const AdminLogin = () => {
   const [error, setError] = useState("");
   const [focusedField, setFocusedField] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    setTimeout(() => {
-      if (email === "admin@gmail.com" && password === "admin1234") {
-        setIsLoading(false);
+    try {
+      const response = await fetch("http://localhost:4000/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
         setIsSuccess(true);
         console.log("Login successful, redirecting...");
         setTimeout(() => {
           navigate("/dashboard", { replace: true });
         }, 800);
       } else {
-        setIsLoading(false);
-        setError("Invalid credentials. Access denied.");
-        setTimeout(() => setError(""), 3000);
+        setError(
+          data.Message || data.message || "Invalid credentials. Access denied."
+        );
+        if (response.status === 429) {
+          setError(
+            data.message || "Too many attempts. Please try again later."
+          );
+        }
       }
-    }, 1000);
+    } catch (err) {
+      console.error("Login failed", err);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row font-inter overflow-hidden">
-    
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

@@ -13,11 +13,12 @@ import {
   MessageCircle,
   FileText,
 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isActive = (path) =>
     location.pathname === path ||
     (path !== "/dashboard" && location.pathname.startsWith(path));
@@ -97,6 +98,39 @@ const Sidebar = () => {
               {group.items.map((item, itemIndex) => {
                 const active = isActive(item.path);
 
+                if (item.label === "Logout") {
+                  return (
+                    <button
+                      key={itemIndex}
+                      onClick={async () => {
+                        try {
+                          await fetch(
+                            "http://localhost:4000/api/admin/logout",
+                            {
+                              method: "POST",
+                              credentials: "include",
+                            }
+                          );
+                          navigate("/admin-portal-secret");
+                        } catch (error) {
+                          console.error("Logout failed:", error);
+                        }
+                      }}
+                      className={`
+                        w-full flex items-center gap-3 px-4 py-3 rounded-lg text-[14px] font-medium transition-all duration-200
+                        text-[#E74C3C] hover:bg-[#E74C3C]/10 text-left cursor-pointer
+                      `}
+                    >
+                      <item.icon
+                        size={18}
+                        strokeWidth={1.5}
+                        className="text-[#E74C3C]"
+                      />
+                      {item.label}
+                    </button>
+                  );
+                }
+
                 return (
                   <Link
                     key={itemIndex}
@@ -119,8 +153,6 @@ const Sidebar = () => {
                       ${
                         active
                           ? "text-[#C9A24D] bg-[#1A1A1A]"
-                          : item.isDanger
-                          ? "text-[#E74C3C] hover:bg-[#E74C3C]/10"
                           : "text-[#EDE6DB]/80 hover:text-[#FAF9F6] hover:bg-[#2B2B2B]/30 hover:pl-5"
                       }
                     `}
@@ -131,8 +163,6 @@ const Sidebar = () => {
                         className={`${
                           active
                             ? "text-[#C9A24D]"
-                            : item.isDanger
-                            ? "text-[#E74C3C]"
                             : "text-[#7A7A7A] group-hover:text-[#EDE6DB]"
                         }`}
                       />
