@@ -1,5 +1,4 @@
 import { Testimonial } from "../Model/Testimonial.js";
-
 export const getTestimonials = async (req, res) => {
   try {
     const testimonials = await Testimonial.find();
@@ -8,7 +7,6 @@ export const getTestimonials = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
-
 export const addTestimonial = async (req, res) => {
   try {
     const { name, feedback, rating, image } = req.body;
@@ -31,7 +29,6 @@ export const addTestimonial = async (req, res) => {
       rating,
       image,
     });
-
     await newTestimonial.save();
     res.status(201).json({
       message: "Testimonial added successfully",
@@ -41,18 +38,15 @@ export const addTestimonial = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
-
 export const updateTestimonial = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, feedback, rating, image } = req.body;
-
     if (rating && (rating < 1 || rating > 5)) {
       return res
         .status(400)
         .json({ message: "Rating must be between 1 and 5" });
     }
-
     const updatedTestimonial = await Testimonial.findByIdAndUpdate(
       id,
       { name, feedback, rating, image },
@@ -62,7 +56,6 @@ export const updateTestimonial = async (req, res) => {
     if (!updatedTestimonial) {
       return res.status(404).json({ message: "Testimonial not found" });
     }
-
     res.status(200).json({
       message: "Testimonial updated successfully",
       testimonial: updatedTestimonial,
@@ -71,16 +64,13 @@ export const updateTestimonial = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
-
 export const deleteTestimonial = async (req, res) => {
   try {
     const { id } = req.params;
     const deletedTestimonial = await Testimonial.findByIdAndDelete(id);
-
     if (!deletedTestimonial) {
       return res.status(404).json({ message: "Testimonial not found" });
     }
-
     res.status(200).json({ message: "Testimonial deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });

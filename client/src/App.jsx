@@ -14,6 +14,7 @@ import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/DashboardPage";
+import { ToastContainer } from "react-toastify";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -35,7 +36,7 @@ const AppContent = () => {
       <ScrollToTop />
       <div className="min-h-screen bg-warm-ivory selection:bg-gold-accent selection:text-white">
         {!shouldHideNavbar && <Navbar />}
-
+        <ToastContainer position="top-center" />
         <main>
           <Routes>
             <Route path="/" element={<HomePage />} />

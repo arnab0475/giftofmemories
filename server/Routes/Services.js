@@ -29,11 +29,10 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit per file
+    fileSize: 10 * 1024 * 1024,
   },
   fileFilter: fileFilter,
 });
-
 router.get("/services", getServices);
 router.post(
   "/add-service",
@@ -49,5 +48,4 @@ router.put(
   updateService
 ); 
 router.delete("/delete-service/:id", AdminMiddleware, deleteService);
-
 export default router;

@@ -5,10 +5,7 @@ import { AdminMiddleware } from "../Middlewares/AuthMiddleware.js";
 
 const router = express.Router();
 
-// Use memory storage for Cloudinary uploads
 const storage = multer.memoryStorage();
-
-// File filter to allow only images
 const fileFilter = (req, file, cb) => {
   const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
   const extname = allowedImageTypes.test(file.originalname.toLowerCase());
@@ -20,12 +17,10 @@ const fileFilter = (req, file, cb) => {
     cb(new Error("Only image files are allowed!"), false);
   }
 };
-
-// Configure multer
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 10 * 1024 * 1024,
   },
   fileFilter: fileFilter,
 });
