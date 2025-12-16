@@ -37,7 +37,7 @@ const Navbar = () => {
           to="/"
           className="font-playfair text-2xl md:text-3xl font-bold text-charcoal-black tracking-tighter"
         >
-          Lumina<span className="text-gold-accent">.</span>
+          Gift of Memories<span className="text-gold-accent">.</span>
         </Link>
 
         {/* Desktop Navigation */}
