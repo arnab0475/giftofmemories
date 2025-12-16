@@ -15,6 +15,7 @@ import AboutPage from "./pages/AboutPage";
 import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/DashboardPage";
 import { ToastContainer } from "react-toastify";
+import ProtectedRoute from "./components/ProtectedRoute"
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -45,16 +46,18 @@ const AppContent = () => {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/admin-portal-secret" element={<AdminLogin />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+
+            {/* Protected Dashboard Route */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+            </Route>
           </Routes>
         </main>
-
         {!shouldHideNavbar && <Footer />}
       </div>
     </>
   );
 };
-
 function App() {
   return (
     <Router>
@@ -62,5 +65,4 @@ function App() {
     </Router>
   );
 }
-
 export default App;

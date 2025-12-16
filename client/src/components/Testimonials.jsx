@@ -17,7 +17,7 @@ const testimonials = [
   },
   {
     id: 3,
-    text: "Lumina's work elevated our brand campaign to a whole new level. The attention to detail and creative direction were impeccable.",
+    text: "Gift of Memories's work elevated our brand campaign to a whole new level. The attention to detail and creative direction were impeccable.",
     author: "Elena Rossi",
     role: "Fashion Director",
   },

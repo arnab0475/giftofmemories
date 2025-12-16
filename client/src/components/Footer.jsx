@@ -8,7 +8,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-6">
             <h2 className="font-playfair text-3xl font-bold tracking-tighter">
-              Lumina<span className="text-gold-accent">.</span>
+              Gift of Memories<span className="text-gold-accent">.</span>
             </h2>
             <p className="font-inter text-warm-ivory/60 text-sm leading-relaxed max-w-xs">
               Professional photography studio capturing life's most beautiful
@@ -125,7 +125,7 @@ const Footer = () => {
         </div>
 
         <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-xs font-inter text-warm-ivory/40">
-          <p>&copy; 2025 Lumina Photography. All rights reserved.</p>
+          <p>&copy; 2025 Gift of Memories Photography. All rights reserved.</p>
           <div className="flex space-x-6">
             <a href="#" className="hover:text-white transition-colors">
               Privacy Policy

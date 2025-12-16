@@ -18,7 +18,7 @@ const CTASection = () => {
             book a session.
           </p>
           <motion.a
-            href="mailto:hello@lumina.com"
+            href="mailto:hello@giftofmemories.com"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="inline-block px-10 py-4 bg-charcoal-black text-warm-ivory font-inter text-sm uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all duration-300 shadow-lg"
