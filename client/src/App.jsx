@@ -12,6 +12,8 @@ import ServicesPage from "./pages/ServicesPage";
 import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
+import AdminLogin from "./pages/AdminLogin";
+import DashboardPage from "./pages/DashboardPage";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -23,12 +25,16 @@ const ScrollToTop = () => {
   return null;
 };
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
+  const hideNavbarRoutes = ["/admin-portal-secret", "/dashboard"];
+  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+
   return (
-    <Router>
+    <>
       <ScrollToTop />
       <div className="min-h-screen bg-warm-ivory selection:bg-gold-accent selection:text-white">
-        <Navbar />
+        {!shouldHideNavbar && <Navbar />}
 
         <main>
           <Routes>
@@ -37,11 +43,21 @@ function App() {
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/admin-portal-secret" element={<AdminLogin />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
           </Routes>
         </main>
 
-        <Footer />
+        {!shouldHideNavbar && <Footer />}
       </div>
+    </>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
