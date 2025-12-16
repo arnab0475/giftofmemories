@@ -9,7 +9,6 @@ const tags = [
   "Black & White",
   "Drone Shots",
 ];
-
 const ExplorationTags = () => {
   return (
     <section className="py-12 bg-muted-beige border-y border-warm-ivory/10">
