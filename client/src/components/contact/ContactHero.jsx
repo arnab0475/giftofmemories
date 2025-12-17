@@ -6,7 +6,7 @@ const ContactHero = () => {
     <motion.section
       initial="initial"
       whileHover="hover"
-      className="relative h-[40vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
+      className="relative h-[55vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
     >
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">

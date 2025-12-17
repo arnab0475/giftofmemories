@@ -11,20 +11,11 @@ import ImmersiveGallery from "../components/gallery/ImmersiveGallery";
 
 const GalleryPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
-  const [viewMode, setViewMode] = useState("masonry");
+  const [viewMode, setViewMode] = useState("grid");
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [viewMode]);
-
-   if (viewMode === "grid") {
-    return (
-      <ImmersiveGallery
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-      />
-    );
-  }
 
   return (
     <motion.div
@@ -33,7 +24,9 @@ const GalleryPage = () => {
       exit={{ opacity: 0 }}
       className="bg-warm-ivory min-h-screen"
     >
-      {viewMode === "masonry" && (
+      {viewMode === "grid" ? (
+        <ImmersiveGallery viewMode={viewMode} setViewMode={setViewMode} />
+      ) : (
         <>
           <GalleryHero />
 
@@ -43,25 +36,21 @@ const GalleryPage = () => {
             viewMode={viewMode}
             setViewMode={setViewMode}
           />
-
           <MainGalleryGrid activeFilter={activeFilter} viewMode={viewMode} />
-          <div className="relative z-10 bg-warm-ivory">
-            <VideoGallery />
-            <FeaturedServices />
-            <main className="container mx-auto px-6 py-12">
-              <h3 className="font-playfair text-3xl text-center mb-8 text-charcoal-black">
-                Explore More Moments
-              </h3>
-              <ExplorationTags />
-            </main>
-            <GalleryCTA />
-          </div>
         </>
       )}
 
-      {/* {viewMode === "grid" && (
-        <ImmersiveGallery viewMode={viewMode} setViewMode={setViewMode} />
-      )} */}
+      <div className="relative z-10 bg-warm-ivory">
+        <VideoGallery />
+        <FeaturedServices />
+        <main className="container mx-auto px-6 py-12">
+          <h3 className="font-playfair text-3xl text-center mb-8 text-charcoal-black">
+            Explore More Moments
+          </h3>
+          <ExplorationTags />
+        </main>
+        <GalleryCTA />
+      </div>
     </motion.div>
   );
 };

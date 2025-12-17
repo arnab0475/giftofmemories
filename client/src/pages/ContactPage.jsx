@@ -11,7 +11,7 @@ const ContactPage = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="bg-warm-ivory min-h-screen pt-20"
+      className="bg-warm-ivory min-h-screen"
     >
       <ContactHero />
 

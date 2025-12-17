@@ -8,14 +8,20 @@ import CustomPackageCTA from "../components/services/CustomPackageCTA";
 import ServiceTrustStrip from "../components/services/ServiceTrustStrip";
 
 const ServicesPage = () => {
-  const [activeFilter, setActiveFilter] = useState("All Services");
+  const [activeFilter, setActiveFilter] = useState({
+    category: "All Services",
+    priceRange: [0, 100000],
+    location: "All",
+    duration: "All",
+    sortBy: "Recommended",
+  });
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="bg-warm-ivory min-h-screen pt-20"
+      className="bg-warm-ivory min-h-screen"
     >
       <ServiceHero />
       <ServiceFilter

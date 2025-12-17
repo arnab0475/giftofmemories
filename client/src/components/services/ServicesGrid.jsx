@@ -4,10 +4,87 @@ import { servicesData } from "../../data/servicesData";
 import { Link } from "react-router-dom";
 
 const ServicesGrid = ({ activeFilter }) => {
-  const filteredServices =
-    activeFilter === "All Services"
-      ? servicesData
-      : servicesData.filter((service) => service.category === activeFilter);
+  const parsePrice = (priceStr) => {
+    return parseInt(priceStr.replace(/[^\d]/g, ""), 10);
+  };
+
+  const filteredServices = servicesData
+    .filter((service) => {
+      // 1. Category Filter
+      if (
+        activeFilter.category !== "All Services" &&
+        service.category !== activeFilter.category
+      ) {
+        return false;
+      }
+
+      // 2. Price Filter
+      const price = parsePrice(service.price);
+      if (
+        price < activeFilter.priceRange[0] ||
+        price > activeFilter.priceRange[1]
+      ) {
+        return false;
+      }
+
+      // 3. Location Filter
+      if (
+        activeFilter.location !== "All" &&
+        service.details.location !== activeFilter.location
+      ) {
+        // Try partial match if exact match fails
+        if (!service.details.location.includes(activeFilter.location)) {
+          return false;
+        }
+      }
+
+      // 4. Duration Filter
+      if (
+        activeFilter.duration !== "All" &&
+        service.details.duration !== activeFilter.duration
+      ) {
+        // Fuzzy match logic for specific cases if needed
+        // e.g. "Full Day" matches "Full Day Coverage"
+        if (
+          activeFilter.duration === "Full Day" &&
+          service.details.duration.includes("Full Day")
+        )
+          return true;
+        if (
+          activeFilter.duration === "Project Based" &&
+          service.details.duration.toLowerCase().includes("project")
+        )
+          return true;
+        if (
+          activeFilter.duration === "Half Day (4-6 Hours)" &&
+          service.details.duration.includes("4-6 Hours")
+        )
+          return true; // Pre-wedding
+        if (
+          activeFilter.duration === "Half Day (4-6 Hours)" &&
+          service.details.duration.includes("4-8 Hours")
+        )
+          return true; // Event
+        if (
+          activeFilter.duration === "Short Session (2-3 Hours)" &&
+          service.details.duration.includes("2-3 Hours")
+        )
+          return true;
+
+        return false;
+      }
+
+      return true;
+    })
+    .sort((a, b) => {
+      if (activeFilter.sortBy === "Price: Low to High") {
+        return parsePrice(a.price) - parsePrice(b.price);
+      }
+      if (activeFilter.sortBy === "Price: High to Low") {
+        return parsePrice(b.price) - parsePrice(a.price);
+      }
+      return 0; // Default / Recommended
+    });
 
   return (
     <section className="py-20 bg-warm-ivory min-h-screen">

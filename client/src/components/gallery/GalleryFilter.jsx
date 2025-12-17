@@ -19,7 +19,7 @@ const GalleryFilter = ({
     <div className="sticky top-[80px] z-40 bg-warm-ivory border-b border-muted-beige/30 py-4 shadow-sm transition-all duration-300">
       <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Filters */}
-        <div className="flex space-x-3 overflow-x-auto no-scrollbar w-full md:w-auto pb-2 md:pb-0">
+        <div className="flex space-x-3 overflow-x-auto no-scrollbar w-full md:w-auto py-2 md:py-2">
           {filters.map((filter) => (
             <button
               key={filter}
