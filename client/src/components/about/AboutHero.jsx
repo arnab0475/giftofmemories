@@ -3,10 +3,21 @@ import aboutHeroBg from "../../assets/images/about-hero.png";
 
 const AboutHero = () => {
   return (
-    <section className="relative h-[50vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center">
+    <motion.section
+      initial="initial"
+      whileHover="hover"
+      className="relative h-[50vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
+    >
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
-        <img
+        <motion.img
+          variants={{
+            initial: { scale: 1 },
+            hover: {
+              scale: 1.05,
+              transition: { duration: 1.5, ease: "easeOut" },
+            },
+          }}
           src={aboutHeroBg}
           alt="Vintage Camera Setup"
           className="w-full h-full object-cover opacity-50"
@@ -29,7 +40,7 @@ const AboutHero = () => {
           </p>
         </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

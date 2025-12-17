@@ -4,18 +4,21 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import LoadingScreen from "./components/LoadingScreen";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import HomePage from "./pages/HomePage";
 import ServicesPage from "./pages/ServicesPage";
+import ServiceDetailsPage from "./pages/ServiceDetailsPage";
 import GalleryPage from "./pages/GalleryPage";
 import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/DashboardPage";
 import { ToastContainer } from "react-toastify";
-import ProtectedRoute from "./components/ProtectedRoute"
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -31,10 +34,22 @@ const AppContent = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/admin-portal-secret", "/dashboard"];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
       <ScrollToTop />
+      <AnimatePresence mode="wait">
+        {isLoading && <LoadingScreen key="loading" />}
+      </AnimatePresence>
+
       <div className="min-h-screen bg-warm-ivory selection:bg-gold-accent selection:text-white">
         {!shouldHideNavbar && <Navbar />}
         <ToastContainer position="top-center" />
@@ -42,6 +57,7 @@ const AppContent = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/services" element={<ServicesPage />} />
+            <Route path="/services/:id" element={<ServiceDetailsPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/about" element={<AboutPage />} />

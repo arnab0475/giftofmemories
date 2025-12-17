@@ -3,10 +3,26 @@ import contactHeroBg from "../../assets/images/contact-hero.png";
 
 const ContactHero = () => {
   return (
-    <section className="relative h-[40vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center">
+    <motion.section
+      initial="initial"
+      whileHover="hover"
+      className="relative h-[40vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
+    >
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
-        <img
+        <motion.img
+          variants={{
+            initial: { scale: 1, opacity: 0.5, x: 0 },
+            hover: {
+              scale: 1.02,
+              opacity: 1,
+              x: [0, 10, 0, -10, -5, 0],
+              transition: {
+                opacity: { duration: 0.5, ease: "easeInOut" },
+                x: { duration: 0.5, ease: "easeInOut" },
+              },
+            },
+          }}
           src={contactHeroBg}
           alt="Photography Studio"
           className="w-full h-full object-cover opacity-60"
@@ -29,7 +45,7 @@ const ContactHero = () => {
           </p>
         </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

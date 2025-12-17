@@ -1,66 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import ServiceCard from "./ServiceCard";
-import serviceHero from "../../assets/images/service-hero.png";
-import gallery1 from "../../assets/images/gallery-1.png";
-import gallery2 from "../../assets/images/gallery-2.png";
-import gallery3 from "../../assets/images/gallery-3.png";
-
-const servicesData = [
-  {
-    id: 1,
-    title: "Wedding Photography",
-    category: "Weddings",
-    description:
-      "Capturing emotions, rituals and unforgettable moments. Comprehensive coverage from pre-wedding to reception.",
-    price: "₹45,000",
-    image: gallery2,
-  },
-  {
-    id: 2,
-    title: "Event Coverage",
-    category: "Events",
-    description:
-      "Professional documentation for corporate events, parties, concerts, and stage performances.",
-    price: "₹20,000",
-    image: serviceHero,
-  },
-  {
-    id: 3,
-    title: "Portrait Sessions",
-    category: "Portraits",
-    description:
-      "Artistic solo, couple, or family portraits shot in studio or on location with professional styling.",
-    price: "₹10,000",
-    image: gallery3,
-  },
-  {
-    id: 4,
-    title: "Commercial & Brand",
-    category: "Commercial",
-    description:
-      "High-quality product photography and brand storytelling visuals to elevate your business presence.",
-    price: "₹35,000",
-    image: gallery1,
-  },
-  {
-    id: 5,
-    title: "Cinematic Films",
-    category: "Weddings",
-    description:
-      "Story-driven videography and cinematography for weddings, ads, and music videos.",
-    price: "₹50,000",
-    image: gallery2,
-  },
-  {
-    id: 6,
-    title: "Pre-Wedding Shoots",
-    category: "Weddings",
-    description:
-      "Dreamy, cinematic outdoor shoots to capture your chemistry before the big day arrives.",
-    price: "₹30,000",
-    image: gallery3,
-  },
-];
+import { servicesData } from "../../data/servicesData";
+import { Link } from "react-router-dom";
 
 const ServicesGrid = ({ activeFilter }) => {
   const filteredServices =
@@ -77,7 +18,9 @@ const ServicesGrid = ({ activeFilter }) => {
         >
           <AnimatePresence>
             {filteredServices.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+              <Link to={`/services/${service.id}`} key={service.id}>
+                <ServiceCard service={service} />
+              </Link>
             ))}
           </AnimatePresence>
         </motion.div>

@@ -1,15 +1,32 @@
 import { motion } from "framer-motion";
 import galleryHeroBg from "../../assets/images/gallery-hero.png";
+import { Link } from "react-router-dom";
 
 const GalleryHero = () => {
   return (
-    <section className="relative h-[40vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center">
+    <motion.section
+      initial="initial"
+      whileHover="hover"
+      className="relative h-[40vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
+    >
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
-        <img
+        <motion.img
+          variants={{
+            initial: { scale: 1, opacity: 0.5, x: 0 },
+            hover: {
+              scale: 1.02,
+              opacity: 1,
+              x: [0, 10, 0, -10, -5, 0],
+              transition: {
+                opacity: { duration: 0.5, ease: "easeInOut" },
+                x: { duration: 0.5, ease: "easeInOut" },
+              },
+            },
+          }}
           src={galleryHeroBg}
           alt="Photography Gallery"
-          className="w-full h-full object-cover opacity-60"
+          className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-charcoal-black/80 to-charcoal-black/40" />
       </div>
@@ -23,13 +40,20 @@ const GalleryHero = () => {
           <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-warm-ivory mb-3 font-bold tracking-tight">
             Our Work
           </h1>
-          <p className="font-inter text-lg text-muted-beige/80 mb-0 font-light max-w-2xl mx-auto">
+          <p className="font-inter text-lg text-muted-beige/80 mb-6 font-light max-w-2xl mx-auto">
             A glimpse into moments we’ve had the privilege to capture. Every
             image tells a unique story of love, joy, and connection.
           </p>
         </motion.div>
+        <div className="flex items-center justify-center space-x-2 text-sm font-inter uppercase tracking-widest text-warm-ivory/60">
+          <Link to="/" className="hover:text-gold-accent transition-colors">
+            Gift of memories
+          </Link>
+          <span className="text-gold-accent">•</span>
+          <span className="text-warm-ivory">Gallery</span>
+        </div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 
