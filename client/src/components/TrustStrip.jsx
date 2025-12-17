@@ -10,7 +10,7 @@ const TrustStrip = () => {
   ];
 
   return (
-    <div className="bg-warm-ivory py-16 border-b border-muted-beige">
+    <div className="bg-gold-accent py-16 border-b border-muted-beige">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
@@ -22,7 +22,7 @@ const TrustStrip = () => {
               transition={{ delay: index * 0.1, duration: 0.5 }}
               className="flex flex-col items-center text-center space-y-2 group cursor-default"
             >
-              <div className="text-gold-accent mb-2 transition-transform duration-300 group-hover:scale-110">
+              <div className="text-slate-gray mb-2 transition-transform duration-300 group-hover:scale-110">
                 {stat.icon}
               </div>
               <h3 className="font-playfair text-3xl font-bold text-charcoal-black">
