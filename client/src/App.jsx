@@ -17,6 +17,7 @@ import ContactPage from "./pages/ContactPage";
 import AboutPage from "./pages/AboutPage";
 import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/DashboardPage";
+import FloatingChatButtons from "./components/FloatingChatButtons";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -52,6 +53,7 @@ const AppContent = () => {
 
       <div className="min-h-screen bg-warm-ivory selection:bg-gold-accent selection:text-white">
         {!shouldHideNavbar && <Navbar />}
+        {!shouldHideNavbar && <FloatingChatButtons />}
         <ToastContainer position="top-center" />
         <main>
           <Routes>

@@ -12,17 +12,28 @@ export const TextGenerateEffect = ({
   const [scope, animate] = useAnimate();
   let wordsArray = words.split(" ");
   useEffect(() => {
-    animate(
-      "span",
-      {
-        opacity: 1,
-        filter: filter ? "blur(0px)" : "none",
-      },
-      {
-        duration: duration ? duration : 1,
-        delay: stagger(0.12),
-      }
-    );
+    const enterAnimation = async () => {
+      await animate(
+        "span",
+        {
+          opacity: 1,
+          filter: filter ? "blur(0px)" : "none",
+        },
+        {
+          duration: duration ? duration : 1,
+          delay: stagger(0.12),
+        }
+      );
+      await animate(
+        "span",
+        {
+          color: "var(--color-charcoal-black)",
+        },
+        { duration: 1 }
+      );
+    };
+
+    enterAnimation();
   }, [scope.current]);
 
   const renderWords = () => {
@@ -35,7 +46,7 @@ export const TextGenerateEffect = ({
             {para.split(" ").map((word, idx) => (
               <motion.span
                 key={word + idx + pIdx}
-                className="text-black opacity-0"
+                className="text-slate-gray/40 opacity-0"
                 style={{ filter: filter ? "blur(10px)" : "none" }}
               >
                 {word}{" "}

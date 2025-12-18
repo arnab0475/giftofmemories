@@ -43,7 +43,7 @@ const StorySection = () => {
 
             <div className="mt-10">
               <span className="font-playfair text-2xl text-gold-accent italic">
-                - The Pixonova Team
+                - Gift of Memories Team
               </span>
             </div>
           </motion.div>

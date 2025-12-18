@@ -8,7 +8,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-6">
             <h2 className="font-playfair text-3xl font-bold tracking-tighter">
-              Gift of Memories<span className="text-gold-accent">.</span>
+              Gift of Memories<span className="text-charcoal-black">.</span>
             </h2>
             <p className="font-inter text-charcoal-black/70 text-sm leading-relaxed max-w-xs">
               Professional photography studio capturing life's most beautiful

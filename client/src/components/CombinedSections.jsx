@@ -70,7 +70,7 @@ const ProgressBar = ({ name, level }) => {
       <div className="h-[2px] w-full bg-charcoal-black/10 rounded-full overflow-hidden">
         <motion.div
           style={{ width }}
-          className="h-full bg-gradient-to-r from-gold-accent to-pink-500"
+          className="h-full bg-gradient-to-r from-warm-ivory/30 to-gold-accent"
         />
       </div>
     </div>
@@ -137,8 +137,8 @@ const CombinedSections = () => {
             viewport={{ once: true, margin: "-100px" }} 
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-block px-4 py-2 rounded-full bg-soft-rose border border-white/10 mb-8 backdrop-blur-sm">
-              <span className="text-secondary-cyan text-xs font-inter uppercase tracking-widest text-[#2ECC71]">
+            <div className="inline-block px-4 py-2 rounded-full bg-gold-accent/40 border border-white/10 mb-8 backdrop-blur-sm">
+              <span className="text-charcoal-black text-xs font-inter uppercase tracking-widest">
                 About Gift of Memories Studio
               </span>
             </div>
@@ -168,10 +168,10 @@ const CombinedSections = () => {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
           >
-            <span className="text-emerald-600 font-inter text-sm font-bold uppercase tracking-widest block mb-6 px-4 border-l-2 border-emerald-600">
+            <span className="text-charcoal-black font-inter text-sm font-bold uppercase tracking-widest block mb-6 px-4 border-l-2 border-charcoal-black">
               Why Choose Us
             </span>
-            <p className="font-inter text-charcoal-black/80 text-lg leading-relaxed mb-12 max-w-xl">
+            <p className="font-inter text-charcoal-black/60 text-lg leading-relaxed mb-12 max-w-xl">
               Gift of Memories delivers candid and cinematic wedding photography
               in Patna with creativity, professionalism, and a personalized
               touch to make your memories timeless.
@@ -179,7 +179,7 @@ const CombinedSections = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
               {features.map((feature, index) => (
                 <div key={index} className="flex items-center gap-4">
-                  <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
+                  <div className="w-6 h-6 rounded-full bg-gold-accent/20 flex items-center justify-center flex-shrink-0 text-gold-accent">
                     <Check size={14} strokeWidth={4} />
                   </div>
                   <span className="font-inter font-bold text-sm tracking-wide text-charcoal-black">
@@ -197,10 +197,10 @@ const CombinedSections = () => {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
           >
-            <span className="text-emerald-600 font-inter text-sm font-bold uppercase tracking-widest block mb-6 px-4 border-l-2 border-emerald-600">
+            <span className="text-charcoal-black font-inter text-sm font-bold uppercase tracking-widest block mb-6 px-4 border-l-2 border-charcoal-black">
               Gift of Memories Team
             </span>
-            <p className="font-inter text-charcoal-black/80 text-lg leading-relaxed mb-16 max-w-xl">
+            <p className="font-inter text-charcoal-black/60 text-lg leading-relaxed mb-16 max-w-xl">
               At Gift of Memories, our team of passionate wedding photographers
               and cinematographers in Patna work together to capture every
               emotion, smile, and detail with creativity and perfection.
@@ -217,7 +217,7 @@ const CombinedSections = () => {
                   <p className="text-xs font-bold uppercase tracking-widest text-charcoal-black/70 mb-4">
                     {stat.label}
                   </p>
-                  <div className="w-8 h-1 bg-emerald-600 rounded-full" />
+                  <div className="w-8 h-1 bg-gold-accent rounded-full" />
                 </div>
               ))}
             </div>

@@ -75,7 +75,7 @@ const HomePage = () => {
               </p>
               <a
                 href="/services"
-                className="group inline-flex items-center gap-3 px-8 py-4 bg-charcoal-black text-warm-ivory font-inter text-sm font-semibold uppercase tracking-widest rounded-full hover:bg-gold-accent hover:text-charcoal-black transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="group inline-flex items-center gap-3 px-8 py-4 bg-gold-accent text-charcoal-black font-inter text-sm font-semibold uppercase tracking-widest rounded-full hover:bg-charcoal-black hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Explore Services
                 <svg
