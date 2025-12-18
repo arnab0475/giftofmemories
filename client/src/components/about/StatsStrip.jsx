@@ -9,7 +9,7 @@ const stats = [
 
 const StatsStrip = () => {
   return (
-    <div className="bg-charcoal-black py-12 border-y border-gold-accent/20">
+    <div className="bg-gold-accent py-12 border-y border-charcoal-black/10">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
@@ -21,10 +21,10 @@ const StatsStrip = () => {
               viewport={{ once: true }}
               className="text-center"
             >
-              <h4 className="font-playfair text-3xl md:text-4xl text-gold-accent font-bold mb-1">
+              <h4 className="font-playfair text-3xl md:text-4xl text-charcoal-black font-bold mb-1">
                 {stat.value}
               </h4>
-              <span className="font-inter text-xs md:text-sm text-stone-300 uppercase tracking-widest">
+              <span className="font-inter text-xs md:text-sm text-charcoal-black/70 uppercase tracking-widest">
                 {stat.label}
               </span>
             </motion.div>

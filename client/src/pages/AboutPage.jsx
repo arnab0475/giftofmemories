@@ -3,7 +3,7 @@ import AboutHero from "../components/about/AboutHero";
 import StorySection from "../components/about/StorySection";
 import ValuesSection from "../components/about/ValuesSection";
 import StatsStrip from "../components/about/StatsStrip";
-import TeamSection from "../components/about/TeamSection";
+import NewTeamSection from "../components/about/NewTeamSection";
 import AboutCTA from "../components/about/AboutCTA";
 
 const AboutPage = () => {
@@ -18,7 +18,7 @@ const AboutPage = () => {
       <StorySection />
       <ValuesSection />
       <StatsStrip />
-      <TeamSection />
+      <NewTeamSection />
       <AboutCTA />
     </motion.div>
   );

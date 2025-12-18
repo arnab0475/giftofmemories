@@ -62,15 +62,82 @@ const servicesData = [
   },
 ];
 
-const ServicesGrid = ({ activeFilter }) => {
-  const filteredServices =
+// Helper function to parse price string to number
+const parsePrice = (priceStr) => {
+  return parseInt(priceStr.replace(/[₹,]/g, ""), 10);
+};
+
+const ServicesGrid = ({ activeFilter, activePriceFilter, sortBy }) => {
+  // Filter by category
+  let filteredServices =
     activeFilter === "All Services"
-      ? servicesData
+      ? [...servicesData]
       : servicesData.filter((service) => service.category === activeFilter);
+
+  // Filter by price range
+  if (activePriceFilter && activePriceFilter.label !== "All Prices") {
+    filteredServices = filteredServices.filter((service) => {
+      const price = parsePrice(service.price);
+      return price >= activePriceFilter.min && price < activePriceFilter.max;
+    });
+  }
+
+  // Sort services
+  if (sortBy && sortBy !== "default") {
+    filteredServices = [...filteredServices].sort((a, b) => {
+      switch (sortBy) {
+        case "price-asc":
+          return parsePrice(a.price) - parsePrice(b.price);
+        case "price-desc":
+          return parsePrice(b.price) - parsePrice(a.price);
+        case "name-asc":
+          return a.title.localeCompare(b.title);
+        case "name-desc":
+          return b.title.localeCompare(a.title);
+        default:
+          return 0;
+      }
+    });
+  }
 
   return (
     <section className="py-20 bg-warm-ivory min-h-screen">
       <div className="container mx-auto px-6">
+        {/* Results count */}
+        <div className="mb-8 text-center">
+          <p className="font-inter text-sm text-slate-gray">
+            Showing{" "}
+            <span className="font-semibold text-charcoal-black">
+              {filteredServices.length}
+            </span>{" "}
+            {filteredServices.length === 1 ? "service" : "services"}
+            {activeFilter !== "All Services" && (
+              <span>
+                {" "}
+                in <span className="text-gold-accent">{activeFilter}</span>
+              </span>
+            )}
+            {activePriceFilter && activePriceFilter.label !== "All Prices" && (
+              <span>
+                {" "}
+                •{" "}
+                <span className="text-gold-accent">
+                  {activePriceFilter.label}
+                </span>
+              </span>
+            )}
+            {sortBy && sortBy !== "default" && (
+              <span>
+                {" "}
+                •{" "}
+                <span className="text-gold-accent">
+                  Sorted by {sortBy.includes("price") ? "price" : "name"}
+                </span>
+              </span>
+            )}
+          </p>
+        </div>
+
         <motion.div
           layout
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
@@ -79,16 +146,17 @@ const ServicesGrid = ({ activeFilter }) => {
             {filteredServices.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}
+            ))}
           </AnimatePresence>
         </motion.div>
 
         {filteredServices.length === 0 && (
           <div className="text-center py-20">
             <h3 className="font-playfair text-2xl text-charcoal-black">
-              No services found in this category.
+              No services found matching your criteria.
             </h3>
             <p className="font-inter text-slate-gray mt-2">
-              Please try selecting a different category.
+              Try adjusting your category or price filters.
             </p>
           </div>
         )}
