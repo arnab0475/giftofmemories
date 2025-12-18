@@ -6,8 +6,8 @@ export const addPopup = async (req, res) => {
   try {
     const { message, delay, link } = req.body;
 
-    if (!message) {
-      return res.status(400).json({ message: "Message is required" });
+    if (!message && !req.file) {
+      return res.status(400).json({ message: "Message or Image is required" });
     }
 
     let imageUrl = null;

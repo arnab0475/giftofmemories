@@ -18,6 +18,8 @@ import AboutPage from "./pages/AboutPage";
 import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/DashboardPage";
 import FloatingChatButtons from "./components/FloatingChatButtons";
+import AnnouncementPopup from "./components/AnnouncementPopup";
+import AdminPopups from "./pages/AdminPopups";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -33,7 +35,11 @@ const ScrollToTop = () => {
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/admin-portal-secret", "/dashboard"];
+  const hideNavbarRoutes = [
+    "/admin-portal-secret",
+    "/dashboard",
+    "/admin-popups",
+  ];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,6 +60,7 @@ const AppContent = () => {
       <div className="min-h-screen bg-warm-ivory selection:bg-gold-accent selection:text-white">
         {!shouldHideNavbar && <Navbar />}
         {!shouldHideNavbar && <FloatingChatButtons />}
+        {!shouldHideNavbar && <AnnouncementPopup />}
         <ToastContainer position="top-center" />
         <main>
           <Routes>
@@ -68,6 +75,7 @@ const AppContent = () => {
             {/* Protected Dashboard Route */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/admin-popups" element={<AdminPopups />} />
             </Route>
           </Routes>
         </main>
