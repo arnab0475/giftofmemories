@@ -64,6 +64,15 @@ const Navbar = () => {
     { name: "About", path: "/about" },
   ];
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Handle search - you can navigate to a search results page or filter content
+      console.log("Searching for:", searchQuery);
+      // Example: navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
@@ -250,6 +259,26 @@ const Navbar = () => {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden absolute top-full left-0 w-full bg-warm-ivory flex flex-col items-center justify-center space-y-8 overflow-hidden"
           >
+            {/* Mobile Search Bar */}
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center rounded-full overflow-hidden bg-charcoal-black/5 border border-charcoal-black/10 focus-within:border-gold-accent/50 w-4/5 max-w-xs"
+            >
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="flex-1 px-5 py-3 bg-transparent text-base font-inter text-charcoal-black placeholder:text-charcoal-black/50 outline-none"
+              />
+              <button
+                type="submit"
+                className="px-4 py-3 text-charcoal-black/60 hover:text-gold-accent transition-colors"
+              >
+                <Search size={20} />
+              </button>
+            </form>
+
             {navLinks.map((link) => (
               <Link
                 key={link.name}

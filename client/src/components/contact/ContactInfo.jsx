@@ -64,21 +64,21 @@ const ContactInfo = () => {
         </div>
       </div>
 
-      <div className="bg-charcoal-black p-8 rounded-[14px] text-warm-ivory shadow-lg">
-        <h3 className="font-playfair text-xl text-gold-accent font-semibold mb-6">
+      <div className="bg-gold-accent p-8 rounded-[14px] text-charcoal-black shadow-lg">
+        <h3 className="font-playfair text-xl text-charcoal-black font-semibold mb-6">
           Studio Hours
         </h3>
         <div className="space-y-3 font-inter text-sm">
-          <div className="flex justify-between border-b border-stone-800 pb-2">
-            <span className="text-stone-300">Monday - Friday</span>
+          <div className="flex justify-between border-b border-charcoal-black/20 pb-2">
+            <span className="text-charcoal-black/70">Monday - Friday</span>
             <span>10:00 AM - 7:00 PM</span>
           </div>
-          <div className="flex justify-between border-b border-stone-800 pb-2">
-            <span className="text-stone-300">Saturday</span>
+          <div className="flex justify-between border-b border-charcoal-black/20 pb-2">
+            <span className="text-charcoal-black/70">Saturday</span>
             <span>11:00 AM - 5:00 PM</span>
           </div>
           <div className="flex justify-between pt-1">
-            <span className="text-stone-300">Sunday</span>
+            <span className="text-charcoal-black/70">Sunday</span>
             <span>By Appointment Only</span>
           </div>
         </div>

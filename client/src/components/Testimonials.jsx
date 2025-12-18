@@ -34,11 +34,11 @@ const Testimonials = () => {
   }, []);
 
   return (
-    <section className="py-24 bg-charcoal-black text-warm-ivory relative overflow-hidden">
+    <section className="py-24 bg-gold-accent text-charcoal-black relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none" />
 
       <div className="container mx-auto px-6 text-center relative z-10">
-        <Quote size={48} className="mx-auto mb-8 text-gold-accent opacity-80" />
+        <Quote size={48} className="mx-auto mb-8 text-warm-ivory opacity-80" />
 
         <div className="h-[300px] flex items-center justify-center">
           <AnimatePresence mode="wait">
@@ -54,10 +54,10 @@ const Testimonials = () => {
                 "{testimonials[currentIndex].text}"
               </h3>
               <div className="font-inter">
-                <p className="text-gold-accent font-bold uppercase tracking-widest text-sm mb-2">
+                <p className="text-charcoal-black font-bold uppercase tracking-widest text-sm mb-2">
                   {testimonials[currentIndex].author}
                 </p>
-                <p className="text-warm-ivory/60 text-xs tracking-wider">
+                <p className="text-charcoal-black/70 text-xs tracking-wider">
                   {testimonials[currentIndex].role}
                 </p>
               </div>
@@ -72,8 +72,8 @@ const Testimonials = () => {
               onClick={() => setCurrentIndex(index)}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 index === currentIndex
-                  ? "bg-gold-accent w-6"
-                  : "bg-warm-ivory/30 hover:bg-warm-ivory/60"
+                  ? "bg-charcoal-black w-6"
+                  : "bg-charcoal-black/30 hover:bg-charcoal-black/50"
               }`}
             />
           ))}

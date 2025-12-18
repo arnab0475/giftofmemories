@@ -1,5 +1,11 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useSpring,
+} from "framer-motion";
 import { X } from "lucide-react";
 
 import gallery1 from "../assets/images/gallery-1.png";
@@ -18,13 +24,104 @@ const galleryImages = [
   { id: 6, src: hero3, alt: "Black and White Portrait", category: "Portrait" },
 ];
 
+// Spring config for smooth, natural motion
+const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
+
+// Single card component with its own scroll-driven animation
+const GalleryCard = ({ image, index, totalImages, containerRef, onClick }) => {
+  // Track scroll progress for this specific card
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"],
+  });
+
+  // Calculate the scroll range for this card
+  // Each card has its own segment of the total scroll
+  const segmentSize = 1 / totalImages;
+  const start = index * segmentSize;
+  const end = start + segmentSize;
+
+  // Raw transforms based on scroll position
+  const xRaw = useTransform(
+    scrollYProgress,
+    [start, start + segmentSize * 0.1, end - segmentSize * 0.1, end],
+    [0, 0, -100, -120] // Stay put, then smoothly slide out
+  );
+
+  const opacityRaw = useTransform(
+    scrollYProgress,
+    [start, end - segmentSize * 0.2, end],
+    [1, 1, 0]
+  );
+
+  const scaleRaw = useTransform(
+    scrollYProgress,
+    [start, end - segmentSize * 0.15, end],
+    [1, 1, 0.95]
+  );
+
+  // Subtle rotation for a more dynamic feel
+  const rotateRaw = useTransform(
+    scrollYProgress,
+    [start, end],
+    [0, -3] // Slight tilt as it slides out
+  );
+
+  // Apply spring physics for buttery smooth motion
+  const x = useSpring(xRaw, springConfig);
+  const opacity = useSpring(opacityRaw, springConfig);
+  const scale = useSpring(scaleRaw, springConfig);
+  const rotate = useSpring(rotateRaw, springConfig);
+
+  // Z-index: cards at the bottom of the stack have lower z-index
+  // As we scroll, earlier cards slide away revealing cards beneath
+  const zIndex = totalImages - index;
+
+  return (
+    <motion.div
+      className="absolute inset-0 w-full h-full cursor-pointer group origin-center"
+      style={{
+        x: useTransform(x, (v) => `${v}%`),
+        opacity,
+        scale,
+        rotate,
+        zIndex,
+      }}
+      onClick={() => onClick(image)}
+    >
+      <img
+        src={image.src}
+        alt={image.alt}
+        className="w-full h-full object-cover rounded-2xl shadow-2xl"
+      />
+      {/* Hover overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-12 rounded-2xl">
+        <p className="text-warm-ivory font-playfair text-2xl tracking-wide drop-shadow-lg">
+          {image.alt}
+        </p>
+      </div>
+    </motion.div>
+  );
+};
+
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // Ref for the scroll container
+  const containerRef = useRef(null);
+
   return (
-    <section id="portfolio" className="py-24 bg-warm-ivory">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
+    // Outer container: tall enough for vertical scrolling (each image gets ~100vh of scroll)
+    <section
+      id="portfolio"
+      ref={containerRef}
+      className="relative bg-warm-ivory"
+      style={{ height: `${galleryImages.length * 100}vh` }}
+    >
+      {/* Sticky wrapper: stays pinned while scrolling through the stack */}
+      <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center py-20">
+        {/* Section header */}
+        <div className="text-center mb-8">
           <span className="text-gold-accent font-inter text-sm uppercase tracking-widest">
             Portfolio
           </span>
@@ -33,31 +130,22 @@ const Gallery = () => {
           </h2>
         </div>
 
-        {/* Masonry Layout */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+        {/* Stacked gallery: 80% width, centered, images stacked on top of each other */}
+        <div className="w-[80%] mx-auto relative" style={{ height: "90vh" }}>
           {galleryImages.map((image, index) => (
-            <motion.div
+            <GalleryCard
               key={image.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="break-inside-avoid relative group cursor-pointer overflow-hidden rounded-sm"
-              onClick={() => setSelectedImage(image)}
-            >
-              <img
-                src={image.src}
-                alt={image.alt}
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-charcoal-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <p className="text-warm-ivory font-playfair text-xl tracking-wide translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                  View
-                </p>
-              </div>
-            </motion.div>
+              image={image}
+              index={index}
+              totalImages={galleryImages.length}
+              containerRef={containerRef}
+              onClick={setSelectedImage}
+            />
           ))}
         </div>
+
+        {/* Scroll indicator */}
+        
       </div>
 
       {/* Lightbox Modal */}

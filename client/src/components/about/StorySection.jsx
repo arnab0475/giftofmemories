@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import storyImage from "../../assets/images/about-hero.png";
+import { TextGenerateEffect } from "../Text-Generate-effect";
 
 const StorySection = () => {
   return (
@@ -32,26 +33,12 @@ const StorySection = () => {
             <h2 className="font-playfair text-3xl md:text-4xl font-bold text-charcoal-black mb-6">
               Crafting Memories Since 2016
             </h2>
-            <div className="space-y-6 font-inter text-slate-gray leading-relaxed text-lg">
-              <p>
-                It started with a simple belief: that the most beautiful moments
-                in life are fleeting. Our mission from day one has been to
-                freeze time, not just visually, but emotionally, ensuring that
-                every laugh, tear, and quiet glance is tangible heritage.
-              </p>
-              <p>
-                Over the years, we have grown from a small studio into a
-                collective of passionate visual storytellers. Whether it's the
-                grandeur of a wedding or the raw intimacy of a portrait, our
-                approach remains the same—observe with empathy, shoot with
-                precision, and edit with love.
-              </p>
-              <p>
-                Our work is not just about perfect lighting or composition; it's
-                about the connection we build with you. We strive to be
-                invisible observers, letting your story unfold naturally while
-                ensuring no detail is missed.
-              </p>
+            <div className="mb-8">
+              <TextGenerateEffect
+                words="It started with a simple belief: that the most beautiful moments in life are fleeting. Our mission from day one has been to freeze time, not just visually, but emotionally, ensuring that every laugh, tear, and quiet glance is tangible heritage. Over the years, we have grown from a small studio into a collective of passionate visual storytellers. Whether it's the grandeur of a wedding or the raw intimacy of a portrait, our approach remains the same—observe with empathy, shoot with precision, and edit with love. Our work is not just about perfect lighting or composition; it's about the connection we build with you. We strive to be invisible observers, letting your story unfold naturally while ensuring no detail is missed."
+                className="font-inter text-slate-gray leading-relaxed text-lg"
+                duration={0.7}
+              />
             </div>
 
             <div className="mt-10">

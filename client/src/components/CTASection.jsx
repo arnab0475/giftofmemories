@@ -21,7 +21,7 @@ const CTASection = () => {
             href="mailto:hello@giftofmemories.com"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-block px-10 py-4 bg-charcoal-black text-warm-ivory font-inter text-sm uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all duration-300 shadow-lg"
+            className="inline-block px-10 py-4 bg-gold-accent text-charcoal-black font-inter text-sm uppercase tracking-widest hover:bg-warm-ivory hover:text-charcoal-black transition-all duration-300 shadow-lg"
           >
             Book a Consultation
           </motion.a>
