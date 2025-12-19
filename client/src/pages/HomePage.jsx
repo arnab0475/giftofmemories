@@ -20,13 +20,20 @@ const services = [
       "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800",
   },
   {
+    title: "Events",
+    description:
+      "Elegant coverage of corporate and private events with a candid, storytelling approach.",
+    image:
+      "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=800",
+  },
+  {
     title: "Portraits",
     description: "Professional portraits that reveal your unique personality.",
     image:
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800",
   },
   {
-    title: "Fashion",
+    title: "Wedding Shoots",
     description: "High-end editorial shoots for brands and models.",
     image:
       "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&q=80&w=800",
@@ -50,9 +57,9 @@ const HomePage = () => {
       {/* Services Section with CardSwap */}
       <section
         id="services"
-        className="py-24 pb-40 bg-warm-ivory overflow-hidden"
+        className="py-12 pb-40 bg-warm-ivory overflow-hidden"
       >
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-24">
           <div className="flex flex-col lg:flex-row items-center gap-2 lg:gap-3">
             {/* Left Side - Header and Description */}
             <div className="flex-1 text-center lg:text-left max-w-lg">
@@ -97,12 +104,12 @@ const HomePage = () => {
 
             {/* Right Side - CardSwap */}
             <div
-              className="flex-1 flex justify-center items-center"
+              className="flex-1 flex justify-center items-center -translate-y-12"
               style={{ height: "600px", position: "relative" }}
             >
               <CardSwap
-                width={380}
-                height={520}
+                width={480}
+                height={560}
                 cardDistance={50}
                 verticalDistance={60}
                 delay={5000}

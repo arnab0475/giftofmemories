@@ -73,7 +73,7 @@ const ImmersiveGallery = ({viewMode, setViewMode}) => {
 const Card = ({ item, index, total, viewMode, setViewMode }) => {
   return (
     <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden bg-charcoal-black">
-      <div className="fixed bottom-6 right-6 z-50 md:flex items-center space-x-2 bg-muted-beige/30 p-1 rounded-lg">
+      <div className="fixed bottom-7 right-28 z-50 md:flex items-center space-x-2 bg-muted-beige/30 p-1 rounded-lg">
         <button
           onClick={() => setViewMode("masonry")}
           className={`p-2 rounded-md transition-all ${
