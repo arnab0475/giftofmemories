@@ -6,8 +6,11 @@ import { cn } from "../lib/utils";
 export const TextGenerateEffect = ({
   words,
   className,
+  containerClassName,
   filter = true,
   duration = 0.5,
+  appearingColor = "var(--color-slate-gray)",
+  finalColor = "var(--color-charcoal-black)",
 }) => {
   const [scope, animate] = useAnimate();
   let wordsArray = words.split(" ");
@@ -18,6 +21,7 @@ export const TextGenerateEffect = ({
         {
           opacity: 1,
           filter: filter ? "blur(0px)" : "none",
+          color: appearingColor,
         },
         {
           duration: duration ? duration : 1,
@@ -27,7 +31,7 @@ export const TextGenerateEffect = ({
       await animate(
         "span",
         {
-          color: "var(--color-charcoal-black)",
+          color: finalColor,
         },
         { duration: 1 }
       );
@@ -37,7 +41,6 @@ export const TextGenerateEffect = ({
   }, [scope.current]);
 
   const renderWords = () => {
-    // Split by double newlines for paragraphs
     const paragraphs = words.split(/\n{2,}/g);
     return (
       <motion.div ref={scope}>
@@ -46,8 +49,11 @@ export const TextGenerateEffect = ({
             {para.split(" ").map((word, idx) => (
               <motion.span
                 key={word + idx + pIdx}
-                className="text-slate-gray/40 opacity-0"
-                style={{ filter: filter ? "blur(10px)" : "none" }}
+                className="opacity-0"
+                style={{
+                  filter: filter ? "blur(10px)" : "none",
+                  color: appearingColor,
+                }}
               >
                 {word}{" "}
               </motion.span>
@@ -60,8 +66,8 @@ export const TextGenerateEffect = ({
 
   return (
     <div className={cn("font-normal", className)}>
-      <div className="mt-6 mb-6">
-        <div className="text-black text-base md:text-lg leading-relaxed tracking-wide">
+      <div className={cn("mt-6 mb-6", containerClassName)}>
+        <div className="text-base md:text-lg leading-relaxed tracking-wide">
           {renderWords()}
         </div>
       </div>
