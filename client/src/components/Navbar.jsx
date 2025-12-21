@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import { servicesData } from "../data/servicesData";
 import { useRef } from "react";
+import logo from "../assets/images/logo-negative-gom.png";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -90,13 +91,20 @@ const Navbar = () => {
         {/* Logo */}
         <Link
           to="/"
-          className={`font-playfair text-2xl md:text-3xl font-bold tracking-tighter transition-colors duration-300 ${
+          className={`font-playfair text-2xl md:text-3xl font-bold tracking-tighter transition-colors duration-300 flex items-center gap-3 ${
             !isScrolled && !isServiceDetails
               ? "text-warm-ivory"
               : "text-charcoal-black"
           }`}
         >
-          Gift of Memories<span className="text-gold-accent">.</span>
+          <img
+            src={logo}
+            alt="Gift of Memories"
+            className="h-10 md:h-12 w-auto object-contain"
+          />
+          <span className="leading-none">
+            Gift of Memories<span className="text-gold-accent">.</span>
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
