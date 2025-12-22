@@ -33,6 +33,7 @@ const Sidebar = () => {
       items: [
         { icon: Layers, label: "Services", path: "/admin-services" },
         { icon: Image, label: "Gallery", path: "/admin-gallery" },
+        { icon: FileText, label: "Blogs", path: "/admin-blogs" },
         { icon: Users, label: "Testimonials", path: "/admin-testimonials" },
         { icon: TvMinimalPlay, label: "Hero Banner", path: "/admin-hero" },
         { icon: Bell, label: "Popups", path: "/admin-popups" },
@@ -76,7 +77,7 @@ const Sidebar = () => {
         <div className="flex items-center gap-3 mb-1">
           <Aperture className="text-[#C9A24D]" size={24} strokeWidth={1.5} />
           <h1 className="font-playfair text-xl text-[#FAF9F6] font-semibold tracking-wide">
-            Photography Club
+            Gift of Memories
           </h1>
         </div>
         <p className="text-[#2B2B2B] text-xs font-medium pl-9 uppercase tracking-wider">

@@ -22,6 +22,7 @@ import DashboardPage from "./pages/DashboardPage";
 import FloatingChatButtons from "./components/FloatingChatButtons";
 import AnnouncementPopup from "./components/AnnouncementPopup";
 import AdminPopups from "./pages/AdminPopups";
+import AdminBlogPage from "./pages/AdminBlogPage";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -41,6 +42,7 @@ const AppContent = () => {
     "/admin-portal-secret",
     "/dashboard",
     "/admin-popups",
+    "/admin-blogs",
   ];
   const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,10 +78,10 @@ const AppContent = () => {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/admin-portal-secret" element={<AdminLogin />} />
 
-            {/* Protected Dashboard Route */}
             <Route element={<ProtectedRoute />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/admin-popups" element={<AdminPopups />} />
+              <Route path="/admin-blogs" element={<AdminBlogPage />} />
             </Route>
           </Routes>
         </main>

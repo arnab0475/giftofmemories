@@ -1,21 +1,40 @@
-import { useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Share2 } from "lucide-react";
-import { blogPosts, featuredPost } from "../data/blogData";
+import axios from "axios";
+import LoadingScreen from "../components/LoadingScreen";
 
 const BlogPostPage = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-
-  // Find post in either all posts or the featured post
-  const post =
-    [featuredPost, ...blogPosts].find((p) => p.id === parseInt(id)) || null;
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          `http://localhost:4000/api/blogs/${id}`
+        );
+        setPost(response.data);
+      } catch (err) {
+        console.error("Failed to fetch blog post", err);
+        setError("Failed to load story.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchPost();
+    }
     // Scroll to top on load
     window.scrollTo(0, 0);
   }, [id]);
+
+  if (loading) return <LoadingScreen />;
 
   if (!post) {
     return (
@@ -89,7 +108,6 @@ const BlogPostPage = () => {
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
-                // Ideally show a toast here
               }}
               className="p-3 rounded-full hover:bg-gray-100 text-charcoal-black transition-colors"
               title="Copy Link"
@@ -100,7 +118,6 @@ const BlogPostPage = () => {
         </motion.div>
       </div>
 
-      {/* Suggested Read Navigation could go here */}
       <div className="h-20" />
     </article>
   );

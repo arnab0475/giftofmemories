@@ -85,7 +85,7 @@ const AdminLogin = () => {
 
         <div className="z-10 flex flex-col items-center">
           <h1 className="font-playfair text-4xl md:text-5xl font-semibold text-[#FAF9F6] mb-4 tracking-wide">
-            Photography Club
+            Gift of Memories
           </h1>
 
           <div className="h-[1px] w-12 bg-[#2B2B2B] my-4"></div>

@@ -11,6 +11,7 @@ import ReminderRouter from "./Routes/Reminder.js";
 import TestimonialRouter from "./Routes/Testimonial.js";
 import PopupRouter from "./Routes/Popup.js";
 import HeroRouter from "./Routes/Hero.js";
+import BlogRouter from "./Routes/Blog.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -32,7 +33,8 @@ app.use("/api/enquiry", EnquiryRouter);
 app.use("/api/reminder", ReminderRouter);
 app.use("/api/testimonial", TestimonialRouter);
 app.use("/api/pop", PopupRouter);
-app.use('/api/hero',HeroRouter);
+app.use("/api/hero", HeroRouter);
+app.use("/api/blogs", BlogRouter);
 app.listen(process.env.PORT, () => {
   console.log("Server is running on port", process.env.PORT);
 });

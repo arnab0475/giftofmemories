@@ -1,16 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { blogPosts, featuredPost, categories } from "../data/blogData";
+import axios from "axios";
+import LoadingScreen from "../components/LoadingScreen";
+
+// Static categories for now, or fetch if dynamic later
+const categories = [
+  "All Posts",
+  "Weddings",
+  "Portraits",
+  "Events",
+  "Inspiration",
+];
 
 const BlogPage = () => {
   const [activeCategory, setActiveCategory] = useState("All Posts");
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("http://localhost:4000/api/blogs");
+        setPosts(response.data);
+      } catch (err) {
+        console.error("Failed to fetch blogs", err);
+        setError("Failed to load stories.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
 
   const filteredPosts =
     activeCategory === "All Posts"
-      ? blogPosts
-      : blogPosts.filter((post) => post.category === activeCategory);
+      ? posts
+      : posts.filter((post) => post.category === activeCategory);
+
+  // Featured post logic: Pick the latest "Featured Story" or just the first post
+  const featuredPost =
+    posts.find((p) => p.category === "Featured Story") || posts[0];
+
+  // Filter out the featured post from the main grid if displaying it separately
+  const gridPosts = filteredPosts.filter((p) => p._id !== featuredPost?._id);
+
+  if (loading) return <LoadingScreen />;
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">
+        {error}
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-warm-ivory">
@@ -97,8 +141,8 @@ const BlogPage = () => {
 
       <div className="container mx-auto px-6 pb-20">
         {/* Featured Story */}
-        {activeCategory === "All Posts" && (
-          <Link to={`/blog/${featuredPost.id}`}>
+        {activeCategory === "All Posts" && featuredPost && (
+          <Link to={`/blog/${featuredPost._id}`}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -121,7 +165,7 @@ const BlogPage = () => {
                 <h2 className="font-playfair text-3xl md:text-4xl text-charcoal-black mb-4 group-hover:text-gold-accent transition-colors">
                   {featuredPost.title}
                 </h2>
-                <p className="font-inter text-charcoal-black/70 mb-8 leading-relaxed">
+                <p className="font-inter text-charcoal-black/70 mb-8 leading-relaxed line-clamp-3">
                   {featuredPost.excerpt}
                 </p>
                 <div className="flex items-center text-charcoal-black font-medium group-hover:text-gold-accent transition-colors">
@@ -137,44 +181,46 @@ const BlogPage = () => {
 
         {/* Blog Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredPosts.map((post, index) => (
-            <Link key={post.id} to={`/blog/${post.id}`}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group cursor-pointer bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full"
-              >
-                <div className="h-64 overflow-hidden relative">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-charcoal-black rounded-sm">
-                    {post.category}
+          {(activeCategory === "All Posts" ? gridPosts : filteredPosts).map(
+            (post, index) => (
+              <Link key={post._id} to={`/blog/${post._id}`}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group cursor-pointer bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 h-full"
+                >
+                  <div className="h-64 overflow-hidden relative">
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-charcoal-black rounded-sm">
+                      {post.category}
+                    </div>
                   </div>
-                </div>
-                <div className="p-6">
-                  <div className="text-xs text-gray-400 mb-3 font-inter uppercase tracking-wide">
-                    {post.date}
+                  <div className="p-6">
+                    <div className="text-xs text-gray-400 mb-3 font-inter uppercase tracking-wide">
+                      {post.date}
+                    </div>
+                    <h3 className="font-playfair text-xl text-charcoal-black mb-3 group-hover:text-gold-accent transition-colors">
+                      {post.title}
+                    </h3>
+                    <p className="font-inter text-sm text-gray-500 mb-6 line-clamp-3">
+                      {post.excerpt}
+                    </p>
+                    <div className="flex items-center text-charcoal-black font-medium text-sm group-hover:text-gold-accent transition-colors">
+                      <span className="border-b border-charcoal-black/30 group-hover:border-gold-accent pb-0.5">
+                        Read Story
+                      </span>
+                    </div>
                   </div>
-                  <h3 className="font-playfair text-xl text-charcoal-black mb-3 group-hover:text-gold-accent transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="font-inter text-sm text-gray-500 mb-6 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center text-charcoal-black font-medium text-sm group-hover:text-gold-accent transition-colors">
-                    <span className="border-b border-charcoal-black/30 group-hover:border-gold-accent pb-0.5">
-                      Read Story
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            </Link>
-          ))}
+                </motion.div>
+              </Link>
+            )
+          )}
         </div>
       </div>
 
