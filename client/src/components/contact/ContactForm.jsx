@@ -47,6 +47,9 @@ const ContactForm = () => {
           eventType: form.eventType,
           eventDate: form.eventDate,
           message: form.message,
+          // New fields
+          source: "website",
+          status: "pending",
         }
       );
       toast.success("Your enquiry has been submitted!");

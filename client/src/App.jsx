@@ -19,6 +19,8 @@ import BlogPostPage from "./pages/BlogPostPage";
 import AboutPage from "./pages/AboutPage";
 import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/DashboardPage";
+import AdminEnquiry from "./pages/AdminEnquiry";
+import AdminEnquiryDetails from "./pages/AdminEnquiryDetails";
 import FloatingChatButtons from "./components/FloatingChatButtons";
 import AnnouncementPopup from "./components/AnnouncementPopup";
 import AdminPopups from "./pages/AdminPopups";
@@ -43,8 +45,11 @@ const AppContent = () => {
     "/dashboard",
     "/admin-popups",
     "/admin-blogs",
+    "/admin-enquiries",
   ];
-  const shouldHideNavbar = hideNavbarRoutes.includes(location.pathname);
+  const shouldHideNavbar = hideNavbarRoutes.some((route) =>
+    location.pathname.startsWith(route)
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -82,6 +87,11 @@ const AppContent = () => {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/admin-popups" element={<AdminPopups />} />
               <Route path="/admin-blogs" element={<AdminBlogPage />} />
+              <Route path="/admin-enquiries" element={<AdminEnquiry />} />
+              <Route
+                path="/admin-enquiries/:id"
+                element={<AdminEnquiryDetails />}
+              />
             </Route>
           </Routes>
         </main>

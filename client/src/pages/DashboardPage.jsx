@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { Layers, Image, MessageSquare, Bell } from "lucide-react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
@@ -8,11 +10,53 @@ import QuickActions from "../components/admin/QuickActions";
 import RecentEnquiries from "../components/admin/RecentEnquiries";
 
 const DashboardPage = () => {
+  const [counts, setCounts] = useState({
+    services: 0,
+    gallery: 0,
+    enquiries: 0,
+    reminders: 0,
+  });
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/admin/metrics`,
+          { withCredentials: true }
+        );
+        setCounts(res.data);
+      } catch (err) {
+        console.error("Failed to load metrics", err);
+      }
+    };
+    fetchMetrics();
+  }, []);
+
   const metrics = [
-    { label: "Total Services", value: "12", icon: Layers, delay: 0.1 },
-    { label: "Gallery Items", value: "148", icon: Image, delay: 0.2 },
-    { label: "Total Enquiries", value: "342", icon: MessageSquare, delay: 0.3 },
-    { label: "Reminders Set", value: "8", icon: Bell, delay: 0.4 },
+    {
+      label: "Total Services",
+      value: counts.services ?? 0,
+      icon: Layers,
+      delay: 0.1,
+    },
+    {
+      label: "Gallery Items",
+      value: counts.gallery ?? 0,
+      icon: Image,
+      delay: 0.2,
+    },
+    {
+      label: "Total Enquiries",
+      value: counts.enquiries ?? 0,
+      icon: MessageSquare,
+      delay: 0.3,
+    },
+    {
+      label: "Reminders Set",
+      value: counts.reminders ?? 0,
+      icon: Bell,
+      delay: 0.4,
+    },
   ];
 
   return (

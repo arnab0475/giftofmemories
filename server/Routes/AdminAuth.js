@@ -6,6 +6,8 @@ import {
   AdminRegister,
   VerifyAdmin,
 } from "../Controller/AdminAuthController.js";
+import { AdminMiddleware } from "../Middlewares/AuthMiddleware.js";
+import { getMetrics, sendTestEmail } from "../Controller/AdminController.js";
 
 const router = express.Router();
 
@@ -22,5 +24,11 @@ router.post("/login", loginLimiter, AdminLogin);
 router.post("/logout", AdminLogout);
 router.post("/register", AdminRegister);
 router.get("/verify", VerifyAdmin);
+
+// Admin-only metrics endpoint
+router.get("/metrics", AdminMiddleware, getMetrics);
+
+// Admin-only test email endpoint (helps verify SMTP configuration)
+router.post("/test-email", AdminMiddleware, sendTestEmail);
 
 export default router;

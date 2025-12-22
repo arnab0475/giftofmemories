@@ -1,55 +1,46 @@
 import { ArrowRight } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 const RecentEnquiries = () => {
-  const enquiries = [
-    {
-      name: "Emily Parker",
-      contact: "emily@example.com",
-      source: "Website",
-      date: "Oct 24, 2025",
-      status: "New",
-    },
-    {
-      name: "Ryan Simmons",
-      contact: "+1 (555) 012-3400",
-      source: "Chatbot",
-      date: "Oct 24, 2025",
-      status: "Pending",
-    },
-    {
-      name: "Sarah Wong",
-      contact: "sarah.w@test.com",
-      source: "WhatsApp",
-      date: "Oct 23, 2025",
-      status: "Responded",
-    },
-    {
-      name: "David Chen",
-      contact: "+1 (555) 987-6543",
-      source: "Popup",
-      date: "Oct 22, 2025",
-      status: "New",
-    },
-    {
-      name: "Jessica Alba",
-      contact: "jessica@demo.com",
-      source: "Website",
-      date: "Oct 21, 2025",
-      status: "Responded",
-    },
-  ];
+  const [enquiries, setEnquiries] = useState([]);
+
+  useEffect(() => {
+    const fetchEnquiries = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/enquiry/enquiries`,
+          {
+            withCredentials: true,
+          }
+        );
+        setEnquiries(res.data.slice(0, 10)); // show latest 10
+      } catch (err) {
+        // Fallback to empty or previously hardcoded data on error
+        setEnquiries([]);
+        console.error("Failed to fetch enquiries", err);
+      }
+    };
+    fetchEnquiries();
+  }, []);
 
   const getStatusStyle = (status) => {
-    switch (status) {
-      case "New":
+    const s = (status || "").toLowerCase();
+    switch (s) {
+      case "new":
         return "bg-[#C9A24D]/10 text-[#C9A24D] border-[#C9A24D]/20";
-      case "Responded":
+      case "responded":
         return "bg-[#2ECC71]/10 text-[#2ECC71] border-[#2ECC71]/20";
+      case "pending":
+        return "bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20";
       default:
         return "bg-[#2B2B2B]/5 text-[#2B2B2B]/60 border-[#2B2B2B]/10";
     }
   };
 
+  const capitalize = (str) =>
+    str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
   return (
     <div className="bg-white rounded-[14px] shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-[#2B2B2B]/5 overflow-hidden font-inter">
       <div className="p-6 flex items-center justify-between border-b border-[#2B2B2B]/5">
@@ -77,34 +68,47 @@ const RecentEnquiries = () => {
             </tr>
           </thead>
           <tbody>
-            {enquiries.map((enquiry, index) => (
-              <tr
-                key={index}
-                className="border-b border-[#2B2B2B]/5 hover:bg-[#FAF9F6] transition-colors group cursor-pointer"
-              >
-                <td className="px-6 py-4 text-[#0F0F0F] text-sm font-medium">
-                  {enquiry.name}
-                </td>
-                <td className="px-6 py-4 text-[#2B2B2B] text-sm">
-                  {enquiry.contact}
-                </td>
-                <td className="px-6 py-4 text-[#2B2B2B] text-sm">
-                  {enquiry.source}
-                </td>
-                <td className="px-6 py-4 text-[#2B2B2B]/70 text-sm">
-                  {enquiry.date}
-                </td>
-                <td className="px-6 py-4">
-                  <span
-                    className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide border ${getStatusStyle(
-                      enquiry.status
-                    )}`}
-                  >
-                    {enquiry.status}
-                  </span>
+            {enquiries.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-6 py-8 text-center text-sm text-[#6B6B6B]"
+                >
+                  No enquiries found
                 </td>
               </tr>
-            ))}
+            ) : (
+              enquiries.map((enquiry, index) => (
+                <tr
+                  key={enquiry._id || index}
+                  className="border-b border-[#2B2B2B]/5 hover:bg-[#FAF9F6] transition-colors group cursor-pointer"
+                >
+                  <td className="px-6 py-4 text-[#0F0F0F] text-sm font-medium">
+                    {enquiry.name}
+                  </td>
+                  <td className="px-6 py-4 text-[#2B2B2B] text-sm">
+                    {enquiry.email || enquiry.phone}
+                  </td>
+                  <td className="px-6 py-4 text-[#2B2B2B] text-sm">
+                    {enquiry.source ? enquiry.source : "Website"}
+                  </td>
+                  <td className="px-6 py-4 text-[#2B2B2B]/70 text-sm">
+                    {enquiry.createdAt
+                      ? new Date(enquiry.createdAt).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide border ${getStatusStyle(
+                        enquiry.status ? capitalize(enquiry.status) : "New"
+                      )}`}
+                    >
+                      {enquiry.status ? capitalize(enquiry.status) : "New"}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
