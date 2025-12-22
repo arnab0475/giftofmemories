@@ -9,25 +9,18 @@ export const getTestimonials = async (req, res) => {
 };
 export const addTestimonial = async (req, res) => {
   try {
-    const { name, feedback, rating, image } = req.body;
+    const { name, feedback, title } = req.body;
 
-    if (!name || !feedback || !rating) {
+    if (!name || !feedback) {
       return res
         .status(400)
-        .json({ message: "Name, feedback, and rating are required" });
-    }
-
-    if (rating < 1 || rating > 5) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be between 1 and 5" });
+        .json({ message: "Name and feedback are required" });
     }
 
     const newTestimonial = new Testimonial({
       name,
       feedback,
-      rating,
-      image,
+      title,
     });
     await newTestimonial.save();
     res.status(201).json({
@@ -41,15 +34,11 @@ export const addTestimonial = async (req, res) => {
 export const updateTestimonial = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, feedback, rating, image } = req.body;
-    if (rating && (rating < 1 || rating > 5)) {
-      return res
-        .status(400)
-        .json({ message: "Rating must be between 1 and 5" });
-    }
+    const { name, feedback, title } = req.body;
+
     const updatedTestimonial = await Testimonial.findByIdAndUpdate(
       id,
-      { name, feedback, rating, image },
+      { name, feedback, title },
       { new: true, runValidators: true }
     );
 

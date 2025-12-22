@@ -57,18 +57,6 @@ const Sidebar = () => {
         { icon: FileText, label: "Reports", path: "/admin-reports" },
       ],
     },
-    {
-      title: "System",
-      items: [
-        { icon: Settings, label: "Settings", path: "/admin-settings" },
-        {
-          icon: LogOut,
-          label: "Logout",
-          path: "/admin-portal-secret",
-          isDanger: true,
-        },
-      ],
-    },
   ];
 
   return (

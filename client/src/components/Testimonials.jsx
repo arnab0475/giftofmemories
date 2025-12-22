@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Quote } from "lucide-react";
 
-const testimonials = [
+const defaultTestimonials = [
   {
     id: 1,
     text: "Absolutely stunning photos. The way they captured the light and emotion of our wedding day was magical. We couldn't be happier.",
@@ -24,14 +24,43 @@ const testimonials = [
 ];
 
 const Testimonials = () => {
+  const [testimonials, setTestimonials] = useState(defaultTestimonials);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_NODE_URL}/api/testimonial/testimonials`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            // map server fields to component fields
+            const mapped = data.map((t) => ({
+              id: t._id,
+              text: t.feedback,
+              author: t.name,
+              role: t.title || "",
+              image: t.image,
+            }));
+            setTestimonials(mapped);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load testimonials", e);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
+  useEffect(() => {
+    if (!testimonials || testimonials.length === 0) return;
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % testimonials.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [testimonials.length]);
 
   return (
     <section className="py-24 bg-gold-accent text-charcoal-black relative overflow-hidden">
@@ -40,7 +69,7 @@ const Testimonials = () => {
       <div className="container mx-auto px-6 text-center relative z-10">
         <Quote size={48} className="mx-auto mb-8 text-warm-ivory opacity-80" />
 
-        <div className="h-[300px] flex items-center justify-center">
+        <div className="h-75 flex items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}

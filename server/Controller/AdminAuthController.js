@@ -53,9 +53,18 @@ export const VerifyAdmin = async (req, res) => {
     const token = req.cookies.adminToken;
     if (!token) return res.json({ isLoggedIn: false });
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
       if (err) return res.json({ isLoggedIn: false });
-      return res.json({ isLoggedIn: true, adminId: decoded.id });
+      try {
+        const admin = await Admin.findById(decoded.id).select("name email");
+        return res.json({
+          isLoggedIn: true,
+          adminId: decoded.id,
+          admin: admin ? { name: admin.name, email: admin.email } : null,
+        });
+      } catch (e) {
+        return res.json({ isLoggedIn: true, adminId: decoded.id });
+      }
     });
   } catch (error) {
     res.status(500).json({ message: "Server Error" });

@@ -25,6 +25,8 @@ import FloatingChatButtons from "./components/FloatingChatButtons";
 import AnnouncementPopup from "./components/AnnouncementPopup";
 import AdminPopups from "./pages/AdminPopups";
 import AdminBlogPage from "./pages/AdminBlogPage";
+import AdminTestimonial from "./pages/AdminTestimonial";
+import AdminHero from "./pages/AdminHero";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -46,6 +48,8 @@ const AppContent = () => {
     "/admin-popups",
     "/admin-blogs",
     "/admin-enquiries",
+    "/admin-testimonials",
+    "/admin-hero",
   ];
   const shouldHideNavbar = hideNavbarRoutes.some((route) =>
     location.pathname.startsWith(route)
@@ -92,6 +96,11 @@ const AppContent = () => {
                 path="/admin-enquiries/:id"
                 element={<AdminEnquiryDetails />}
               />
+              <Route
+                path="/admin-testimonials"
+                element={<AdminTestimonial />}
+              />
+              <Route path="/admin-hero" element={<AdminHero />} />
             </Route>
           </Routes>
         </main>

@@ -30,13 +30,67 @@ const heroImages = [
 
 const Hero = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [serverHero, setServerHero] = useState(null);
 
   useEffect(() => {
+    const fetchHero = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_NODE_URL}/api/hero/hero`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setServerHero(data);
+        }
+      } catch (e) {
+        // ignore and fallback to local slides
+        console.warn("Could not fetch hero:", e);
+      }
+    };
+    fetchHero();
+  }, []);
+
+  useEffect(() => {
+    if (serverHero) return; // when server hero exists, don't rotate
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [serverHero]);
+
+  if (serverHero) {
+    return (
+      <section className="relative h-screen w-full overflow-hidden bg-charcoal-black">
+        <div className="absolute inset-0 w-full h-full">
+          <img
+            src={serverHero.image}
+            alt={serverHero.title}
+            className="w-full h-full object-cover opacity-60"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-charcoal-black via-charcoal-black/20 to-transparent" />
+        </div>
+
+        <div className="absolute inset-0 flex items-center justify-center text-center px-6">
+          <div className="max-w-4xl z-10">
+            <h1 className="font-playfair text-5xl md:text-7xl lg:text-8xl text-warm-ivory mb-6 leading-tight">
+              {serverHero.title}
+            </h1>
+            <p className="font-inter text-lg md:text-xl text-muted-beige mb-10 max-w-2xl mx-auto font-light tracking-wide">
+              {serverHero.subtitle}
+            </p>
+            <motion.a
+              href={serverHero.buttonLink || "#portfolio"}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-block px-8 py-4 bg-gold-accent/90 text-charcoal-black font-inter text-sm uppercase tracking-widest hover:bg-gold-accent transition-colors"
+            >
+              {serverHero.buttonText || "View Portfolio"}
+            </motion.a>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-charcoal-black">
@@ -55,7 +109,7 @@ const Hero = () => {
             className="w-full h-full object-cover opacity-60"
           />
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-charcoal-black via-charcoal-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-charcoal-black via-charcoal-black/20 to-transparent" />
         </motion.div>
       </AnimatePresence>
 

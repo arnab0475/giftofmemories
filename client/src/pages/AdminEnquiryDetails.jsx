@@ -34,6 +34,22 @@ const AdminEnquiryDetails = () => {
 
   const submitStatus = async () => {
     if (!modalStatus) return;
+    if (modalStatus === "responded" && !feedback.trim()) {
+      toast.error("Please write a response before sending");
+      return;
+    }
+
+    // Prevent responding to enquiries that are already approved or rejected
+    if (
+      modalStatus === "responded" &&
+      (enquiry?.status === "approved" || enquiry?.status === "rejected")
+    ) {
+      toast.error(
+        "Cannot send a response for enquiries that are approved or rejected"
+      );
+      return;
+    }
+
     setSaving(true);
     try {
       const res = await axios.put(
@@ -139,6 +155,25 @@ const AdminEnquiryDetails = () => {
                   >
                     Approve
                   </button>
+
+                  <button
+                    onClick={() => openModal("responded")}
+                    disabled={
+                      enquiry?.status === "responded" ||
+                      enquiry?.status === "approved" ||
+                      enquiry?.status === "rejected"
+                    }
+                    className={`py-2 px-4 rounded-md text-sm font-semibold shadow-sm transition-colors ${
+                      enquiry?.status === "responded" ||
+                      enquiry?.status === "approved" ||
+                      enquiry?.status === "rejected"
+                        ? "opacity-50 cursor-not-allowed bg-[#2ECC71] text-white"
+                        : "bg-[#2ECC71] text-white hover:opacity-90"
+                    }`}
+                  >
+                    Respond
+                  </button>
+
                   <button
                     onClick={() => openModal("rejected")}
                     disabled={enquiry?.status === "rejected"}
@@ -290,17 +325,25 @@ const AdminEnquiryDetails = () => {
                   <h3 className="font-playfair text-lg font-semibold mb-2">
                     {modalStatus === "approved"
                       ? "Approve Enquiry"
+                      : modalStatus === "responded"
+                      ? "Send Response"
                       : "Reject Enquiry"}
                   </h3>
                   <p className="text-sm text-slate-gray/60 mb-4">
-                    Add feedback to be sent to the user (optional)
+                    {modalStatus === "responded"
+                      ? "Write the response that will be sent to the user (required)"
+                      : "Add feedback to be sent to the user (optional)"}
                   </p>
                   <textarea
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
                     rows={5}
                     className="w-full p-3 border border-slate-gray/10 rounded-md mb-4"
-                    placeholder="Write feedback to the user"
+                    placeholder={
+                      modalStatus === "responded"
+                        ? "Write your message to the user"
+                        : "Write feedback to the user"
+                    }
                   />
                   <div className="flex justify-end gap-3">
                     <button
@@ -315,6 +358,8 @@ const AdminEnquiryDetails = () => {
                       className={`py-2 px-4 rounded-md font-semibold shadow-sm transition-colors ${
                         modalStatus === "approved"
                           ? "bg-charcoal-black text-gold-accent hover:bg-[#0c0c0c]"
+                          : modalStatus === "responded"
+                          ? "bg-[#2ECC71] text-white hover:opacity-90"
                           : "bg-[#E74C3C] text-white hover:opacity-95"
                       } ${saving ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
@@ -322,6 +367,8 @@ const AdminEnquiryDetails = () => {
                         ? "Sending..."
                         : modalStatus === "approved"
                         ? "Send Approval"
+                        : modalStatus === "responded"
+                        ? "Send Response"
                         : "Send Rejection"}
                     </button>
                   </div>
