@@ -1,67 +1,37 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import gallery1 from "../../assets/images/gallery-1.png";
-import gallery2 from "../../assets/images/gallery-2.png";
-import gallery3 from "../../assets/images/gallery-3.png";
-import serviceHero from "../../assets/images/service-hero.png";
-import contactHero from "../../assets/images/contact-hero.png";
-import aboutHero from "../../assets/images/about-hero.png";
 import { GripHorizontal, LayoutGrid } from "lucide-react";
 
-const galleryItems = [
-  {
-    id: 1,
-    image: gallery1,
-    title: "Eternal Moments",
-    location: "Kolkata, India",
-    year: "2024",
-  },
-  {
-    id: 2,
-    image: serviceHero,
-    title: "Cinematic Love",
-    location: "Udaipur, Rajasthan",
-    year: "2023",
-  },
-  {
-    id: 3,
-    image: gallery2,
-    title: "Traditional Elegance",
-    location: "Varanasi, India",
-    year: "2024",
-  },
-  {
-    id: 4,
-    image: gallery3,
-    title: "Candid Joy",
-    location: "Goa, India",
-    year: "2023",
-  },
-  {
-    id: 5,
-    image: aboutHero,
-    title: "Studio Portraits",
-    location: "Mumbai, India",
-    year: "2024",
-  },
-  {
-    id: 6,
-    image: contactHero,
-    title: "Pre-Wedding Bliss",
-    location: "Jaipur, Rajasthan",
-    year: "2024",
-  },
-];
+const ImmersiveGallery = ({ viewMode, setViewMode, items = [] }) => {
+ 
+  const displayItems =
+    items.length > 0
+      ? items.map((item, index) => ({
+          id: item._id,
+          image: item.url,
+          title: item.tags?.[0] || "Gallery Moment",
+          location: "Featured Collection",
+          year: "2025",
+          type: item.type,
+        }))
+      : []; 
 
-const ImmersiveGallery = ({viewMode, setViewMode}) => {
+  if (displayItems.length === 0) {
+    return (
+      <div className="min-h-screen bg-charcoal-black flex items-center justify-center text-warm-ivory">
+        <p>No gallery items found.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-charcoal-black">
-      {galleryItems.map((item, index) => (
+      {displayItems.map((item, index) => (
         <Card
           key={item.id}
           item={item}
           index={index}
-          total={galleryItems.length}
+          total={displayItems.length}
           viewMode={viewMode}
           setViewMode={setViewMode}
         />
@@ -98,13 +68,23 @@ const Card = ({ item, index, total, viewMode, setViewMode }) => {
         </button>
       </div>
       <div className="relative w-full h-full">
-        <img
-          src={item.image}
-          alt={item.title}
-          className="w-full h-full object-cover"
-        />
+        {item.type === "video" ? (
+          <video
+            src={item.image}
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          />
+        ) : (
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-full object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-black/20" />{" "}
-        {/* Subtle overlay for text readability */}
         <div className="absolute bottom-12 left-6 md:left-12 text-warm-ivory z-10">
           <p className="font-inter text-xs uppercase tracking-[0.2em] mb-2">
             {item.location} — {item.year}

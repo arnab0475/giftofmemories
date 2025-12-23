@@ -9,13 +9,33 @@ import ExplorationTags from "../components/gallery/ExplorationTags";
 import GalleryCTA from "../components/gallery/GalleryCTA";
 import ImmersiveGallery from "../components/gallery/ImmersiveGallery";
 
+import axios from "axios";
+
 const GalleryPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [viewMode, setViewMode] = useState("grid");
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [viewMode]);
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:4000/api/gallery/get-gallery"
+        );
+        setGalleryItems(response.data);
+      } catch (error) {
+        console.error("Error fetching gallery:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchGallery();
+  }, []);
 
   return (
     <motion.div
@@ -25,7 +45,11 @@ const GalleryPage = () => {
       className="bg-warm-ivory min-h-screen"
     >
       {viewMode === "grid" ? (
-        <ImmersiveGallery viewMode={viewMode} setViewMode={setViewMode} />
+        <ImmersiveGallery
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          items={galleryItems} 
+        />
       ) : (
         <>
           <GalleryHero />
@@ -36,7 +60,11 @@ const GalleryPage = () => {
             viewMode={viewMode}
             setViewMode={setViewMode}
           />
-          <MainGalleryGrid activeFilter={activeFilter} viewMode={viewMode} />
+          <MainGalleryGrid
+            activeFilter={activeFilter}
+            viewMode={viewMode}
+            items={galleryItems} 
+          />
         </>
       )}
 

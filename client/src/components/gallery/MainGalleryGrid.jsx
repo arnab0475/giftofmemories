@@ -1,39 +1,28 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Eye, Maximize2 } from "lucide-react";
+import { Eye, Maximize2, Play } from "lucide-react";
 import ImageLightbox from "./ImageLightbox";
 
-import gallery1 from "../../assets/images/gallery-1.png";
-import gallery2 from "../../assets/images/gallery-2.png";
-import gallery3 from "../../assets/images/gallery-3.png";
-import hero1 from "../../assets/images/hero-1.png";
-import hero2 from "../../assets/images/hero-2.png";
-import galleryHero from "../../assets/images/gallery-hero.png";
-
-const initialImages = [
-  { id: 1, src: gallery1, category: "Weddings", caption: "Sunset Vows" },
-  {
-    id: 2,
-    src: gallery2,
-    category: "Portraits",
-    caption: "Golden Hour Portrait",
-  },
-  { id: 3, src: gallery3, category: "Events", caption: "Gala Night" },
-  { id: 4, src: hero1, category: "Commercial", caption: "Luxury Product" },
-  { id: 5, src: hero2, category: "Weddings", caption: "The First Dance" },
-  { id: 6, src: galleryHero, category: "Portraits", caption: "Studio Session" },
-  // Duplicating for masonry effect demo until more images generated
-  { id: 7, src: gallery2, category: "Weddings", caption: "Candid Laughter" },
-  { id: 8, src: gallery1, category: "Events", caption: "Corporate Summit" },
-];
-
-const MainGalleryGrid = ({ activeFilter, viewMode }) => {
+const MainGalleryGrid = ({ activeFilter, viewMode, items = [] }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+
+  // Map DB items to component format
+  const mappedImages = items.map((item) => ({
+    id: item._id,
+    src: item.url,
+    category: item.tags?.[0] || "Uncategorized",
+    caption: item.tags?.[0] || "Moment",
+    type: item.type,
+    tags: item.tags || [],
+  }));
 
   const filteredImages =
     activeFilter === "All"
-      ? initialImages
-      : initialImages.filter((img) => img.category === activeFilter);
+      ? mappedImages
+      : mappedImages.filter(
+          (img) =>
+            img.tags.includes(activeFilter) || img.category === activeFilter
+        );
 
   const handleImageClick = (index) => {
     setSelectedImageIndex(index);
@@ -73,12 +62,31 @@ const MainGalleryGrid = ({ activeFilter, viewMode }) => {
               className="relative group break-inside-avoid overflow-hidden rounded-[14px] cursor-pointer"
               onClick={() => handleImageClick(index)}
             >
-              <img
-                src={image.src}
-                alt={image.caption}
-                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
-                loading="lazy"
-              />
+              {image.type === "video" ? (
+                <div className="relative">
+                  <video
+                    src={image.src}
+                    className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                    muted
+                    loop
+                    playsInline
+                    onMouseOver={(e) => e.target.play()}
+                    onMouseOut={(e) => e.target.pause()}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="bg-black/30 p-3 rounded-full backdrop-blur-sm group-hover:opacity-0 transition-opacity">
+                      <Play className="text-white" size={24} fill="white" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <img
+                  src={image.src}
+                  alt={image.caption}
+                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
+              )}
 
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-charcoal-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">

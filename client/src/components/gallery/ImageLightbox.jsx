@@ -59,14 +59,26 @@ const ImageLightbox = ({
             </button>
           )}
 
-          <motion.img
-            key={selectedImage.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            src={selectedImage.src}
-            alt="Gallery Preview"
-            className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-          />
+          {selectedImage.type === "video" ? (
+            <motion.video
+              key={selectedImage.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              src={selectedImage.src}
+              controls
+              autoPlay
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+            />
+          ) : (
+            <motion.img
+              key={selectedImage.id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              src={selectedImage.src}
+              alt="Gallery Preview"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+            />
+          )}
 
           {selectedImage.caption && (
             <div className="absolute bottom-[-40px] left-0 w-full text-center">
