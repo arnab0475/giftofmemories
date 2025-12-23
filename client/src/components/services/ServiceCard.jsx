@@ -11,7 +11,11 @@ const ServiceCard = ({ service }) => {
       {/* Image Container */}
       <div className="h-[250px] overflow-hidden">
         <img
-          src={service.image}
+          src={
+            service.images && service.images.length > 0
+              ? service.images[0]
+              : service.image
+          }
           alt={service.title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
@@ -23,7 +27,7 @@ const ServiceCard = ({ service }) => {
           {service.title}
         </h3>
         <p className="font-inter text-slate-gray mb-6 text-sm leading-relaxed line-clamp-3">
-          {service.description}
+          {service.shortDescription || service.description}
         </p>
 
         <div className="flex items-center justify-between mt-auto">

@@ -13,12 +13,13 @@ export const getServices = async (req, res) => {
 
 export const addService = async (req, res) => {
   try {
-    const { name, category, description, price } = req.body;
+    const { title, category, description, price, shortDescription, details } =
+      req.body;
 
-    if (!name || !category || !price) {
+    if (!title || !category || !price) {
       return res
         .status(400)
-        .json({ message: "Name, category, and price are required" });
+        .json({ message: "Title, category, and price are required" });
     }
 
     let imageUrls = [];
@@ -43,11 +44,13 @@ export const addService = async (req, res) => {
     }
 
     const newService = new Service({
-      name,
+      title,
       category,
+      shortDescription,
       description,
       price,
       images: imageUrls,
+      details: details ? JSON.parse(details) : {},
     });
 
     await newService.save();
@@ -78,9 +81,21 @@ export const getServiceById = async (req, res) => {
 export const updateService = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, category, description, price } = req.body;
+    const { title, category, description, price, shortDescription, details } =
+      req.body;
 
-    const updateData = { name, category, description, price };
+    const updateData = {
+      title,
+      category,
+      description,
+      price,
+      shortDescription,
+    };
+
+    if (details) {
+      updateData.details = JSON.parse(details);
+    }
+
     if (req.files && req.files.length > 0) {
       const uploadPromises = req.files.map((file) => {
         return new Promise((resolve, reject) => {
@@ -99,6 +114,12 @@ export const updateService = async (req, res) => {
       });
 
       const newImageUrls = await Promise.all(uploadPromises);
+
+      // Optionally delete old images here if replacing
+      // tailored for now to just append or replace if logic demands,
+      // but simplistic replacement of array is what was here.
+      // The previous logic deleted ALL old images if ANY new one was uploaded.
+
       const oldService = await Service.findById(id);
       if (oldService && oldService.images && oldService.images.length > 0) {
         const deletePromises = oldService.images.map((imageUrl) => {

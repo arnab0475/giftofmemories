@@ -1,20 +1,45 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, ArrowLeft } from "lucide-react";
-import { servicesData } from "../data/servicesData";
+import axios from "axios";
 import ServiceSidebar from "../components/services/ServiceSidebar";
 import ServiceBookingForm from "../components/services/ServiceBookingForm";
 import RevealOnScroll from "../components/RevealOnScroll";
 
 const ServiceDetailsPage = () => {
   const { id } = useParams();
-  const service = servicesData.find((s) => s.id === id);
+  const [service, setService] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Scroll to top on id change
+  useEffect(() => {
+    const fetchService = async () => {
+      if (!id) return;
+      try {
+        const response = await axios.get(
+          `http://localhost:4000/api/services/service/${id}`
+        );
+        setService(response.data);
+      } catch (error) {
+        console.error("Error fetching service:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchService();
+  }, [id]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 bg-warm-ivory flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C9A24D]"></div>
+      </div>
+    );
+  }
 
   if (!service) {
     return (
@@ -68,7 +93,11 @@ const ServiceDetailsPage = () => {
                   className="rounded-xl overflow-hidden shadow-lg h-[300px] md:h-[400px]"
                 >
                   <img
-                    src={service.image}
+                    src={
+                      service.images && service.images.length > 0
+                        ? service.images[0]
+                        : service.image
+                    }
                     alt={service.title}
                     className="w-full h-full object-cover"
                   />
@@ -93,7 +122,7 @@ const ServiceDetailsPage = () => {
                           <span className="text-charcoal-black/70">
                             <strong className="text-charcoal-black font-medium">
                               Starting Price:
-                            </strong>{" "}
+                            </strong>{" "}₹
                             {service.price}
                           </span>
                         </li>

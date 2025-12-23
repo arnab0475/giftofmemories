@@ -1,14 +1,13 @@
 import { motion, AnimatePresence } from "framer-motion";
 import ServiceCard from "./ServiceCard";
-import { servicesData } from "../../data/servicesData";
 import { Link } from "react-router-dom";
 
-const ServicesGrid = ({ activeFilter }) => {
+const ServicesGrid = ({ activeFilter, services = [] }) => {
   const parsePrice = (priceStr) => {
     return parseInt(priceStr.replace(/[^\d]/g, ""), 10);
   };
 
-  const filteredServices = servicesData
+  const filteredServices = services
     .filter((service) => {
       // 1. Category Filter
       if (
@@ -94,11 +93,13 @@ const ServicesGrid = ({ activeFilter }) => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
           <AnimatePresence>
-            {filteredServices.map((service) => (
-              <Link to={`/services/${service.id}`} key={service.id}>
-                <ServiceCard service={service} />
-              </Link>
-            ))}
+            {filteredServices.map((service) =>
+              service._id ? (
+                <Link to={`/services/${service._id}`} key={service._id}>
+                  <ServiceCard service={service} />
+                </Link>
+              ) : null
+            )}
           </AnimatePresence>
         </motion.div>
 

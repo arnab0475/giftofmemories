@@ -26,6 +26,7 @@ import AnnouncementPopup from "./components/AnnouncementPopup";
 import AdminPopups from "./pages/AdminPopups";
 import AdminBlogPage from "./pages/AdminBlogPage";
 import AdminTestimonial from "./pages/AdminTestimonial";
+import AdminServicePage from "./pages/AdminServicePage";
 import AdminHero from "./pages/AdminHero";
 import AdminGalleryPage from "./pages/AdminGalleryPage";
 import { ToastContainer } from "react-toastify";
@@ -50,6 +51,7 @@ const AppContent = () => {
     "/admin-blogs",
     "/admin-enquiries",
     "/admin-testimonials",
+    "/admin-services",
     "/admin-hero",
     "/admin-gallery",
   ];
@@ -102,6 +104,7 @@ const AppContent = () => {
                 path="/admin-testimonials"
                 element={<AdminTestimonial />}
               />
+              <Route path="/admin-services" element={<AdminServicePage />} />
               <Route path="/admin-hero" element={<AdminHero />} />
               <Route path="/admin-gallery" element={<AdminGalleryPage />} />
             </Route>
