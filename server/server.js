@@ -1,5 +1,5 @@
 import express from "express";
-import { connectDB } from "./config/db.js";
+import { connectDB } from "./Config/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
