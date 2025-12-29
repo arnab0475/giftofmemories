@@ -17,7 +17,9 @@ const AdminBlogPage = () => {
   const fetchBlogs = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("VITE_NODE_URL/api/blogs");
+      const response = await axios.get(
+        `${import.meta.env.VITE_NODE_URL}/api/blogs`
+      );
       setBlogs(response.data);
     } catch (error) {
       console.error("Error fetching blogs:", error);
@@ -44,7 +46,7 @@ const AdminBlogPage = () => {
   const handleDeleteBlog = async (id) => {
     if (window.confirm("Are you sure you want to delete this blog post?")) {
       try {
-        await axios.delete(`VITE_NODE_URL/api/blogs/${id}`);
+        await axios.delete(`${import.meta.env.VITE_NODE_URL}/api/blogs/${id}`);
         toast.success("Blog deleted successfully");
         fetchBlogs();
       } catch (error) {
@@ -60,11 +62,17 @@ const AdminBlogPage = () => {
 
       if (currentBlog) {
         // Update
-        await axios.put(`VITE_NODE_URL/api/blogs/${currentBlog._id}`, blogData);
+        await axios.put(
+          `${import.meta.env.VITE_NODE_URL}/api/blogs/${currentBlog._id}`,
+          blogData
+        );
         toast.success("Blog updated successfully");
       } else {
         // Create
-        await axios.post("VITE_NODE_URL/api/blogs", blogData);
+        await axios.post(
+          `${import.meta.env.VITE_NODE_URL}/api/blogs`,
+          blogData
+        );
         toast.success("Blog created successfully");
       }
       setIsEditing(false);

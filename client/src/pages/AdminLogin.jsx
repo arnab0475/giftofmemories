@@ -19,14 +19,17 @@ const AdminLogin = () => {
     setError("");
 
     try {
-      const response = await fetch("VITE_NODE_URL/api/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_NODE_URL}/api/admin/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await response.json();
 

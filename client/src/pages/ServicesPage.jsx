@@ -22,7 +22,9 @@ const ServicesPage = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await axios.get("VITE_NODE_URL/api/services/services");
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/services/services`
+        );
         setServices(response.data);
       } catch (error) {
         console.error("Error fetching services:", error);

@@ -22,7 +22,9 @@ const AdminGalleryPage = () => {
   const fetchGallery = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("VITE_NODE_URL/api/gallery/get-gallery");
+      const response = await axios.get(
+        `${import.meta.env.VITE_NODE_URL}/api/gallery/get-gallery`
+      );
       setGalleryItems(response.data);
     } catch (error) {
       console.error("Error fetching gallery:", error);
@@ -61,12 +63,16 @@ const AdminGalleryPage = () => {
       formData.append("file", uploadFile);
       formData.append("tags", JSON.stringify([uploadCategory]));
 
-      await axios.post("VITE_NODE_URL/api/gallery/add-gallery", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      });
+      await axios.post(
+        `${import.meta.env.VITE_NODE_URL}/api/gallery/add-gallery`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
 
       toast.success("Gallery item uploaded successfully");
       setShowUploadModal(false);
@@ -85,9 +91,12 @@ const AdminGalleryPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       try {
-        await axios.delete(`VITE_NODE_URL/api/gallery/delete-gallery/${id}`, {
-          withCredentials: true,
-        });
+        await axios.delete(
+          `${import.meta.env.VITE_NODE_URL}/api/gallery/delete-gallery/${id}`,
+          {
+            withCredentials: true,
+          }
+        );
         toast.success("Item deleted successfully");
         setGalleryItems((prev) => prev.filter((item) => item._id !== id));
       } catch (error) {

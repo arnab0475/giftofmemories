@@ -40,7 +40,9 @@ const AdminServicePage = () => {
   const fetchServices = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("VITE_NODE_URL/api/services/services");
+      const response = await axios.get(
+        `${import.meta.env.VITE_NODE_URL}/api/services/services`
+      );
       setServices(response.data);
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -114,9 +116,12 @@ const AdminServicePage = () => {
   const handleDeleteService = async (id) => {
     if (window.confirm("Are you sure you want to delete this service?")) {
       try {
-        await axios.delete(`VITE_NODE_URL/api/services/delete-service/${id}`, {
-          withCredentials: true,
-        });
+        await axios.delete(
+          `${import.meta.env.VITE_NODE_URL}/api/services/delete-service/${id}`,
+          {
+            withCredentials: true,
+          }
+        );
         toast.success("Service deleted successfully");
         setServices((prev) => prev.filter((s) => s._id !== id));
       } catch (error) {
@@ -150,7 +155,9 @@ const AdminServicePage = () => {
 
       if (currentService) {
         await axios.put(
-          `VITE_NODE_URL/api/services/update-service/${currentService._id}`,
+          `${import.meta.env.VITE_NODE_URL}/api/services/update-service/${
+            currentService._id
+          }`,
           data,
           {
             headers: { "Content-Type": "multipart/form-data" },
@@ -159,10 +166,14 @@ const AdminServicePage = () => {
         );
         toast.success("Service updated successfully");
       } else {
-        await axios.post("VITE_NODE_URL/api/services/add-service", data, {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        });
+        await axios.post(
+          `${import.meta.env.VITE_NODE_URL}/api/services/add-service`,
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+            withCredentials: true,
+          }
+        );
         toast.success("Service created successfully");
       }
 

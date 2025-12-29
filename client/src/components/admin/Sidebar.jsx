@@ -93,10 +93,13 @@ const Sidebar = () => {
                       key={itemIndex}
                       onClick={async () => {
                         try {
-                          await fetch("VITE_NODE_URL/api/admin/logout", {
-                            method: "POST",
-                            credentials: "include",
-                          });
+                          await fetch(
+                            `${import.meta.env.VITE_NODE_URL}/api/admin/logout`,
+                            {
+                              method: "POST",
+                              credentials: "include",
+                            }
+                          );
                           navigate("/admin-portal-secret");
                         } catch (error) {
                           console.error("Logout failed:", error);

@@ -8,10 +8,13 @@ const ProtectedRoute = () => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        const response = await fetch("VITE_NODE_URL/api/admin/verify", {
-          method: "GET",
-          credentials: "include", // Important for cookies
-        });
+        const response = await fetch(
+          `${import.meta.env.VITE_NODE_URL}/api/admin/verify`,
+          {
+            method: "GET",
+            credentials: "include", // Important for cookies
+          }
+        );
         console.log(response);
         const data = await response.json();
         console.log(data);
