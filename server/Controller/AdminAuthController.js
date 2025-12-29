@@ -14,7 +14,7 @@ export const AdminLogin = async (req, res) => {
     res
       .cookie("adminToken", token, {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
         secure: process.env.NODE_ENV === "production",
         maxAge: 24 * 60 * 60 * 1000, // 1 day
       })

@@ -23,7 +23,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
     ],
-    credentials: "include",
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
