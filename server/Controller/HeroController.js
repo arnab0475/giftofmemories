@@ -1,5 +1,5 @@
 import { Hero } from "../Model/Hero.js";
-import cloudinary from "../Config/cloudinary.js";
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
 export const addHero = async (req, res) => {

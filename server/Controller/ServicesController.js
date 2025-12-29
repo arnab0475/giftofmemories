@@ -1,5 +1,5 @@
 import { Service } from "../Model/Service.js";
-import cloudinary from "../Config/cloudinary.js";
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
 export const getServices = async (req, res) => {

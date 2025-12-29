@@ -1,5 +1,5 @@
 import { Popup } from "../Model/Popup.js";
-import cloudinary from "../Config/cloudinary.js";
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
 export const addPopup = async (req, res) => {

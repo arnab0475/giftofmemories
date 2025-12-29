@@ -1,8 +1,8 @@
 import express from "express";
-import { connectDB } from "./Config/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import { connectDB } from "./config/db.js";
 import adminRouter from "./Routes/AdminAuth.js";
 import ServicesRouter from "./Routes/Services.js";
 import GalleryRouter from "./Routes/Gallery.js";

@@ -1,5 +1,5 @@
 import { Gallery } from "../Model/Gallery.js";
-import cloudinary from "../Config/cloudinary.js";
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
 export const getGallery = async (req, res) => {

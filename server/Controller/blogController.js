@@ -1,5 +1,5 @@
 import Blog from "../Model/Blog.js";
-import cloudinary from "../Config/cloudinary.js";
+import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
 // Get all blogs
