@@ -17,7 +17,7 @@ const ServiceDetailsPage = () => {
       if (!id) return;
       try {
         const response = await axios.get(
-          `http://localhost:4000/api/services/service/${id}`
+          `VITE_NODE_URL/api/services/service/${id}`
         );
         setService(response.data);
       } catch (error) {
@@ -122,8 +122,8 @@ const ServiceDetailsPage = () => {
                           <span className="text-charcoal-black/70">
                             <strong className="text-charcoal-black font-medium">
                               Starting Price:
-                            </strong>{" "}₹
-                            {service.price}
+                            </strong>{" "}
+                            ₹{service.price}
                           </span>
                         </li>
                         <li className="flex items-start gap-3">

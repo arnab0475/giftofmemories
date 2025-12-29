@@ -24,7 +24,7 @@ const BlogPage = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:4000/api/blogs");
+        const response = await axios.get("VITE_NODE_URL/api/blogs");
         setPosts(response.data);
       } catch (err) {
         console.error("Failed to fetch blogs", err);

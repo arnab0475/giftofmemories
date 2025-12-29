@@ -8,18 +8,17 @@ const ProtectedRoute = () => {
   useEffect(() => {
     const verifyAuth = async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/admin/verify", {
+        const response = await fetch("VITE_NODE_URL/api/admin/verify", {
           method: "GET",
           credentials: "include", // Important for cookies
         });
-        console.log(response)
+        console.log(response);
         const data = await response.json();
-        console.log(data)
+        console.log(data);
         setIsAuthenticated(data.isLoggedIn);
       } catch (error) {
         setIsAuthenticated(false);
       }
-
     };
 
     verifyAuth();

@@ -25,7 +25,7 @@ const GalleryPage = () => {
     const fetchGallery = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:4000/api/gallery/get-gallery"
+          "VITE_NODE_URL/api/gallery/get-gallery"
         );
         setGalleryItems(response.data);
       } catch (error) {
@@ -48,7 +48,7 @@ const GalleryPage = () => {
         <ImmersiveGallery
           viewMode={viewMode}
           setViewMode={setViewMode}
-          items={galleryItems} 
+          items={galleryItems}
         />
       ) : (
         <>
@@ -63,7 +63,7 @@ const GalleryPage = () => {
           <MainGalleryGrid
             activeFilter={activeFilter}
             viewMode={viewMode}
-            items={galleryItems} 
+            items={galleryItems}
           />
         </>
       )}
