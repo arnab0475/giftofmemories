@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { IconBrandWhatsapp } from "@tabler/icons-react";
 
 const FloatingChatButtons = () => {
-  const whatsappNumber = "911234567890";
+  const whatsappNumber = "918335934679";
   const whatsappMessage = encodeURIComponent(
     "Hi, I'm interested in your photography services!"
   );

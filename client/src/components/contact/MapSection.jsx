@@ -25,10 +25,10 @@ const MapSection = () => {
               Pixonova Studio
             </h4>
             <p className="font-inter text-sm text-slate-gray mb-3">
-              12/4 Park Avenue, Jubilee Hills, Hyderabad
+              Sukanta pally Rabindra Nagar, Dum Dum Cantonment , Kolkata, West Bengal, India
             </p>
             <a
-              href="https://maps.google.com"
+              href="https://maps.app.goo.gl/8efg7B8JEt9n89bw5?g_st=aw"
               target="_blank"
               rel="noreferrer"
               className="text-gold-accent font-inter text-xs font-bold uppercase tracking-widest hover:text-charcoal-black transition-colors"
