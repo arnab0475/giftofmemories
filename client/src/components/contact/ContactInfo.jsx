@@ -23,9 +23,9 @@ const ContactInfo = () => {
                 Our Studio
               </h4>
               <p className="font-inter text-charcoal-black/70 text-sm leading-relaxed">
-                12/4 Park Avenue, Jubilee Hills,
+                Sukanta pally Rabindra Nagar, Dum Dum Cantonment 
                 <br />
-                Hyderabad, Telangana 500033
+                Kolkata, West Bengal, India 700065
               </p>
             </div>
           </div>
@@ -39,9 +39,7 @@ const ContactInfo = () => {
                 Phone
               </h4>
               <p className="font-inter text-charcoal-black/70 text-sm leading-relaxed">
-                +91 98765 43210
-                <br />
-                +91 40 1234 5678
+                +91 83359 34679
               </p>
             </div>
           </div>
@@ -55,9 +53,7 @@ const ContactInfo = () => {
                 Email
               </h4>
               <p className="font-inter text-charcoal-black/70 text-sm leading-relaxed">
-                hello@pixonova.com
-                <br />
-                bookings@pixonova.com
+                thegiftofmemories.clicks@gmail.com
               </p>
             </div>
           </div>
