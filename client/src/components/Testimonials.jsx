@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Quote } from "lucide-react";
+import { motion } from "framer-motion";
+import { Quote, Star } from "lucide-react";
 
 const defaultTestimonials = [
   {
@@ -21,11 +21,18 @@ const defaultTestimonials = [
     author: "Elena Rossi",
     role: "Fashion Director",
   },
+  {
+    id: 4,
+    text: "Simply the best. Professional, creative, and a joy to work with. Our family photos are treasures we will cherish forever.",
+    author: "The Thompson Family",
+    role: "Family Session",
+  },
 ];
+
+const STAR_COUNT = 5;
 
 const Testimonials = () => {
   const [testimonials, setTestimonials] = useState(defaultTestimonials);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const fetchTestimonials = async () => {
@@ -36,7 +43,6 @@ const Testimonials = () => {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            // map server fields to component fields
             const mapped = data.map((t) => ({
               id: t._id,
               text: t.feedback,
@@ -54,59 +60,76 @@ const Testimonials = () => {
     fetchTestimonials();
   }, []);
 
-  useEffect(() => {
-    if (!testimonials || testimonials.length === 0) return;
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-    }, 6000);
-    return () => clearInterval(timer);
-  }, [testimonials.length]);
+  // Duplicate testimonials to ensure seamless loop
+  const seamlessTestimonials = [
+    ...testimonials,
+    ...testimonials,
+    ...testimonials,
+  ];
 
   return (
-    <section className="py-24 bg-gold-accent text-charcoal-black relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none" />
+    <section className="py-24 bg-charcoal-black text-warm-ivory relative overflow-hidden">
+      {/* Header */}
+      <div className="container mx-auto px-6 text-center mb-16 relative z-10">
+        <div className="flex justify-center items-center gap-2 mb-4">
+          <div className="flex text-gold-accent">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={14} fill="currentColor" className="mr-0.5" />
+            ))}
+          </div>
+          <span className="text-xs font-inter tracking-widest text-muted-beige uppercase">
+            Rated 4.9 Stars on Google
+          </span>
+        </div>
 
-      <div className="container mx-auto px-6 text-center relative z-10">
-        <Quote size={48} className="mx-auto mb-8 text-warm-ivory opacity-80" />
+        <h2 className="font-playfair text-4xl md:text-5xl text-warm-ivory mb-6 leading-tight">
+          Your feedback is what makes us{" "}
+          <span className="italic text-gold-accent">better</span>
+        </h2>
+      </div>
 
-        <div className="h-75 flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentIndex}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-3xl"
+      {/* Marquee Container */}
+      <div className="relative w-full overflow-hidden mask-linear-gradient">
+        <motion.div
+          className="flex gap-8 w-max"
+          animate={{ x: "-33.33%" }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          {seamlessTestimonials.map((testimonial, index) => (
+            <div
+              key={`${testimonial.id}-${index}`}
+              className="w-[350px] md:w-[450px] p-8 shrink-0 select-none"
             >
-              <h3 className="font-playfair text-2xl md:text-4xl leading-relaxed mb-8 italic">
-                "{testimonials[currentIndex].text}"
-              </h3>
-              <div className="font-inter">
-                <p className="text-charcoal-black font-bold uppercase tracking-widest text-sm mb-2">
-                  {testimonials[currentIndex].author}
-                </p>
-                <p className="text-charcoal-black/70 text-xs tracking-wider">
-                  {testimonials[currentIndex].role}
-                </p>
+              {/* Stars */}
+              <div className="flex gap-1 mb-6 text-gold-accent">
+                {[...Array(STAR_COUNT)].map((_, i) => (
+                  <Star key={i} size={16} fill="currentColor" />
+                ))}
               </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
 
-        <div className="flex justify-center space-x-2 mt-8">
-          {testimonials.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentIndex
-                  ? "bg-charcoal-black w-6"
-                  : "bg-charcoal-black/30 hover:bg-charcoal-black/50"
-              }`}
-            />
+              {/* Quote */}
+              <p className="font-inter text-lg leading-relaxed text-gray-300 font-light italic mb-8">
+                "{testimonial.text}"
+              </p>
+
+              {/* Author */}
+              <div>
+                <h4 className="font-playfair text-xl text-warm-ivory mb-1">
+                  - {testimonial.author}
+                </h4>
+                {testimonial.role && (
+                  <span className="font-inter text-xs tracking-wider text-gray-500 uppercase">
+                    {testimonial.role}
+                  </span>
+                )}
+              </div>
+            </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

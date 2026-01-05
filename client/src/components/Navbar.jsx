@@ -5,10 +5,12 @@ import { Link, useLocation } from "react-router-dom";
 import { servicesData } from "../data/servicesData";
 import { useRef } from "react";
 import logo from "../assets/images/logo-negative-gom.png";
+import { useClientAuth } from "../context/ClientAuthContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { isClientLoggedIn, logout } = useClientAuth();
 
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -61,6 +63,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },
+    { name: "Shop", path: "/shop" },
     { name: "Gallery", path: "/gallery" },
     { name: "Blog", path: "/blog" },
     { name: "About", path: "/about" },
@@ -125,6 +128,31 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
+
+          {/* Client Auth Buttons */}
+          {isClientLoggedIn ? (
+            <button
+              onClick={logout}
+              className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 mr-4 ${
+                !isScrolled && !isServiceDetails
+                  ? "text-warm-ivory/90 hover:text-gold-accent"
+                  : "text-charcoal-black/80 hover:text-gold-accent"
+              }`}
+            >
+              Logout
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 mr-4 ${
+                !isScrolled && !isServiceDetails
+                  ? "text-warm-ivory/90 hover:text-gold-accent"
+                  : "text-charcoal-black/80 hover:text-gold-accent"
+              }`}
+            >
+              Login
+            </Link>
+          )}
 
           {/* Search Bar */}
           <div className="relative" ref={searchRef}>

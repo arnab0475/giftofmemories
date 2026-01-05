@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import ServiceHero from "../components/services/ServiceHero";
 import ServiceFilter from "../components/services/ServiceFilter";
-import ServicesGrid from "../components/services/ServicesGrid";
+import ServiceCategoryGrid from "../components/services/ServiceCategoryGrid";
 import FeaturedServices from "../components/services/FeaturedServices";
 import CustomPackageCTA from "../components/services/CustomPackageCTA";
 import ServiceTrustStrip from "../components/services/ServiceTrustStrip";
@@ -47,7 +47,9 @@ const ServicesPage = () => {
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
       />
-      <ServicesGrid activeFilter={activeFilter} services={services} />
+      <div className="py-12">
+        <ServiceCategoryGrid />
+      </div>
       <FeaturedServices />
       <CustomPackageCTA />
       <ServiceTrustStrip />
