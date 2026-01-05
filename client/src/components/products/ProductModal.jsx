@@ -1,6 +1,9 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useClientAuth } from "../../context/ClientAuthContext";
+import { triggerWhatsApp } from "../../../utils/whatsappHandler";
+
+const userName = "Customer"
 
 const ProductModal = ({ isOpen, onClose, product }) => {
   const { isClientLoggedIn } = useClientAuth();
@@ -117,7 +120,7 @@ const ProductModal = ({ isOpen, onClose, product }) => {
 
                 {/* Purchase Actions */}
                 <div className="mt-auto flex gap-4">
-                  <button className="flex-1 bg-gold-accent text-charcoal-black font-bold py-4 rounded-[10px] hover:brightness-105 transition-all text-lg shadow-lg shadow-gold-accent/20">
+                  <button className="flex-1 bg-gold-accent text-charcoal-black font-bold py-4 rounded-[10px] hover:brightness-105 transition-all text-lg shadow-lg shadow-gold-accent/20" onClick={() => triggerWhatsApp(userName, product.name)}>
                     Buy Now
                   </button>
                   <button className="px-6 py-4 rounded-[10px] border border-charcoal-black text-charcoal-black font-semibold hover:bg-gray-50 transition-all">
