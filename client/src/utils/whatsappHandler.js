@@ -24,9 +24,11 @@ export async function triggerWhatsApp(name, orderType) {
 
   const encodedMessage = encodeURIComponent(message);
 
-  const PHONE_NUMBER = "91XXXXXXXXXX"; // 🔴 REPLACE THIS
+  const PHONE_NUMBER = "919144113540";
 
   const whatsappURL = `https://wa.me/${PHONE_NUMBER}?text=${encodedMessage}`;
+
+  console.log(whatsappURL);
 
   window.open(whatsappURL, "_blank");
 }
