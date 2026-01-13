@@ -10,6 +10,7 @@ import {
 import {
   getPackages,
   getPackagesWithServices,
+  getMostBookedPackages,
   addPackage,
   updatePackage,
   deletePackage,
@@ -43,18 +44,25 @@ const upload = multer({
 router.get("/services", getServices);
 router.get("/packages", getPackages);
 router.get("/packages-with-services", getPackagesWithServices);
+router.get("/most-booked-packages", getMostBookedPackages);
 
 router.post(
   "/add-service",
   AdminMiddleware,
-  upload.array("images", 5),
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "logo", maxCount: 1 },
+  ]),
   addService
 );
 router.get("/service/:id", getServiceById);
 router.put(
   "/update-service/:id",
   AdminMiddleware,
-  upload.array("images", 5),
+  upload.fields([
+    { name: "images", maxCount: 5 },
+    { name: "logo", maxCount: 1 },
+  ]),
   updateService
 );
 router.delete("/delete-service/:id", AdminMiddleware, deleteService);

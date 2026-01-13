@@ -121,69 +121,66 @@ const MegaSearch = () => {
             transition={{ duration: 0.2 }}
             className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl overflow-hidden border-t border-gold-accent/20"
           >
-            <div className="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 max-h-[65vh] overflow-y-auto custom-scrollbar">
-              {/* Services grouped by packages - only show packages with services */}
+            <div className="p-6 flex flex-col gap-4 max-h-[65vh] overflow-y-auto custom-scrollbar">
+              {/* Services grouped by packages - each package is a row */}
               {groupedServices
                 .filter((group) => group.services.length > 0)
                 .map((group) => (
                   <div key={group.packageId} className="flex flex-col gap-2">
-                    <h3 className="font-playfair text-base font-bold text-gold-accent uppercase tracking-wide border-b border-gold-accent/30 pb-1 mb-2">
+                    <h3 className="font-playfair text-sm font-bold text-gold-accent uppercase tracking-wide">
                       {group.packageTitle}
                     </h3>
-                    <ul className="space-y-1.5">
+                    <div className="flex flex-wrap gap-2">
                       {group.services.map((service) => (
-                        <li key={service._id}>
-                          <button
-                            onClick={() => handleServiceClick(service._id)}
-                            className="font-inter text-sm text-slate-gray hover:text-gold-accent hover:pl-1 transition-all duration-200 block text-left w-full"
-                          >
-                            {service.title}
-                          </button>
-                        </li>
+                        <button
+                          key={service._id}
+                          onClick={() => handleServiceClick(service._id)}
+                          className="font-inter text-sm text-charcoal-black bg-gray-50 hover:bg-gold-accent hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 border border-gray-200 hover:border-gold-accent"
+                        >
+                          {service.title}
+                        </button>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 ))}
 
               {/* Unassigned services */}
               {unassignedServices.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <h3 className="font-playfair text-base font-bold text-gold-accent uppercase tracking-wide border-b border-gold-accent/30 pb-1 mb-2">
+                  <h3 className="font-playfair text-sm font-bold text-gold-accent uppercase tracking-wide">
                     Other Services
                   </h3>
-                  <ul className="space-y-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {unassignedServices.map((service) => (
-                      <li key={service._id}>
-                        <button
-                          onClick={() => handleServiceClick(service._id)}
-                          className="font-inter text-sm text-slate-gray hover:text-gold-accent hover:pl-1 transition-all duration-200 block text-left w-full"
-                        >
-                          {service.title}
-                        </button>
-                      </li>
+                      <button
+                        key={service._id}
+                        onClick={() => handleServiceClick(service._id)}
+                        className="font-inter text-sm text-charcoal-black bg-gray-50 hover:bg-gold-accent hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 border border-gray-200 hover:border-gold-accent"
+                      >
+                        {service.title}
+                      </button>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
 
               {/* Products Section */}
               {products.length > 0 && (
                 <div className="flex flex-col gap-2">
-                  <h3 className="font-playfair text-base font-bold text-gold-accent uppercase tracking-wide border-b border-gold-accent/30 pb-1 mb-2">
+                  <h3 className="font-playfair text-sm font-bold text-gold-accent uppercase tracking-wide">
                     Products
                   </h3>
-                  <ul className="space-y-1.5">
+                  <div className="flex flex-wrap gap-2">
                     {products.map((product) => (
-                      <li key={product._id}>
-                        <button
-                          onClick={handleProductClick}
-                          className="font-inter text-sm text-slate-gray hover:text-gold-accent hover:pl-1 transition-all duration-200 block text-left w-full"
-                        >
-                          {product.name}
-                        </button>
-                      </li>
+                      <button
+                        key={product._id}
+                        onClick={handleProductClick}
+                        className="font-inter text-sm text-charcoal-black bg-gray-50 hover:bg-gold-accent hover:text-white px-3 py-1.5 rounded-full transition-all duration-200 border border-gray-200 hover:border-gold-accent"
+                      >
+                        {product.name}
+                      </button>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
             </div>

@@ -43,11 +43,51 @@ export const getPackagesWithServices = async (req, res) => {
   }
 };
 
+// Get most booked packages with their services nested - public
+export const getMostBookedPackages = async (req, res) => {
+  try {
+    const packages = await Package.find({ isMostBooked: true }).sort({
+      order: 1,
+      createdAt: 1,
+    });
+    const packageIds = packages.map((p) => p._id);
+
+    const services = await Service.find({ package: { $in: packageIds } });
+
+    const servicesByPackage = services.reduce((acc, service) => {
+      const key = service.package?.toString();
+      if (!key) return acc;
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(service);
+      return acc;
+    }, {});
+
+    const result = packages.map((pkg) => {
+      const pkgObj = pkg.toObject();
+      return {
+        ...pkgObj,
+        services: servicesByPackage[pkg._id.toString()] || [],
+      };
+    });
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
 // Admin: create a package
 export const addPackage = async (req, res) => {
   try {
-    const { title, description, category, startingPrice, isFeatured, order } =
-      req.body;
+    const {
+      title,
+      description,
+      category,
+      startingPrice,
+      isFeatured,
+      isMostBooked,
+      order,
+    } = req.body;
 
     if (!title) {
       return res.status(400).json({ message: "Title is required" });
@@ -78,6 +118,7 @@ export const addPackage = async (req, res) => {
       image: imageUrl,
       startingPrice,
       isFeatured,
+      isMostBooked,
       order,
     });
 
@@ -96,8 +137,15 @@ export const addPackage = async (req, res) => {
 export const updatePackage = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, category, startingPrice, isFeatured, order } =
-      req.body;
+    const {
+      title,
+      description,
+      category,
+      startingPrice,
+      isFeatured,
+      isMostBooked,
+      order,
+    } = req.body;
 
     const existingPackage = await Package.findById(id);
     if (!existingPackage) {
@@ -110,6 +158,7 @@ export const updatePackage = async (req, res) => {
     if (category !== undefined) updateData.category = category;
     if (startingPrice !== undefined) updateData.startingPrice = startingPrice;
     if (isFeatured !== undefined) updateData.isFeatured = isFeatured;
+    if (isMostBooked !== undefined) updateData.isMostBooked = isMostBooked;
     if (order !== undefined) updateData.order = order;
 
     // Handle image update

@@ -4,9 +4,9 @@ import axios from "axios";
 import ServiceHero from "../components/services/ServiceHero";
 import ServiceFilter from "../components/services/ServiceFilter";
 import ServiceCategoryGrid from "../components/services/ServiceCategoryGrid";
-import FeaturedServices from "../components/services/FeaturedServices";
 import CustomPackageCTA from "../components/services/CustomPackageCTA";
 import ServiceTrustStrip from "../components/services/ServiceTrustStrip";
+import MostBookedPackages from "../components/services/MostBookedPackages";
 
 const ServicesPage = () => {
   const [services, setServices] = useState([]);
@@ -43,6 +43,7 @@ const ServicesPage = () => {
       className="bg-warm-ivory min-h-screen"
     >
       <ServiceHero />
+      <MostBookedPackages />
       <ServiceFilter
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
@@ -50,7 +51,6 @@ const ServicesPage = () => {
       <div className="py-12">
         <ServiceCategoryGrid />
       </div>
-      <FeaturedServices />
       <CustomPackageCTA />
       <ServiceTrustStrip />
     </motion.div>

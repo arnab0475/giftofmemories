@@ -30,12 +30,38 @@ export const addService = async (req, res) => {
     }
 
     let imageUrls = [];
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map((file) => {
-        return new Promise((resolve, reject) => {
+    let logoUrl = null;
+
+    if (req.files) {
+      // Handle cover images
+      const coverImages = req.files.images || req.files["images"] || [];
+      if (coverImages.length > 0) {
+        const uploadPromises = coverImages.map((file) => {
+          return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "services",
+                resource_type: "image",
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result.secure_url);
+              }
+            );
+            streamifier.createReadStream(file.buffer).pipe(uploadStream);
+          });
+        });
+        imageUrls = await Promise.all(uploadPromises);
+      }
+
+      // Handle logo
+      const logoFiles = req.files.logo || req.files["logo"] || [];
+      if (logoFiles.length > 0) {
+        const logoFile = logoFiles[0];
+        logoUrl = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             {
-              folder: "services",
+              folder: "services/logos",
               resource_type: "image",
             },
             (error, result) => {
@@ -43,11 +69,9 @@ export const addService = async (req, res) => {
               else resolve(result.secure_url);
             }
           );
-          streamifier.createReadStream(file.buffer).pipe(uploadStream);
+          streamifier.createReadStream(logoFile.buffer).pipe(uploadStream);
         });
-      });
-
-      imageUrls = await Promise.all(uploadPromises);
+      }
     }
 
     const newService = new Service({
@@ -57,6 +81,7 @@ export const addService = async (req, res) => {
       description,
       price,
       images: imageUrls,
+      logo: logoUrl,
       details: details ? JSON.parse(details) : {},
       package: packageId || null,
     });
@@ -115,12 +140,53 @@ export const updateService = async (req, res) => {
       updateData.details = JSON.parse(details);
     }
 
-    if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map((file) => {
-        return new Promise((resolve, reject) => {
+    if (req.files) {
+      // Handle cover images
+      const coverImages = req.files.images || req.files["images"] || [];
+      if (coverImages.length > 0) {
+        const uploadPromises = coverImages.map((file) => {
+          return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: "services",
+                resource_type: "image",
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result.secure_url);
+              }
+            );
+            streamifier.createReadStream(file.buffer).pipe(uploadStream);
+          });
+        });
+
+        const newImageUrls = await Promise.all(uploadPromises);
+
+        const oldService = await Service.findById(id);
+        if (oldService && oldService.images && oldService.images.length > 0) {
+          const deletePromises = oldService.images.map((imageUrl) => {
+            const urlParts = imageUrl.split("/");
+            const publicIdWithExtension = urlParts.slice(-2).join("/");
+            const publicId = publicIdWithExtension.split(".")[0];
+            return cloudinary.uploader.destroy(publicId, {
+              resource_type: "image",
+            });
+          });
+
+          await Promise.all(deletePromises);
+        }
+
+        updateData.images = newImageUrls;
+      }
+
+      // Handle logo
+      const logoFiles = req.files.logo || req.files["logo"] || [];
+      if (logoFiles.length > 0) {
+        const logoFile = logoFiles[0];
+        const logoUrl = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             {
-              folder: "services",
+              folder: "services/logos",
               resource_type: "image",
             },
             (error, result) => {
@@ -128,32 +194,22 @@ export const updateService = async (req, res) => {
               else resolve(result.secure_url);
             }
           );
-          streamifier.createReadStream(file.buffer).pipe(uploadStream);
+          streamifier.createReadStream(logoFile.buffer).pipe(uploadStream);
         });
-      });
 
-      const newImageUrls = await Promise.all(uploadPromises);
-
-      // Optionally delete old images here if replacing
-      // tailored for now to just append or replace if logic demands,
-      // but simplistic replacement of array is what was here.
-      // The previous logic deleted ALL old images if ANY new one was uploaded.
-
-      const oldService = await Service.findById(id);
-      if (oldService && oldService.images && oldService.images.length > 0) {
-        const deletePromises = oldService.images.map((imageUrl) => {
-          const urlParts = imageUrl.split("/");
+        // Delete old logo if exists
+        const oldService = await Service.findById(id);
+        if (oldService && oldService.logo) {
+          const urlParts = oldService.logo.split("/");
           const publicIdWithExtension = urlParts.slice(-2).join("/");
           const publicId = publicIdWithExtension.split(".")[0];
-          return cloudinary.uploader.destroy(publicId, {
+          await cloudinary.uploader.destroy(publicId, {
             resource_type: "image",
           });
-        });
+        }
 
-        await Promise.all(deletePromises);
+        updateData.logo = logoUrl;
       }
-
-      updateData.images = newImageUrls;
     }
 
     const updatedService = await Service.findByIdAndUpdate(id, updateData, {

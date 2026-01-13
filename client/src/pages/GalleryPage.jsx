@@ -4,7 +4,6 @@ import GalleryHero from "../components/gallery/GalleryHero";
 import GalleryFilter from "../components/gallery/GalleryFilter";
 import MainGalleryGrid from "../components/gallery/MainGalleryGrid";
 import VideoGallery from "../components/gallery/VideoGallery";
-import FeaturedServices from "../components/services/FeaturedServices";
 import ExplorationTags from "../components/gallery/ExplorationTags";
 import GalleryCTA from "../components/gallery/GalleryCTA";
 import ImmersiveGallery from "../components/gallery/ImmersiveGallery";
@@ -70,7 +69,6 @@ const GalleryPage = () => {
 
       <div className="relative z-10 bg-warm-ivory">
         <VideoGallery />
-        <FeaturedServices />
         <main className="container mx-auto px-6 py-12">
           <h3 className="font-playfair text-3xl text-center mb-8 text-charcoal-black">
             Explore More Moments

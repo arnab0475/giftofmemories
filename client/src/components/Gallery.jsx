@@ -8,20 +8,23 @@ import {
 } from "framer-motion";
 import { X } from "lucide-react";
 
-import gallery1 from "../assets/images/gallery-1.png";
-import gallery2 from "../assets/images/gallery-2.png";
-import gallery3 from "../assets/images/gallery-3.png";
-import hero1 from "../assets/images/hero-1.png";
-import hero2 from "../assets/images/hero-2.png";
-import hero3 from "../assets/images/hero-3.png";
-
 const galleryImages = [
-  { id: 1, src: gallery1, alt: "Avant-Garde Portrait", category: "Fashion" },
-  { id: 2, src: gallery2, alt: "Wedding Details", category: "Wedding" },
-  { id: 3, src: gallery3, alt: "Moody Landscape", category: "Fine Art" },
-  { id: 4, src: hero1, alt: "Editorial Fashion", category: "Fashion" },
-  { id: 5, src: hero2, alt: "Sunset Wedding", category: "Wedding" },
-  { id: 6, src: hero3, alt: "Black and White Portrait", category: "Portrait" },
+  {
+    id: 1,
+    src: "/img1.jpeg",
+    alt: "Shubho Bibaho Ceremony",
+    category: "Wedding",
+  },
+  {
+    id: 2,
+    src: "/img2.jpeg",
+    alt: "Haldi Celebration",
+    category: "Pre-Wedding",
+  },
+  { id: 3, src: "/img3.jpeg", alt: "Sindoor Daan Moment", category: "Wedding" },
+  { id: 4, src: "/img4.jpg", alt: "Saat Paak Ritual", category: "Wedding" },
+  { id: 5, src: "/img5.jpg", alt: "Bridal Portraits", category: "Portrait" },
+  { id: 6, src: "/img7.jpg", alt: "Reception Elegance", category: "Reception" },
 ];
 
 // Spring config for smooth, natural motion
@@ -145,7 +148,6 @@ const Gallery = () => {
         </div>
 
         {/* Scroll indicator */}
-        
       </div>
 
       {/* Lightbox Modal */}

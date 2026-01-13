@@ -8,10 +8,17 @@ import {
   useTransform,
 } from "framer-motion";
 import { Check } from "lucide-react";
-import hero1 from "../assets/images/hero-1.png";
-import hero2 from "../assets/images/hero-2.png";
-import hero3 from "../assets/images/hero-3.png";
-import gallery1 from "../assets/images/gallery-1.png";
+
+// Mix of nowimg, img, and preimg for variety
+const nowimg1 = "/nowimg1.jpg";
+const nowimg2 = "/nowimg2.jpg";
+const nowimg3 = "/nowimg3.jpg";
+const img1 = "/img1.jpeg";
+const img2 = "/img2.jpeg";
+const img4 = "/img4.jpg";
+const preimg1 = "/preimg1.jpeg";
+const preimg2 = "/preimg2.jpeg";
+const preimg5 = "/preimg5.jpeg";
 
 const skills = [
   { name: "Photography", level: 92 },
@@ -132,9 +139,9 @@ const CombinedSections = () => {
         <div className="flex flex-col gap-32">
           {/* 1. About Section */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }} 
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }} 
+            viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
           >
             <div className="inline-block px-4 py-2 rounded-full bg-gold-accent/40 border border-white/10 mb-8 backdrop-blur-sm">
@@ -234,35 +241,35 @@ const CombinedSections = () => {
             >
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={hero1}
+                  src={nowimg1}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-80 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={hero3}
+                  src={img1}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={gallery1}
+                  src={preimg1}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-96 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={hero2}
+                  src={nowimg2}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden">
                 <img
-                  src={hero1}
+                  src={img4}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
@@ -273,35 +280,35 @@ const CombinedSections = () => {
             <motion.div style={{ y: y2 }} className="space-y-4 flex flex-col">
               <div className="h-96 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={hero2}
+                  src={preimg2}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={gallery1}
+                  src={nowimg3}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-80 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={hero1}
+                  src={img2}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
-                  src={hero3}
+                  src={preimg5}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-80 rounded-3xl overflow-hidden shrink-1">
                 <img
-                  src={gallery1}
+                  src={img1}
                   className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
                   alt="Gallery"
                 />

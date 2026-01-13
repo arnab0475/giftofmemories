@@ -22,6 +22,10 @@ const PackageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isMostBooked: {
+      type: Boolean,
+      default: false,
+    },
     order: {
       type: Number,
       default: 0,

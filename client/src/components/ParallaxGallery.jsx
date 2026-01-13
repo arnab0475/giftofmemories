@@ -1,25 +1,14 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import gallery1 from "../assets/images/gallery-1.png";
-import gallery2 from "../assets/images/gallery-2.png";
-import gallery3 from "../assets/images/gallery-3.png";
-import hero1 from "../assets/images/hero-1.png";
-import hero2 from "../assets/images/hero-2.png";
-import hero3 from "../assets/images/hero-3.png";
 
 const images = [
-  gallery1,
-  gallery2,
-  gallery3,
-  hero1,
-  hero2,
-  hero3,
-  gallery1,
-  gallery2,
-  gallery3,
-  hero1,
-  hero2,
-  hero3,
+  "/preimg1.jpeg",
+  "/preimg2.jpeg",
+  "/preimg3.jpeg",
+  "/preimg4.jpeg",
+  "/preimg5.jpeg",
+  "/preimg6.jpg",
+  "/preimg7.jpg",
 ];
 
 const Row = ({ images, direction, speed = 150 }) => {
@@ -90,7 +79,7 @@ const ParallaxGallery = () => {
         <Row images={images.slice(2, 7)} direction="left" />
 
         <Row images={images.slice(5, 10)} direction="right" />
-        
+
         <Row images={images.slice(2, 7)} direction="left" />
       </div>
     </section>

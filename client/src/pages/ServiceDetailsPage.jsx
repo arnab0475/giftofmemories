@@ -68,9 +68,18 @@ const ServiceDetailsPage = () => {
             <ChevronRight size={12} />
             <span className="text-gold-accent font-bold">{service.title}</span>
           </div>
-          <h1 className="font-playfair text-4xl md:text-5xl font-bold">
-            {service.title}
-          </h1>
+          <div className="flex items-center gap-4">
+            {service.logo && (
+              <img
+                src={service.logo}
+                alt={service.title}
+                className="w-14 h-14 md:w-16 md:h-16 object-contain rounded-xl bg-white shadow-md p-2"
+              />
+            )}
+            <h1 className="font-playfair text-4xl md:text-5xl font-bold">
+              {service.title}
+            </h1>
+          </div>
         </div>
       </div>
 
@@ -116,45 +125,59 @@ const ServiceDetailsPage = () => {
                 </motion.div>
 
                 <RevealOnScroll>
-                  <div>
-                    <h2 className="font-playfair text-3xl text-charcoal-black mb-4 font-bold">
-                      About This Service
-                    </h2>
-                    <p className="font-inter text-charcoal-black/80 leading-relaxed text-lg mb-6">
-                      {service.description}
-                    </p>
+                  <div className="space-y-8">
+                    {/* About Section */}
+                    <div className="bg-white p-6 md:p-8 rounded-xl border border-charcoal-black/5 shadow-sm">
+                      <div className="flex items-center gap-3 mb-5">
+                        <div className="w-1 h-8 bg-gold-accent rounded-full"></div>
+                        <h2 className="font-playfair text-2xl md:text-3xl text-charcoal-black font-bold">
+                          About This Service
+                        </h2>
+                      </div>
+                      <div className="font-inter text-charcoal-black/75 leading-relaxed text-base md:text-lg whitespace-pre-line">
+                        {service.description}
+                      </div>
+                    </div>
 
-                    <div className="bg-white p-6 rounded-lg border border-charcoal-black/5 shadow-sm">
-                      <h3 className="font-inter font-bold text-sm uppercase tracking-widest text-gold-accent mb-4">
+                    {/* Service Highlights */}
+                    <div className="bg-gradient-to-br from-charcoal-black to-charcoal-black/95 p-6 md:p-8 rounded-xl shadow-lg">
+                      <h3 className="font-playfair font-bold text-xl text-gold-accent mb-6 flex items-center gap-3">
+                        <span className="w-8 h-[2px] bg-gold-accent"></span>
                         Service Highlights
                       </h3>
-                      <ul className="space-y-3">
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
-                          <span className="text-charcoal-black/70">
-                            <strong className="text-charcoal-black font-medium">
-                              Starting Price:
-                            </strong>{" "}
-                            ₹{service.price}
-                          </span>
+                      <ul className="space-y-4">
+                        <li className="flex items-start gap-4 p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                          <span className="w-3 h-3 rounded-full bg-gold-accent mt-1 shrink-0"></span>
+                          <div>
+                            <span className="text-gold-accent/80 text-sm uppercase tracking-wider font-inter">
+                              Starting Price
+                            </span>
+                            <p className="text-white font-semibold text-lg mt-1">
+                              ₹{service.price}
+                            </p>
+                          </div>
                         </li>
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
-                          <span className="text-charcoal-black/70">
-                            <strong className="text-charcoal-black font-medium">
-                              Typical Duration:
-                            </strong>{" "}
-                            {service.details.duration}
-                          </span>
+                        <li className="flex items-start gap-4 p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                          <span className="w-3 h-3 rounded-full bg-gold-accent mt-1 shrink-0"></span>
+                          <div>
+                            <span className="text-gold-accent/80 text-sm uppercase tracking-wider font-inter">
+                              Typical Duration
+                            </span>
+                            <p className="text-white font-semibold text-lg mt-1">
+                              {service.details.duration}
+                            </p>
+                          </div>
                         </li>
-                        <li className="flex items-start gap-3">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 mt-2 shrink-0"></span>
-                          <span className="text-charcoal-black/70">
-                            <strong className="text-charcoal-black font-medium">
-                              Deliverables:
-                            </strong>{" "}
-                            {service.details.deliverables}
-                          </span>
+                        <li className="flex items-start gap-4 p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                          <span className="w-3 h-3 rounded-full bg-gold-accent mt-1 shrink-0"></span>
+                          <div>
+                            <span className="text-gold-accent/80 text-sm uppercase tracking-wider font-inter">
+                              Deliverables
+                            </span>
+                            <p className="text-white font-semibold text-lg mt-1">
+                              {service.details.deliverables}
+                            </p>
+                          </div>
                         </li>
                       </ul>
                     </div>

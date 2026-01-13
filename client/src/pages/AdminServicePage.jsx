@@ -37,6 +37,7 @@ const AdminServicePage = () => {
     description: "",
     startingPrice: "",
     order: "",
+    isMostBooked: false,
   });
 
   // Service form state
@@ -54,6 +55,8 @@ const AdminServicePage = () => {
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
   const [packageImageFile, setPackageImageFile] = useState(null);
   const [packageImagePreview, setPackageImagePreview] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -101,6 +104,7 @@ const AdminServicePage = () => {
       description: "",
       startingPrice: "",
       order: "",
+      isMostBooked: false,
     });
     setPackageImageFile(null);
     setPackageImagePreview(null);
@@ -114,6 +118,7 @@ const AdminServicePage = () => {
       description: pkg.description || "",
       startingPrice: pkg.startingPrice?.toString() || "",
       order: pkg.order?.toString() || "",
+      isMostBooked: pkg.isMostBooked || false,
     });
     setPackageImageFile(null);
     setPackageImagePreview(pkg.image || null);
@@ -128,6 +133,7 @@ const AdminServicePage = () => {
       description: "",
       startingPrice: "",
       order: "",
+      isMostBooked: false,
     });
     setPackageImageFile(null);
     setPackageImagePreview(null);
@@ -168,6 +174,7 @@ const AdminServicePage = () => {
       if (packageForm.order) {
         formData.append("order", packageForm.order);
       }
+      formData.append("isMostBooked", packageForm.isMostBooked);
 
       if (packageImageFile) {
         formData.append("image", packageImageFile);
@@ -246,6 +253,8 @@ const AdminServicePage = () => {
     });
     setImageFile(null);
     setImagePreview(null);
+    setLogoFile(null);
+    setLogoPreview(null);
     setShowServiceModal(true);
   };
 
@@ -267,6 +276,8 @@ const AdminServicePage = () => {
       service.images && service.images.length > 0 ? service.images[0] : null
     );
     setImageFile(null);
+    setLogoPreview(service.logo || null);
+    setLogoFile(null);
     setShowServiceModal(true);
   };
 
@@ -287,6 +298,8 @@ const AdminServicePage = () => {
     });
     setImageFile(null);
     setImagePreview(null);
+    setLogoFile(null);
+    setLogoPreview(null);
   };
 
   const handleServiceInputChange = (e) => {
@@ -301,6 +314,18 @@ const AdminServicePage = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLogoFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -332,6 +357,10 @@ const AdminServicePage = () => {
 
       if (imageFile) {
         data.append("images", imageFile);
+      }
+
+      if (logoFile) {
+        data.append("logo", logoFile);
       }
 
       if (currentService) {
@@ -483,9 +512,16 @@ const AdminServicePage = () => {
                             </div>
                           )}
                           <div className="flex-1">
-                            <h3 className="font-playfair text-xl font-bold text-[#0F0F0F]">
-                              {pkg.title}
-                            </h3>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-playfair text-xl font-bold text-[#0F0F0F]">
+                                {pkg.title}
+                              </h3>
+                              {pkg.isMostBooked && (
+                                <span className="px-2 py-0.5 text-xs font-medium bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 rounded-full border border-amber-200">
+                                  🔥 Most Booked
+                                </span>
+                              )}
+                            </div>
                             {pkg.description && (
                               <p className="text-gray-500 text-sm mt-1">
                                 {pkg.description}
@@ -827,6 +863,36 @@ const AdminServicePage = () => {
                   </div>
                 </div>
 
+                {/* Most Booked Toggle */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Most Booked Package
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Mark this package as most booked to highlight it on the services page
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPackageForm((prev) => ({
+                        ...prev,
+                        isMostBooked: !prev.isMostBooked,
+                      }))
+                    }
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      packageForm.isMostBooked ? "bg-[#C9A24D]" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        packageForm.isMostBooked ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+
                 <div className="flex justify-end gap-3 pt-4 border-t">
                   <button
                     type="button"
@@ -1022,30 +1088,64 @@ const AdminServicePage = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cover Image
-                  </label>
-                  <div className="flex gap-6 items-start">
-                    {imagePreview && (
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-32 h-32 object-cover rounded-lg border border-gray-200"
-                      />
-                    )}
-                    <label className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-8 flex flex-col items-center justify-center cursor-pointer hover:border-[#C9A24D] transition-colors relative">
-                      <input
-                        type="file"
-                        onChange={handleFileChange}
-                        accept="image/*"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                      <ImageIcon className="text-gray-400 mb-2" size={24} />
-                      <span className="text-sm text-gray-600">
-                        {imageFile ? "Change Image" : "Upload Image"}
-                      </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Cover Image */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Cover Image
                     </label>
+                    <div className="flex gap-4 items-start">
+                      {imagePreview && (
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                        />
+                      )}
+                      <label className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#C9A24D] transition-colors relative">
+                        <input
+                          type="file"
+                          onChange={handleFileChange}
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <ImageIcon className="text-gray-400 mb-2" size={20} />
+                        <span className="text-xs text-gray-600 text-center">
+                          {imageFile ? "Change Cover" : "Upload Cover"}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Service Logo */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Service Logo / Icon
+                    </label>
+                    <div className="flex gap-4 items-start">
+                      {logoPreview && (
+                        <img
+                          src={logoPreview}
+                          alt="Logo Preview"
+                          className="w-24 h-24 object-contain rounded-lg border border-gray-200 bg-gray-50 p-2"
+                        />
+                      )}
+                      <label className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#C9A24D] transition-colors relative">
+                        <input
+                          type="file"
+                          onChange={handleLogoFileChange}
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        <ImageIcon className="text-gray-400 mb-2" size={20} />
+                        <span className="text-xs text-gray-600 text-center">
+                          {logoFile ? "Change Logo" : "Upload Logo"}
+                        </span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      Small icon shown alongside service title
+                    </p>
                   </div>
                 </div>
 

@@ -1,5 +1,4 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import axios from "axios";
 
 const ClientAuthContext = createContext();
 
@@ -20,21 +19,32 @@ export const ClientAuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
+  // Frontend-only login (no backend API call)
   const login = async (email, password) => {
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_NODE_URL}/api/users/login`,
-        { email, password }
-      );
-      const user = res.data.user;
-      localStorage.setItem("clientUser", JSON.stringify(user));
-      setClientUser(user);
+    // Get registered users from localStorage
+    const registeredUsers = JSON.parse(
+      localStorage.getItem("registeredUsers") || "[]"
+    );
+
+    // Find user with matching email and password
+    const user = registeredUsers.find(
+      (u) => u.email === email && u.password === password
+    );
+
+    if (user) {
+      const loggedInUser = {
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      };
+      localStorage.setItem("clientUser", JSON.stringify(loggedInUser));
+      setClientUser(loggedInUser);
       setIsClientLoggedIn(true);
-      return { success: true, user };
-    } catch (error) {
+      return { success: true, user: loggedInUser };
+    } else {
       return {
         success: false,
-        message: error.response?.data?.message || "Login failed",
+        message: "Invalid email or password",
       };
     }
   };
@@ -45,23 +55,32 @@ export const ClientAuthProvider = ({ children }) => {
     setIsClientLoggedIn(false);
   };
 
+  // Frontend-only signup (no backend API call)
   const signup = async (name, email, password, phone) => {
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_NODE_URL}/api/users/signup`,
-        { name, email, password, phone }
-      );
-      return {
-        success: true,
-        message: res.data.message,
-        user: res.data.user,
-      };
-    } catch (error) {
+    // Get existing registered users from localStorage
+    const registeredUsers = JSON.parse(
+      localStorage.getItem("registeredUsers") || "[]"
+    );
+
+    // Check if email already exists
+    const existingUser = registeredUsers.find((u) => u.email === email);
+    if (existingUser) {
       return {
         success: false,
-        message: error.response?.data?.message || "Signup failed",
+        message: "Email already registered",
       };
     }
+
+    // Add new user to localStorage
+    const newUser = { name, email, password, phone };
+    registeredUsers.push(newUser);
+    localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
+
+    return {
+      success: true,
+      message: "Account created successfully! Please log in.",
+      user: { name, email, phone },
+    };
   };
 
   return (

@@ -64,18 +64,41 @@ const ServiceSidebar = ({ currentServiceId, packageId, packageTitle }) => {
             <li key={service._id}>
               <Link
                 to={`/services/${service._id}`}
-                className={`flex items-center justify-between p-3 rounded-md transition-all duration-300 group ${
+                className={`flex items-center gap-3 p-3 rounded-md transition-all duration-300 group ${
                   isActive
                     ? "bg-gold-accent text-white font-semibold shadow-md"
                     : "text-charcoal-black/70 hover:bg-gold-accent/10 hover:text-gold-accent"
                 }`}
               >
-                <span className="font-inter text-sm tracking-wide">
+                {service.logo ? (
+                  <img
+                    src={service.logo}
+                    alt={service.title}
+                    className={`w-7 h-7 object-contain rounded-md p-0.5 shrink-0 ${
+                      isActive ? "bg-white/20" : "bg-white shadow-sm"
+                    }`}
+                  />
+                ) : (
+                  <div
+                    className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${
+                      isActive ? "bg-white/20" : "bg-gold-accent/10"
+                    }`}
+                  >
+                    <span
+                      className={`text-xs font-bold ${
+                        isActive ? "text-white" : "text-gold-accent"
+                      }`}
+                    >
+                      {service.title.charAt(0)}
+                    </span>
+                  </div>
+                )}
+                <span className="font-inter text-sm tracking-wide flex-1">
                   {service.title}
                 </span>
                 <ChevronRight
                   size={16}
-                  className={`transition-transform duration-300 ${
+                  className={`transition-transform duration-300 shrink-0 ${
                     isActive
                       ? "opacity-100"
                       : "opacity-0 group-hover:opacity-100 text-gold-accent"

@@ -6,6 +6,7 @@ const ServiceSchema = new mongoose.Schema({
   description: String,
   price: String,
   images: [String],
+  logo: String,
   details: {
     duration: String,
     deliverables: String,
