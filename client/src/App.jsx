@@ -30,6 +30,8 @@ import AdminTestimonial from "./pages/AdminTestimonial";
 import AdminServicePage from "./pages/AdminServicePage";
 import AdminHero from "./pages/AdminHero";
 import AdminGalleryPage from "./pages/AdminGalleryPage";
+import AdminShopPage from "./pages/AdminShopPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ClientAuthProvider } from "./context/ClientAuthContext";
@@ -58,6 +60,8 @@ const AppContent = () => {
     "/admin-services",
     "/admin-hero",
     "/admin-gallery",
+    "/admin-shop",
+    "/admin-users",
   ];
   const shouldHideNavbar = hideNavbarRoutes.some((route) =>
     location.pathname.startsWith(route)
@@ -115,6 +119,8 @@ const AppContent = () => {
                 <Route path="/admin-services" element={<AdminServicePage />} />
                 <Route path="/admin-hero" element={<AdminHero />} />
                 <Route path="/admin-gallery" element={<AdminGalleryPage />} />
+                <Route path="/admin-shop" element={<AdminShopPage />} />
+                <Route path="/admin-users" element={<AdminUsersPage />} />
               </Route>
             </Routes>
           </main>

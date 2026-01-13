@@ -1,23 +1,69 @@
 import { Link, useLocation } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { servicesData } from "../../data/servicesData";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const ServiceSidebar = () => {
+const ServiceSidebar = ({ currentServiceId, packageId, packageTitle }) => {
   const location = useLocation();
-  const currentId = location.pathname.split("/").pop();
+  const [relatedServices, setRelatedServices] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRelatedServices = async () => {
+      if (!packageId) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/services/services`
+        );
+        const allServices = response.data || [];
+        // Filter services that belong to the same package
+        const filtered = allServices.filter((s) => {
+          const svcPkgId =
+            typeof s.package === "string" ? s.package : s.package?._id;
+          return svcPkgId === packageId;
+        });
+        setRelatedServices(filtered);
+      } catch (error) {
+        console.error("Error fetching related services:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchRelatedServices();
+  }, [packageId]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg p-6 py-6 h-fit sticky top-24 border border-gold-accent/20 shadow-sm">
+        <div className="animate-pulse space-y-3">
+          <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="h-4 bg-gray-200 rounded w-full"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (relatedServices.length === 0) {
+    return null;
+  }
 
   return (
     <div className="bg-white rounded-lg p-6 py-6 h-fit sticky top-24 border border-gold-accent/20 shadow-sm">
       <h3 className="font-playfair text-xl text-charcoal-black mb-6 border-b border-gold-accent/20 pb-4">
-        Our Services
+        {packageTitle ? `${packageTitle} Services` : "Our Services"}
       </h3>
       <ul className="space-y-2">
-        {servicesData.map((service) => {
-          const isActive = service.id === currentId;
+        {relatedServices.map((service) => {
+          const isActive = service._id === currentServiceId;
           return (
-            <li key={service.id}>
+            <li key={service._id}>
               <Link
-                to={`/services/${service.id}`}
+                to={`/services/${service._id}`}
                 className={`flex items-center justify-between p-3 rounded-md transition-all duration-300 group ${
                   isActive
                     ? "bg-gold-accent text-white font-semibold shadow-md"
@@ -41,7 +87,7 @@ const ServiceSidebar = () => {
         })}
       </ul>
 
-      <div className="mt-8 p-4 bg-gradient-to-br from-gray-600 to-charcoal-black  rounded-lg text-center text-white">
+      <div className="mt-8 p-4 bg-gradient-to-br from-gray-600 to-charcoal-black rounded-lg text-center text-white">
         <p className="text-sm mb-3">Need a custom package?</p>
         <Link
           to="/contact"

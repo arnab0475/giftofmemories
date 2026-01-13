@@ -17,7 +17,7 @@ const ServiceDetailsPage = () => {
       if (!id) return;
       try {
         const response = await axios.get(
-          `VITE_NODE_URL/api/services/service/${id}`
+          `${import.meta.env.VITE_NODE_URL}/api/services/service/${id}`
         );
         setService(response.data);
       } catch (error) {
@@ -78,7 +78,19 @@ const ServiceDetailsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* LEFT SIDEBAR (Navigation) - Spans 3 columns */}
           <div className="hidden lg:block lg:col-span-3">
-            <ServiceSidebar />
+            <ServiceSidebar
+              currentServiceId={id}
+              packageId={
+                typeof service.package === "string"
+                  ? service.package
+                  : service.package?._id
+              }
+              packageTitle={
+                typeof service.package === "object"
+                  ? service.package?.title
+                  : null
+              }
+            />
           </div>
 
           {/* MAIN CONTENT AREA - Spans 9 columns */}

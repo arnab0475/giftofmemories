@@ -7,6 +7,13 @@ import {
   getServices,
   updateService,
 } from "../Controller/ServicesController.js";
+import {
+  getPackages,
+  getPackagesWithServices,
+  addPackage,
+  updatePackage,
+  deletePackage,
+} from "../Controller/PackageController.js";
 import { AdminMiddleware } from "../Middlewares/AuthMiddleware.js";
 
 const router = express.Router();
@@ -34,6 +41,9 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 router.get("/services", getServices);
+router.get("/packages", getPackages);
+router.get("/packages-with-services", getPackagesWithServices);
+
 router.post(
   "/add-service",
   AdminMiddleware,
@@ -46,6 +56,14 @@ router.put(
   AdminMiddleware,
   upload.array("images", 5),
   updateService
-); 
+);
 router.delete("/delete-service/:id", AdminMiddleware, deleteService);
+router.post("/packages", AdminMiddleware, upload.single("image"), addPackage);
+router.put(
+  "/packages/:id",
+  AdminMiddleware,
+  upload.single("image"),
+  updatePackage
+);
+router.delete("/packages/:id", AdminMiddleware, deletePackage);
 export default router;

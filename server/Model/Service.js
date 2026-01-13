@@ -11,6 +11,10 @@ const ServiceSchema = new mongoose.Schema({
     deliverables: String,
     location: String,
   },
+  package: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Package",
+  },
 });
 
 export const Service = mongoose.model("Service", ServiceSchema);

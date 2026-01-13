@@ -1,13 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { servicesData } from "../../data/servicesData";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const ServiceCategoryGrid = () => {
+  const [packages, setPackages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/services/packages-with-services`
+        );
+        setPackages(response.data);
+      } catch (error) {
+        console.error("Error fetching service packages:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPackages();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C9A24D]"></div>
+      </div>
+    );
+  }
+
+  if (!packages.length) {
+    return (
+      <div className="text-center py-12 text-slate-gray">
+        No service packages available right now.
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 items-start">
-      {servicesData.map((category, index) => (
-        <ServiceCard key={index} category={category} />
+      {packages.map((pkg) => (
+        <ServiceCard key={pkg._id} category={pkg} />
       ))}
     </div>
   );
@@ -15,6 +51,7 @@ const ServiceCategoryGrid = () => {
 
 const ServiceCard = ({ category }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="relative overflow-hidden rounded-xl bg-warm-ivory shadow-md border border-gold-accent/20 transition-all duration-300 hover:shadow-xl">
@@ -37,9 +74,9 @@ const ServiceCard = ({ category }) => {
           </div>
 
           {/* Subtitle / Preview Items */}
-          {!isOpen && (
+          {!isOpen && category.services && category.services.length > 0 && (
             <p className="font-inter text-sm text-slate-gray line-clamp-2 pr-4">
-              {category.items.join(", ")}
+              {category.services.map((s) => s.title).join(", ")}
             </p>
           )}
 
@@ -54,13 +91,15 @@ const ServiceCard = ({ category }) => {
                 className="overflow-hidden"
               >
                 <div className="mt-4 grid grid-cols-1 gap-y-2">
-                  {category.items.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="text-sm font-inter text-charcoal-black/80 hover:text-gold-accent transition-colors py-1 border-b border-gray-100 last:border-0"
+                  {category.services?.map((service) => (
+                    <button
+                      key={service._id}
+                      type="button"
+                      onClick={() => navigate(`/services/${service._id}`)}
+                      className="text-left text-sm font-inter text-charcoal-black/80 hover:text-gold-accent transition-colors py-1 border-b border-gray-100 last:border-0"
                     >
-                      {item}
-                    </div>
+                      {service.title}
+                    </button>
                   ))}
                 </div>
               </motion.div>
@@ -71,11 +110,19 @@ const ServiceCard = ({ category }) => {
         {/* Right Image with Semi-Circle Mask */}
         <div className="relative w-[30%] min-w-[120px]">
           <div className="absolute inset-0 h-full w-full">
-            <img
-              src={category.image}
-              alt={category.title}
-              className="h-full w-full object-cover"
-            />
+            {category.image ? (
+              <img
+                src={category.image}
+                alt={category.title}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-br from-[#C9A24D]/20 to-[#C9A24D]/5 flex items-center justify-center">
+                <span className="text-[#C9A24D] text-4xl font-playfair">
+                  {category.title.charAt(0)}
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="absolute top-0 bottom-0 left-[-1px] w-12 h-full z-20">

@@ -12,6 +12,8 @@ import {
   Bot,
   MessageCircle,
   FileText,
+  ShoppingBag,
+  Star,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -33,8 +35,10 @@ const Sidebar = () => {
       items: [
         { icon: Layers, label: "Services", path: "/admin-services" },
         { icon: Image, label: "Gallery", path: "/admin-gallery" },
+        { icon: ShoppingBag, label: "Shop", path: "/admin-shop" },
         { icon: FileText, label: "Blogs", path: "/admin-blogs" },
-        { icon: Users, label: "Testimonials", path: "/admin-testimonials" },
+        { icon: Users, label: "Users", path: "/admin-users" },
+        { icon: Star, label: "Testimonials", path: "/admin-testimonials" },
         { icon: TvMinimalPlay, label: "Hero Banner", path: "/admin-hero" },
         { icon: Bell, label: "Popups", path: "/admin-popups" },
       ],

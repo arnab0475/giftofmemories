@@ -13,8 +13,15 @@ export const getServices = async (req, res) => {
 
 export const addService = async (req, res) => {
   try {
-    const { title, category, description, price, shortDescription, details } =
-      req.body;
+    const {
+      title,
+      category,
+      description,
+      price,
+      shortDescription,
+      details,
+      packageId,
+    } = req.body;
 
     if (!title || !category || !price) {
       return res
@@ -51,6 +58,7 @@ export const addService = async (req, res) => {
       price,
       images: imageUrls,
       details: details ? JSON.parse(details) : {},
+      package: packageId || null,
     });
 
     await newService.save();
@@ -66,7 +74,7 @@ export const addService = async (req, res) => {
 export const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
-    const service = await Service.findById(id);
+    const service = await Service.findById(id).populate("package", "title");
 
     if (!service) {
       return res.status(404).json({ message: "Service not found" });
@@ -81,8 +89,15 @@ export const getServiceById = async (req, res) => {
 export const updateService = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, category, description, price, shortDescription, details } =
-      req.body;
+    const {
+      title,
+      category,
+      description,
+      price,
+      shortDescription,
+      details,
+      packageId,
+    } = req.body;
 
     const updateData = {
       title,
@@ -91,6 +106,10 @@ export const updateService = async (req, res) => {
       price,
       shortDescription,
     };
+
+    if (packageId !== undefined) {
+      updateData.package = packageId || null;
+    }
 
     if (details) {
       updateData.details = JSON.parse(details);

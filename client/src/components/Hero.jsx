@@ -50,15 +50,6 @@ const Hero = () => {
             {serverHero.subtitle}
           </p>
           <div className="flex flex-col items-center gap-6">
-            <motion.a
-              href={serverHero.buttonLink || "#portfolio"}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-block px-8 py-4 bg-gold-accent/90 text-charcoal-black font-inter text-sm uppercase tracking-widest hover:bg-gold-accent transition-colors"
-            >
-              {serverHero.buttonText || "View Portfolio"}
-            </motion.a>
-
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 20 }}

@@ -1,9 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import ProductCard from "./ProductCard";
-import { products } from "../../data/productsData";
 
 const FeaturedStrip = ({ onProductClick }) => {
-  const bestsellers = products.filter((p) => p.isBestseller);
+  const [bestsellers, setBestsellers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBestsellers = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/shop/get-bestsellers`
+        );
+        setBestsellers(response.data);
+      } catch (error) {
+        console.error("Error fetching bestsellers:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBestsellers();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="bg-muted-beige py-16 md:py-24">
+        <div className="flex justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold-accent"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (bestsellers.length === 0) {
+    return null;
+  }
 
   return (
     <div className="bg-muted-beige py-16 md:py-24 overflow-hidden">
@@ -26,7 +57,7 @@ const FeaturedStrip = ({ onProductClick }) => {
         <div className="overflow-x-auto no-scrollbar -mx-4 px-4 md:-mx-8 md:px-8 pb-8">
           <div className="flex gap-6 w-max">
             {bestsellers.map((product) => (
-              <div key={product.id} className="w-[280px] md:w-[320px]">
+              <div key={product._id} className="w-[280px] md:w-[320px]">
                 <ProductCard product={product} onClick={onProductClick} />
               </div>
             ))}

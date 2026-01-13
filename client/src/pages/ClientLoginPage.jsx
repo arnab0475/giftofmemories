@@ -2,19 +2,28 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useClientAuth } from "../context/ClientAuthContext";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 const ClientLoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useClientAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email && password) {
-      // Mock login success
-      login({ email });
+    if (!email || !password) return;
+
+    setIsSubmitting(true);
+    const result = await login(email, password);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      toast.success("Login successful!");
       navigate("/shop");
+    } else {
+      toast.error(result.message);
     }
   };
 
@@ -64,9 +73,10 @@ const ClientLoginPage = () => {
 
           <button
             type="submit"
-            className="w-full py-3 bg-charcoal-black text-gold-accent font-bold rounded-lg hover:bg-black transition-colors shadow-lg"
+            disabled={isSubmitting}
+            className="w-full py-3 bg-charcoal-black text-gold-accent font-bold rounded-lg hover:bg-black transition-colors shadow-lg disabled:opacity-50"
           >
-            Log In
+            {isSubmitting ? "Logging in..." : "Log In"}
           </button>
         </form>
 

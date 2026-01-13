@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
 
 const ClientAuthContext = createContext();
 
@@ -19,12 +20,23 @@ export const ClientAuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (userData) => {
-    // Mock login
-    const user = { ...userData, id: 1, name: "Valued Customer" };
-    localStorage.setItem("clientUser", JSON.stringify(user));
-    setClientUser(user);
-    setIsClientLoggedIn(true);
+  const login = async (email, password) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_NODE_URL}/api/users/login`,
+        { email, password }
+      );
+      const user = res.data.user;
+      localStorage.setItem("clientUser", JSON.stringify(user));
+      setClientUser(user);
+      setIsClientLoggedIn(true);
+      return { success: true, user };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Login failed",
+      };
+    }
   };
 
   const logout = () => {
@@ -33,16 +45,23 @@ export const ClientAuthProvider = ({ children }) => {
     setIsClientLoggedIn(false);
   };
 
-  const signup = (userData) => {
-    // Mock signup - logic same as login for client-side demo
-    const user = {
-      ...userData,
-      id: Date.now(),
-      name: userData.name || "New User",
-    };
-    localStorage.setItem("clientUser", JSON.stringify(user));
-    setClientUser(user);
-    setIsClientLoggedIn(true);
+  const signup = async (name, email, password, phone) => {
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_NODE_URL}/api/users/signup`,
+        { name, email, password, phone }
+      );
+      return {
+        success: true,
+        message: res.data.message,
+        user: res.data.user,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Signup failed",
+      };
+    }
   };
 
   return (

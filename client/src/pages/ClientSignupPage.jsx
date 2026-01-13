@@ -2,20 +2,32 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useClientAuth } from "../context/ClientAuthContext";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
 
 const ClientSignupPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { signup } = useClientAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (name && email && password) {
-      // Mock signup success
-      signup({ name, email });
-      navigate("/shop");
+    if (!name || !email || !password) return;
+
+    setIsSubmitting(true);
+    const result = await signup(name, email, password, phone);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      toast.success(
+        result.message || "Account created! Awaiting admin approval."
+      );
+      navigate("/login");
+    } else {
+      toast.error(result.message);
     }
   };
 
@@ -75,13 +87,30 @@ const ClientSignupPage = () => {
               required
             />
           </div>
+          <div>
+            <label className="block text-sm font-semibold text-charcoal-black mb-2">
+              Phone Number (Optional)
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border border-slate-gray/20 focus:outline-none focus:border-gold-accent bg-warm-ivory/30"
+              placeholder="+91 9876543210"
+            />
+          </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-charcoal-black text-gold-accent font-bold rounded-lg hover:bg-black transition-colors shadow-lg"
+            disabled={isSubmitting}
+            className="w-full py-3 bg-charcoal-black text-gold-accent font-bold rounded-lg hover:bg-black transition-colors shadow-lg disabled:opacity-50"
           >
-            Create Account
+            {isSubmitting ? "Creating Account..." : "Create Account"}
           </button>
+
+          <p className="text-xs text-slate-gray text-center">
+            Your account will need admin approval before you can log in.
+          </p>
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-gray">

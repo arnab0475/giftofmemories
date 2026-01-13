@@ -8,7 +8,8 @@ const ProductsHero = () => {
       <div className="absolute inset-0">
         <img
           src="https://images.unsplash.com/photo-1554048612-387768052bf7?q=80&w=2835&auto=format&fit=crop"
-          alt="Photography Products"
+          alt=""
+          aria-hidden="true"
           className="h-full w-full object-cover"
         />
         {/* Overlay */}

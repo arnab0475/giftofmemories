@@ -1,7 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useClientAuth } from "../../context/ClientAuthContext";
-import { triggerWhatsApp } from "../../../utils/whatsappHandler";
+import { triggerWhatsApp } from "../../utils/whatsappHandler.js";
 
 const userName = "Customer"
 

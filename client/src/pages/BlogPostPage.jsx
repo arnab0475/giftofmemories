@@ -15,7 +15,9 @@ const BlogPostPage = () => {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`VITE_NODE_URL/api/blogs/${id}`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/blogs/${id}`
+        );
         setPost(response.data);
       } catch (err) {
         console.error("Failed to fetch blog post", err);

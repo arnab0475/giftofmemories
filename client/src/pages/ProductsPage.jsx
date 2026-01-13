@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 import ProductsHero from "../components/products/ProductsHero";
 import FilterSortBar from "../components/products/FilterSortBar";
 import ProductCard from "../components/products/ProductCard";
@@ -7,14 +8,15 @@ import ProductModal from "../components/products/ProductModal";
 import FeaturedStrip from "../components/products/FeaturedStrip";
 import TrustStrip from "../components/products/TrustStrip";
 import CTASection from "../components/products/CTASection";
-import { products } from "../data/productsData";
 
 const ProductsPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeSort, setActiveSort] = useState("Popular");
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filters = [
     "All",
@@ -31,6 +33,25 @@ const ProductsPage = () => {
     "Price: High to Low",
     "Newest",
   ];
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`
+        );
+        setProducts(response.data);
+        setFilteredProducts(response.data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   // Handle Filter and Sort
   useEffect(() => {
@@ -59,7 +80,7 @@ const ProductsPage = () => {
     }
 
     setFilteredProducts(result);
-  }, [activeFilter, activeSort]);
+  }, [activeFilter, activeSort, products]);
 
   const handleProductClick = (product) => {
     setSelectedProduct(product);
@@ -88,27 +109,33 @@ const ProductsPage = () => {
 
       {/* 3. Products Grid */}
       <div className="max-w-[1240px] mx-auto px-4 md:px-8 py-12 md:py-20 min-h-[60vh]">
-        <motion.div
-          layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-        >
-          <AnimatePresence>
-            {filteredProducts.map((product) => (
-              <motion.div
-                layout
-                key={product.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ProductCard product={product} onClick={handleProductClick} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold-accent"></div>
+          </div>
+        ) : (
+          <motion.div
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+          >
+            <AnimatePresence>
+              {filteredProducts.map((product) => (
+                <motion.div
+                  layout
+                  key={product._id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <ProductCard product={product} onClick={handleProductClick} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
 
-        {filteredProducts.length === 0 && (
+        {!isLoading && filteredProducts.length === 0 && (
           <div className="text-center py-20 text-slate-gray">
             <p className="text-xl">No products found for this category.</p>
             <button
@@ -128,7 +155,6 @@ const ProductsPage = () => {
       <CTASection />
       {/* 6. Trust Assurance */}
       <TrustStrip />
-
 
       {/* Product Modal */}
       <ProductModal

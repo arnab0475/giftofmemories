@@ -22,7 +22,7 @@ const MapSection = () => {
 
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 bg-white p-6 rounded-lg shadow-lg max-w-xs">
             <h4 className="font-playfair text-lg font-bold text-charcoal-black mb-2">
-              Pixonova Studio
+              Gift of Memories
             </h4>
             <p className="font-inter text-sm text-slate-gray mb-3">
               Sukanta pally Rabindra Nagar, Dum Dum Cantonment , Kolkata, West Bengal, India
