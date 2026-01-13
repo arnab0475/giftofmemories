@@ -3,18 +3,19 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { GripHorizontal, LayoutGrid } from "lucide-react";
 
 const ImmersiveGallery = ({ viewMode, setViewMode, items = [] }) => {
- 
-  const displayItems =
-    items.length > 0
-      ? items.map((item, index) => ({
-          id: item._id,
-          image: item.url,
-          title: item.tags?.[0] || "Gallery Moment",
-          location: "Featured Collection",
-          year: "2025",
-          type: item.type,
-        }))
-      : []; 
+  // Gallery page should display only images.
+  // YouTube videos are handled separately by the VideoGallery section.
+  const displayItems = items
+    .filter((item) => item?.type === "image")
+    .map((item) => ({
+      id: item._id,
+      image: item.url,
+      // Don't show tags (e.g. "Pre-Wedding Cinematic") as the big overlay title.
+      title: "",
+      location: "Featured Collection",
+      year: "2025",
+      type: item.type,
+    }));
 
   if (displayItems.length === 0) {
     return (
@@ -80,7 +81,7 @@ const Card = ({ item, index, total, viewMode, setViewMode }) => {
         ) : (
           <img
             src={item.image}
-            alt={item.title}
+            alt="Gallery image"
             className="w-full h-full object-cover"
           />
         )}
@@ -89,9 +90,11 @@ const Card = ({ item, index, total, viewMode, setViewMode }) => {
           <p className="font-inter text-xs uppercase tracking-[0.2em] mb-2">
             {item.location} — {item.year}
           </p>
-          <h2 className="font-playfair text-5xl md:text-7xl font-bold">
-            {item.title}
-          </h2>
+          {item.title?.trim() ? (
+            <h2 className="font-playfair text-5xl md:text-7xl font-bold">
+              {item.title}
+            </h2>
+          ) : null}
         </div>
         <div className="absolute top-1/2 right-6 md:right-12 -translate-y-1/2 flex flex-col items-center gap-2 z-10">
           <span className="text-warm-ivory/50 font-inter text-xs">

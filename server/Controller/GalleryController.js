@@ -180,7 +180,8 @@ export const deleteGallery = async (req, res) => {
       return res.status(404).json({ message: "Gallery item not found" });
     }
 
-    if (deletedGallery.url) {
+    // Only try to delete from Cloudinary if it's not a YouTube video
+    if (deletedGallery.url && deletedGallery.type !== "youtube") {
       const urlParts = deletedGallery.url.split("/");
       const publicIdWithExtension = urlParts.slice(-2).join("/");
       const publicId = publicIdWithExtension.split(".")[0];
@@ -191,6 +192,62 @@ export const deleteGallery = async (req, res) => {
     }
 
     res.status(200).json({ message: "Gallery item deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// Add YouTube video link
+export const addYoutubeVideo = async (req, res) => {
+  try {
+    const { youtubeUrl, title, tags } = req.body;
+
+    if (!youtubeUrl) {
+      return res.status(400).json({ message: "YouTube URL is required" });
+    }
+
+    // Extract YouTube video ID from various URL formats
+    let youtubeId = null;
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
+      /^([a-zA-Z0-9_-]{11})$/,
+    ];
+
+    for (const pattern of patterns) {
+      const match = youtubeUrl.match(pattern);
+      if (match) {
+        youtubeId = match[1];
+        break;
+      }
+    }
+
+    if (!youtubeId) {
+      return res.status(400).json({ message: "Invalid YouTube URL" });
+    }
+
+    const newGalleryItem = new Gallery({
+      url: youtubeUrl,
+      type: "youtube",
+      youtubeId: youtubeId,
+      title: title || "",
+      tags: tags ? JSON.parse(tags) : [],
+    });
+
+    await newGalleryItem.save();
+    res.status(201).json({
+      message: "YouTube video added successfully",
+      gallery: newGalleryItem,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};
+
+// Get only YouTube videos
+export const getYoutubeVideos = async (req, res) => {
+  try {
+    const videos = await Gallery.find({ type: "youtube" });
+    res.status(200).json(videos);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }

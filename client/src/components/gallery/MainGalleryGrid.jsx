@@ -7,14 +7,18 @@ const MainGalleryGrid = ({ activeFilter, viewMode, items = [] }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
   // Map DB items to component format
-  const mappedImages = items.map((item) => ({
-    id: item._id,
-    src: item.url,
-    category: item.tags?.[0] || "Uncategorized",
-    caption: item.tags?.[0] || "Moment",
-    type: item.type,
-    tags: item.tags || [],
-  }));
+  const mappedImages = items
+    // Gallery grid should show only images
+    .filter((item) => item?.type === "image")
+    .map((item) => ({
+      id: item._id,
+      src: item.url,
+      // Keep tags for filtering, but don't display them as alt/caption
+      category: item.tags?.[0] || "Uncategorized",
+      caption: "Gallery image",
+      type: item.type,
+      tags: item.tags || [],
+    }));
 
   const filteredImages =
     activeFilter === "All"

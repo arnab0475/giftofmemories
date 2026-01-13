@@ -16,7 +16,7 @@ const StorySection = () => {
             className="w-full md:w-1/2 aspect-[4/5] bg-muted-beige rounded-2xl shadow-xl overflow-hidden relative"
           >
             <img
-              src={storyImage}
+              src="/about-us.jpg"
               alt="Our Story"
               className="w-full h-full object-cover"
             />

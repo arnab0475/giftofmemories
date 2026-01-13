@@ -8,7 +8,7 @@ const images = [
   "/preimg4.jpeg",
   "/preimg5.jpeg",
   "/preimg6.jpg",
-  "/preimg7.jpg",
+  "/nowimg3.jpg",
 ];
 
 const Row = ({ images, direction, speed = 150 }) => {

@@ -7,6 +7,8 @@ import {
   deleteGallery,
   getGallery,
   updateGallery,
+  addYoutubeVideo,
+  getYoutubeVideos,
 } from "../Controller/GalleryController.js";
 import { AdminMiddleware } from "../Middlewares/AuthMiddleware.js";
 const router = express.Router();
@@ -34,7 +36,9 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 router.get("/get-gallery", getGallery);
+router.get("/get-youtube-videos", getYoutubeVideos);
 router.post("/add-gallery", AdminMiddleware, upload.single("file"), addGallery);
+router.post("/add-youtube", AdminMiddleware, addYoutubeVideo);
 router.post(
   "/add-multiple-gallery",
   AdminMiddleware,
