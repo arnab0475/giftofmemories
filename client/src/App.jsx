@@ -110,7 +110,7 @@ const AppContent = () => {
                 <Route path="/admin-enquiries" element={<AdminEnquiry />} />
                 <Route
                   path="/admin-enquiries/:id"
-                  element={<AdminEnquiryDetails />}
+                  element={<AdminEnquiryDetails/>}
                 />
                 <Route
                   path="/admin-testimonials"

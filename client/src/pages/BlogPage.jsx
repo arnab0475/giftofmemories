@@ -76,9 +76,10 @@ const BlogPage = () => {
                 transition: { duration: 0.5, ease: "easeInOut" },
               },
             }}
-            src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&q=80&w=2000"
+            src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&q=100&w=2880"
             alt="Photography Services"
             className="w-full h-full object-cover"
+            loading="eager"
           />
 
           <div className="absolute inset-0 bg-gradient-to-b from-charcoal-black/60 to-charcoal-black/80" />

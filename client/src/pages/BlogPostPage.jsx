@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Share2 } from "lucide-react";
+import { ArrowLeft, Clock, Share2, Check } from "lucide-react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import LoadingScreen from "../components/LoadingScreen";
 
 const BlogPostPage = () => {
@@ -10,6 +11,7 @@ const BlogPostPage = () => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -106,13 +108,28 @@ const BlogPostPage = () => {
               Share this story
             </span>
             <button
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href);
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(window.location.href);
+                  setCopied(true);
+                  toast.success("Link copied to clipboard!");
+                  setTimeout(() => setCopied(false), 2000);
+                } catch (err) {
+                  toast.error("Failed to copy link");
+                }
               }}
-              className="p-3 rounded-full hover:bg-gray-100 text-charcoal-black transition-colors"
+              className={`p-3 rounded-full transition-colors ${
+                copied
+                  ? "bg-green-100 text-green-600"
+                  : "hover:bg-gray-100 text-charcoal-black"
+              }`}
               title="Copy Link"
             >
-              <Share2 className="w-5 h-5" />
+              {copied ? (
+                <Check className="w-5 h-5" />
+              ) : (
+                <Share2 className="w-5 h-5" />
+              )}
             </button>
           </div>
         </motion.div>
