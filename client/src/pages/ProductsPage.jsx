@@ -8,6 +8,7 @@ import ProductModal from "../components/products/ProductModal";
 import FeaturedStrip from "../components/products/FeaturedStrip";
 import TrustStrip from "../components/products/TrustStrip";
 import CTASection from "../components/products/CTASection";
+import Loader from "../components/Loader";
 
 const ProductsPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
@@ -111,7 +112,7 @@ const ProductsPage = () => {
       <div className="max-w-[1240px] mx-auto px-4 md:px-8 py-12 md:py-20 min-h-[60vh]">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold-accent"></div>
+            <Loader color="#C9A24D" />
           </div>
         ) : (
           <motion.div

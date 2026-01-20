@@ -3,6 +3,7 @@ import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Loader from "../components/Loader";
 
 const AdminTestimonial = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -185,7 +186,9 @@ const AdminTestimonial = () => {
 
             <div className="bg-white p-6 rounded-[14px] shadow-sm border border-slate-gray/5">
               {loading ? (
-                <div>Loading...</div>
+                <div className="flex justify-center py-4">
+                  <Loader />
+                </div>
               ) : error ? (
                 <div className="text-red-600">{error}</div>
               ) : (

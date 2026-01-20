@@ -3,12 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useClientAuth } from "../context/ClientAuthContext";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
+import { Eye, EyeOff } from "lucide-react";
 
 const ClientSignupPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { signup } = useClientAuth();
   const navigate = useNavigate();
@@ -22,9 +24,7 @@ const ClientSignupPage = () => {
     setIsSubmitting(false);
 
     if (result.success) {
-      toast.success(
-        result.message || "Account created! Awaiting admin approval."
-      );
+      toast.success(result.message || "Account created successfully!");
       navigate("/login");
     } else {
       toast.error(result.message);
@@ -78,14 +78,24 @@ const ClientSignupPage = () => {
             <label className="block text-sm font-semibold text-charcoal-black mb-2">
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border border-slate-gray/20 focus:outline-none focus:border-gold-accent bg-warm-ivory/30"
-              placeholder="••••••••"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 pr-12 rounded-lg border border-slate-gray/20 focus:outline-none focus:border-gold-accent bg-warm-ivory/30"
+                placeholder="••••••••"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-gray hover:text-charcoal-black transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-semibold text-charcoal-black mb-2">
@@ -107,10 +117,6 @@ const ClientSignupPage = () => {
           >
             {isSubmitting ? "Creating Account..." : "Create Account"}
           </button>
-
-          <p className="text-xs text-slate-gray text-center">
-            Your account will need admin approval before you can log in.
-          </p>
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-gray">

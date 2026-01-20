@@ -5,6 +5,7 @@ import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Loader from "../components/Loader";
 
 const AdminGalleryPage = () => {
   const [galleryItems, setGalleryItems] = useState([]);
@@ -205,7 +206,7 @@ const AdminGalleryPage = () => {
 
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C9A24D]"></div>
+                <Loader />
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">

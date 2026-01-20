@@ -6,11 +6,19 @@ import axios from "axios";
 import ServiceSidebar from "../components/services/ServiceSidebar";
 import ServiceBookingForm from "../components/services/ServiceBookingForm";
 import RevealOnScroll from "../components/RevealOnScroll";
+import { useClientAuth } from "../context/ClientAuthContext";
 
 const ServiceDetailsPage = () => {
   const { id } = useParams();
   const [service, setService] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { isClientLoggedIn } = useClientAuth();
+
+  // Extract numeric price from string
+  const extractPrice = (priceString) => {
+    const match = priceString?.match(/[\d,]+/);
+    return match ? parseInt(match[0].replace(/,/g, "")) : 0;
+  };
 
   useEffect(() => {
     const fetchService = async () => {
@@ -36,7 +44,7 @@ const ServiceDetailsPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen pt-32 pb-20 bg-warm-ivory flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C9A24D]"></div>
+        <Loader />
       </div>
     );
   }
@@ -111,7 +119,7 @@ const ServiceDetailsPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
-                  className="rounded-xl overflow-hidden shadow-lg h-[300px] md:h-[400px]"
+                  className="rounded-xl overflow-hidden shadow-lg h-[300px] md:h-[400px] relative"
                 >
                   <img
                     src={
@@ -122,6 +130,11 @@ const ServiceDetailsPage = () => {
                     alt={service.title}
                     className="w-full h-full object-cover"
                   />
+                  {isClientLoggedIn && (
+                    <div className="absolute top-4 right-4 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-sm shadow-md z-10">
+                      15% OFF FOR YOU
+                    </div>
+                  )}
                 </motion.div>
 
                 <RevealOnScroll>
@@ -150,11 +163,30 @@ const ServiceDetailsPage = () => {
                           <span className="w-3 h-3 rounded-full bg-gold-accent mt-1 shrink-0"></span>
                           <div>
                             <span className="text-gold-accent/80 text-sm uppercase tracking-wider font-inter">
-                              Starting Price
+                              Starting Price{" "}
+                              {isClientLoggedIn && "(Your Discounted Price)"}
                             </span>
-                            <p className="text-white font-semibold text-lg mt-1">
-                              ₹{service.price}
-                            </p>
+                            {isClientLoggedIn &&
+                            extractPrice(service.price) > 0 ? (
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-white/50 line-through text-base">
+                                  ₹
+                                  {extractPrice(service.price).toLocaleString(
+                                    "en-IN"
+                                  )}
+                                </span>
+                                <span className="text-white font-semibold text-lg">
+                                  ₹
+                                  {Math.round(
+                                    extractPrice(service.price) * 0.85
+                                  ).toLocaleString("en-IN")}
+                                </span>
+                              </div>
+                            ) : (
+                              <p className="text-white font-semibold text-lg mt-1">
+                                {service.price}
+                              </p>
+                            )}
                           </div>
                         </li>
                         <li className="flex items-start gap-4 p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
@@ -187,7 +219,11 @@ const ServiceDetailsPage = () => {
 
               {/* Right Column of Content: Sticky Form */}
               <div className="xl:col-span-1">
-                <ServiceBookingForm serviceTitle={service.title} />
+                <ServiceBookingForm
+                  serviceTitle={service.title}
+                  servicePrice={service.price}
+                  isLoggedIn={isClientLoggedIn}
+                />
               </div>
             </div>
           </div>

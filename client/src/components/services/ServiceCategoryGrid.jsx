@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Loader from "../Loader";
 
 const ServiceCategoryGrid = () => {
   const [packages, setPackages] = useState([]);
@@ -27,7 +28,7 @@ const ServiceCategoryGrid = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C9A24D]"></div>
+        <Loader />
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ProductCard from "./ProductCard";
+import Loader from "../Loader";
 
 const FeaturedStrip = ({ onProductClick }) => {
   const [bestsellers, setBestsellers] = useState([]);
@@ -26,7 +27,7 @@ const FeaturedStrip = ({ onProductClick }) => {
     return (
       <div className="bg-muted-beige py-16 md:py-24">
         <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold-accent"></div>
+          <Loader color="#C9A24D" />
         </div>
       </div>
     );

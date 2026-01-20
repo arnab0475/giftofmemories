@@ -14,6 +14,7 @@ import HeroRouter from "./Routes/Hero.js";
 import BlogRouter from "./Routes/Blog.js";
 import ShopRouter from "./Routes/ShopRouter.js";
 import UserRouter from "./Routes/User.js";
+import AboutRouter from "./Routes/About.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -26,7 +27,7 @@ app.use(
       "http://localhost:5174",
     ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -43,6 +44,7 @@ app.use("/api/hero", HeroRouter);
 app.use("/api/blogs", BlogRouter);
 app.use("/api/shop", ShopRouter);
 app.use("/api/users", UserRouter);
+app.use("/api/about", AboutRouter);
 app.listen(process.env.PORT, () => {
   console.log("Server is running on port", process.env.PORT);
 });

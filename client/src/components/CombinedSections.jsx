@@ -242,35 +242,35 @@ const CombinedSections = () => {
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={nowimg1}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-80 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={img1}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={preimg1}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-96 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={nowimg2}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden">
                 <img
                   src={img4}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
@@ -281,35 +281,35 @@ const CombinedSections = () => {
               <div className="h-96 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={preimg2}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={nowimg3}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-80 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={img2}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-64 rounded-3xl overflow-hidden shrink-0">
                 <img
                   src={preimg5}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>
               <div className="h-80 rounded-3xl overflow-hidden shrink-1">
                 <img
                   src={img1}
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                  className="w-full h-full object-cover transition-all duration-500"
                   alt="Gallery"
                 />
               </div>

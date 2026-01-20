@@ -8,3 +8,6 @@ export const AdminMiddleware = (req, res, next) => {
     next();
   });
 };
+
+// Export verifyToken as an alias for AdminMiddleware for consistency
+export const verifyToken = AdminMiddleware;

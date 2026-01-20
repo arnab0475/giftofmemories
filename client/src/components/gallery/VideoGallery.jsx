@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Play, X } from "lucide-react";
 import axios from "axios";
+import Loader from "../Loader";
 
 const VideoGallery = () => {
   const [videos, setVideos] = useState([]);
@@ -29,7 +30,7 @@ const VideoGallery = () => {
       <div className="py-20 bg-charcoal-black text-warm-ivory">
         <div className="container mx-auto px-6">
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold-accent"></div>
+            <Loader color="#C9A24D" />
           </div>
         </div>
       </div>

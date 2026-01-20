@@ -5,6 +5,7 @@ import TopBar from "../components/admin/TopBar";
 import axios from "axios";
 import { ArrowLeft, Mail, Phone, Clock, Tag, User } from "lucide-react";
 import { toast } from "react-toastify";
+import Loader from "../components/Loader";
 
 const AdminEnquiryDetails = () => {
   const { id } = useParams();
@@ -190,8 +191,8 @@ const AdminEnquiryDetails = () => {
             </div>
 
             {loading ? (
-              <div className="text-center text-slate-gray/60 py-10">
-                Loading...
+              <div className="text-center py-10">
+                <Loader />
               </div>
             ) : error ? (
               <div className="text-center text-red-600 py-10">{error}</div>

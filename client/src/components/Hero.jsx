@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import MegaSearch from "./MegaSearch";
+import Loader from "./Loader";
 
 const Hero = () => {
   const [serverHero, setServerHero] = useState(null);
@@ -25,7 +26,7 @@ const Hero = () => {
   if (!serverHero) {
     return (
       <section className="relative h-screen w-full z-30 bg-charcoal-black flex items-center justify-center">
-        <div className="text-warm-ivory">Loading...</div>
+        <Loader color="#F5F3EF" />
       </section>
     );
   }

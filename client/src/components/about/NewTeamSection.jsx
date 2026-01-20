@@ -2,38 +2,11 @@
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState } from "react";
-
-import team1 from "../../assets/images/team-member-1.png";
-import team2 from "../../assets/images/team-member-2.png";
-import team3 from "../../assets/images/team-member-3.png";
-
-// Team data matching the old TeamSection
-const teamMembers = [
-  {
-    name: "Aditya Roy",
-    designation: "Lead Photographer",
-    quote:
-      "Every frame tells a story. My passion is finding the beauty in fleeting moments and preserving them forever through my lens.",
-    src: team1,
-  },
-  {
-    name: "Sarah Jen",
-    designation: "Creative Director",
-    quote:
-      "I believe in the power of visual storytelling. My role is to bring creative visions to life and ensure every project exceeds expectations.",
-    src: team3,
-  },
-  {
-    name: "Rohan Mehta",
-    designation: "Senior Videographer",
-    quote:
-      "Motion brings memories to life. I specialize in capturing the emotion and energy of your special moments in cinematic detail.",
-    src: team2,
-  },
-];
+import axios from "axios";
+import Loader from "../Loader";
 
 export const AnimatedTestimonials = ({
-  testimonials = teamMembers,
+  testimonials = [],
   autoplay = false,
 }) => {
   const [active, setActive] = useState(0);
@@ -51,15 +24,30 @@ export const AnimatedTestimonials = ({
   };
 
   useEffect(() => {
-    if (autoplay) {
+    if (autoplay && testimonials.length > 0) {
       const interval = setInterval(handleNext, 5000);
       return () => clearInterval(interval);
     }
-  }, [autoplay]);
+  }, [autoplay, testimonials.length]);
 
   const randomRotateY = () => {
     return Math.floor(Math.random() * 21) - 10;
   };
+
+  if (!testimonials || testimonials.length === 0) {
+    return (
+      <section className="bg-warm-ivory py-24">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="font-playfair text-3xl md:text-4xl font-bold text-charcoal-black mb-3">
+            Meet The Creators
+          </h2>
+          <p className="text-slate-gray font-inter">
+            No team members available yet.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="bg-warm-ivory py-24">
@@ -79,7 +67,7 @@ export const AnimatedTestimonials = ({
               <AnimatePresence>
                 {testimonials.map((testimonial, index) => (
                   <motion.div
-                    key={testimonial.src}
+                    key={testimonial._id || testimonial.image}
                     initial={{
                       opacity: 0,
                       scale: 0.9,
@@ -109,7 +97,7 @@ export const AnimatedTestimonials = ({
                     className="absolute inset-0 origin-bottom"
                   >
                     <img
-                      src={testimonial.src}
+                      src={testimonial.image}
                       alt={testimonial.name}
                       width={500}
                       height={500}
@@ -196,6 +184,35 @@ export const AnimatedTestimonials = ({
 
 // Default export for easy import in AboutPage
 const NewTeamSection = () => {
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/about/get-about`
+        );
+        setTeamMembers(response.data.teamMembers || []);
+      } catch (error) {
+        console.error("Error fetching team members:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTeamMembers();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <section className="bg-warm-ivory py-24">
+        <div className="container mx-auto px-6 flex justify-center">
+          <Loader color="#C9A24D" />
+        </div>
+      </section>
+    );
+  }
+
   return <AnimatedTestimonials testimonials={teamMembers} autoplay={true} />;
 };
 

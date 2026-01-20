@@ -10,8 +10,22 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useClientAuth } from "../../context/ClientAuthContext";
 
-const ServiceBookingForm = ({ serviceTitle }) => {
+const ServiceBookingForm = ({ serviceTitle, servicePrice, isLoggedIn }) => {
+  const { clientUser } = useClientAuth();
+
+  // Extract numeric price
+  const extractPrice = (priceString) => {
+    const match = priceString?.match(/[\d,]+/);
+    return match ? parseInt(match[0].replace(/,/g, "")) : 0;
+  };
+
+  const originalPrice = extractPrice(servicePrice);
+  const discountedPrice =
+    isLoggedIn && originalPrice > 0
+      ? Math.round(originalPrice * 0.85)
+      : originalPrice;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,23 +35,59 @@ const ServiceBookingForm = ({ serviceTitle }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [dateError, setDateError] = useState("");
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Clear date error when user changes the date
+    if (name === "date") {
+      setDateError("");
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate date is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(formData.date);
+
+    if (selectedDate < today) {
+      setDateError(
+        "Event date cannot be in the past. Please select today or a future date."
+      );
+      toast.error("Event date cannot be in the past.");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate API call
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await axios.post(
+        `${import.meta.env.VITE_NODE_URL}/api/enquiry/post-enquiry`,
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          eventType: serviceTitle,
+          eventDate: formData.date,
+          message: formData.message,
+          source: "service-page",
+          status: "pending",
+        }
+      );
 
       setIsSuccess(true);
       toast.success("Booking inquiry sent successfully!");
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
+      console.error("Booking error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -76,9 +126,40 @@ const ServiceBookingForm = ({ serviceTitle }) => {
       <h3 className="font-playfair text-2xl text-charcoal-black mb-1">
         Book This Service
       </h3>
-      <p className="text-gray-500 text-sm mb-6">
+      <p className="text-gray-500 text-sm mb-2">
         Fill out the form below to check availability and get a quote.
       </p>
+
+      {/* Pricing Display */}
+      {servicePrice && originalPrice > 0 && (
+        <div className="bg-gold-accent/10 border border-gold-accent/30 rounded-lg p-4 mb-6">
+          <p className="text-xs text-slate-gray uppercase tracking-wider mb-2">
+            {isLoggedIn ? "Your Discounted Price" : "Starting Price"}
+          </p>
+          {isLoggedIn ? (
+            <div className="flex items-center gap-3">
+              <span className="text-slate-400 line-through text-lg">
+                ₹{originalPrice.toLocaleString("en-IN")}
+              </span>
+              <span className="text-2xl font-bold text-gold-accent">
+                ₹{discountedPrice.toLocaleString("en-IN")}
+              </span>
+              <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                15% OFF
+              </span>
+            </div>
+          ) : (
+            <p className="text-2xl font-bold text-charcoal-black">
+              {servicePrice}
+            </p>
+          )}
+          {isLoggedIn && clientUser && (
+            <p className="text-xs text-green-600 mt-2 font-semibold">
+              ✓ Logged in as {clientUser.name}
+            </p>
+          )}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Name */}
@@ -136,10 +217,16 @@ const ServiceBookingForm = ({ serviceTitle }) => {
             type="date"
             name="date"
             required
+            min={new Date().toISOString().split("T")[0]}
             value={formData.date}
             onChange={handleChange}
-            className="w-full pl-10 pr-4 py-3 bg-warm-ivory/30 border border-gray-200 rounded-md focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-inter text-sm text-gray-600"
+            className={`w-full pl-10 pr-4 py-3 bg-warm-ivory/30 border rounded-md focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-inter text-sm text-gray-600 ${
+              dateError ? "border-red-500" : "border-gray-200"
+            }`}
           />
+          {dateError && (
+            <p className="text-red-500 text-xs mt-1 ml-1">{dateError}</p>
+          )}
         </div>
 
         {/* Message */}

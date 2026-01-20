@@ -2,11 +2,14 @@ import { useEffect, useState, useMemo } from "react";
 import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
 import axios from "axios";
+import { RefreshCw } from "lucide-react";
+import Loader from "../components/Loader";
 
 const AdminEnquiry = () => {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   // Filter UI and state
   const [showFilters, setShowFilters] = useState(false);
@@ -58,22 +61,30 @@ const AdminEnquiry = () => {
     });
   }, [enquiries, filters]);
 
+  const fetchEnquiries = async () => {
+    try {
+      setError("");
+      const res = await axios.get(
+        `${import.meta.env.VITE_NODE_URL}/api/enquiry/enquiries`,
+        {
+          withCredentials: true,
+        }
+      );
+      setEnquiries(res.data);
+    } catch (err) {
+      setError("Failed to load enquiries");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchEnquiries();
+  };
+
   useEffect(() => {
-    const fetchEnquiries = async () => {
-      try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/enquiry/enquiries`,
-          {
-            withCredentials: true,
-          }
-        );
-        setEnquiries(res.data);
-      } catch (err) {
-        setError("Failed to load enquiries");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchEnquiries();
   }, []);
 
@@ -88,8 +99,8 @@ const AdminEnquiry = () => {
               All Enquiries
             </h2>
             {loading ? (
-              <div className="text-center text-slate-gray/60 py-10">
-                Loading...
+              <div className="text-center py-10">
+                <Loader />
               </div>
             ) : error ? (
               <div className="text-center text-red-600 py-10">{error}</div>
@@ -102,6 +113,18 @@ const AdminEnquiry = () => {
                   </div>
 
                   <div className="flex items-center gap-3">
+                    <button
+                      onClick={handleRefresh}
+                      disabled={refreshing}
+                      className="py-1 px-3 bg-white border rounded-md text-sm hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <RefreshCw
+                        className={`w-4 h-4 ${
+                          refreshing ? "animate-spin" : ""
+                        }`}
+                      />
+                      {refreshing ? "Refreshing..." : "Refresh"}
+                    </button>
                     <button
                       onClick={() => setShowFilters((s) => !s)}
                       className="py-1 px-3 bg-white border rounded-md text-sm hover:bg-slate-50"

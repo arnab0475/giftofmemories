@@ -1,16 +1,17 @@
 import { motion } from "framer-motion";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 const ContactForm = () => {
+  const [services, setServices] = useState([]);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
-    eventType: "Wedding Photography",
+    eventType: "",
     eventDate: "",
     message: "",
   });
@@ -18,9 +19,32 @@ const ContactForm = () => {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  // Fetch services on mount
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/services/services`
+        );
+        setServices(response.data);
+        if (response.data.length > 0) {
+          setForm((prev) => ({ ...prev, eventType: response.data[0].title }));
+        }
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      }
+    };
+    fetchServices();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+
+    // Clear error when user changes the date
+    if (name === "eventDate") {
+      setError("");
+    }
   };
 
   // Get today's date in yyyy-mm-dd format
@@ -31,9 +55,17 @@ const ContactForm = () => {
     setLoading(true);
     setError("");
     setSuccess("");
+
     // Prevent selecting a date before today
-    if (form.eventDate < today) {
-      setError("Event date cannot be in the past.");
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(form.eventDate);
+
+    if (selectedDate < todayDate) {
+      setError(
+        "Event date cannot be in the past. Please select today or a future date."
+      );
+      toast.error("Event date cannot be in the past.");
       setLoading(false);
       return;
     }
@@ -58,7 +90,7 @@ const ContactForm = () => {
         lastName: "",
         email: "",
         phone: "",
-        eventType: "Wedding Photography",
+        eventType: services.length > 0 ? services[0].title : "",
         eventDate: "",
         message: "",
       });
@@ -153,11 +185,11 @@ const ContactForm = () => {
               className="w-full px-4 py-3 bg-warm-ivory/30 border border-muted-beige/50 rounded-lg focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-inter text-charcoal-black appearance-none"
               required
             >
-              <option>Wedding Photography</option>
-              <option>Event Coverage</option>
-              <option>Portrait Session</option>
-              <option>Commercial Shoot</option>
-              <option>Other</option>
+              {services.map((service) => (
+                <option key={service._id} value={service.title}>
+                  {service.title}
+                </option>
+              ))}
             </select>
           </div>
           <div className="space-y-2">
@@ -170,7 +202,11 @@ const ContactForm = () => {
               value={form.eventDate}
               onChange={handleChange}
               min={today}
-              className="w-full px-4 py-3 bg-warm-ivory/30 border border-muted-beige/50 rounded-lg focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-inter text-charcoal-black uppercase text-sm"
+              className={`w-full px-4 py-3 bg-warm-ivory/30 border rounded-lg focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-inter text-charcoal-black uppercase text-sm ${
+                error && error.includes("date")
+                  ? "border-red-500"
+                  : "border-muted-beige/50"
+              }`}
               required
             />
           </div>

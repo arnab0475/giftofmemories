@@ -48,7 +48,7 @@ const TeamSection = () => {
                 <img
                   src={member.image}
                   alt={member.name}
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500 transform group-hover:scale-105"
+                  className="w-full h-full object-cover transition-all duration-500 transform group-hover:scale-105"
                 />
               </div>
               <h4 className="font-playfair text-xl font-bold text-charcoal-black mb-1">

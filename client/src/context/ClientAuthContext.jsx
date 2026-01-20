@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
 
 const ClientAuthContext = createContext();
 
@@ -19,32 +20,33 @@ export const ClientAuthProvider = ({ children }) => {
     setIsLoading(false);
   }, []);
 
-  // Frontend-only login (no backend API call)
+  // Backend API login
   const login = async (email, password) => {
-    // Get registered users from localStorage
-    const registeredUsers = JSON.parse(
-      localStorage.getItem("registeredUsers") || "[]"
-    );
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_NODE_URL}/api/users/login`,
+        { email, password }
+      );
 
-    // Find user with matching email and password
-    const user = registeredUsers.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (user) {
+      const userData = response.data.user;
       const loggedInUser = {
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.role,
+        discount: userData.discount,
       };
+
       localStorage.setItem("clientUser", JSON.stringify(loggedInUser));
       setClientUser(loggedInUser);
       setIsClientLoggedIn(true);
+
       return { success: true, user: loggedInUser };
-    } else {
+    } catch (error) {
       return {
         success: false,
-        message: "Invalid email or password",
+        message: error.response?.data?.message || "Login failed",
       };
     }
   };
@@ -55,32 +57,35 @@ export const ClientAuthProvider = ({ children }) => {
     setIsClientLoggedIn(false);
   };
 
-  // Frontend-only signup (no backend API call)
+  // Backend API signup
   const signup = async (name, email, password, phone) => {
-    // Get existing registered users from localStorage
-    const registeredUsers = JSON.parse(
-      localStorage.getItem("registeredUsers") || "[]"
-    );
+    try {
+      console.log("Signup attempt:", { name, email, phone });
+      console.log(
+        "API URL:",
+        `${import.meta.env.VITE_NODE_URL}/api/users/signup`
+      );
 
-    // Check if email already exists
-    const existingUser = registeredUsers.find((u) => u.email === email);
-    if (existingUser) {
+      const response = await axios.post(
+        `${import.meta.env.VITE_NODE_URL}/api/users/signup`,
+        { name, email, password, phone }
+      );
+
+      console.log("Signup response:", response.data);
+      return {
+        success: true,
+        message:
+          response.data.message || "Account created! Awaiting admin approval.",
+      };
+    } catch (error) {
+      console.error("Signup error:", error);
+      console.error("Error response:", error.response?.data);
       return {
         success: false,
-        message: "Email already registered",
+        message:
+          error.response?.data?.message || error.message || "Signup failed",
       };
     }
-
-    // Add new user to localStorage
-    const newUser = { name, email, password, phone };
-    registeredUsers.push(newUser);
-    localStorage.setItem("registeredUsers", JSON.stringify(registeredUsers));
-
-    return {
-      success: true,
-      message: "Account created successfully! Please log in.",
-      user: { name, email, phone },
-    };
   };
 
   return (

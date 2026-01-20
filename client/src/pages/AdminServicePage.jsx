@@ -15,6 +15,7 @@ import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Loader from "../components/Loader";
 
 const AdminServicePage = () => {
   const [services, setServices] = useState([]);
@@ -476,7 +477,7 @@ const AdminServicePage = () => {
 
             {isLoading ? (
               <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#C9A24D]"></div>
+                <Loader />
               </div>
             ) : (
               <div className="space-y-4">
@@ -870,7 +871,8 @@ const AdminServicePage = () => {
                       Most Booked Package
                     </label>
                     <p className="text-xs text-gray-500 mt-1">
-                      Mark this package as most booked to highlight it on the services page
+                      Mark this package as most booked to highlight it on the
+                      services page
                     </p>
                   </div>
                   <button
@@ -887,7 +889,9 @@ const AdminServicePage = () => {
                   >
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        packageForm.isMostBooked ? "translate-x-6" : "translate-x-1"
+                        packageForm.isMostBooked
+                          ? "translate-x-6"
+                          : "translate-x-1"
                       }`}
                     />
                   </button>

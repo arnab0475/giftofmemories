@@ -3,6 +3,7 @@ import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Loader from "../components/Loader";
 
 const AdminHero = () => {
   const [hero, setHero] = useState(null);
@@ -257,7 +258,9 @@ const AdminHero = () => {
             <div className="bg-white p-6 rounded-[14px] shadow-sm border border-slate-gray/5">
               <h3 className="font-semibold mb-3">Current Hero Preview</h3>
               {loading ? (
-                <div>Loading...</div>
+                <div className="flex justify-center py-4">
+                  <Loader />
+                </div>
               ) : !hero ? (
                 <div className="text-sm text-slate-gray/60">
                   No hero configured yet.

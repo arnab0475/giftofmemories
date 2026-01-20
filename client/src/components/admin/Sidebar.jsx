@@ -14,6 +14,8 @@ import {
   FileText,
   ShoppingBag,
   Star,
+  BookOpen,
+  Calendar,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -31,12 +33,17 @@ const Sidebar = () => {
       items: [{ icon: LayoutDashboard, label: "Overview", path: "/dashboard" }],
     },
     {
+      title: "Bookings",
+      items: [{ icon: Calendar, label: "Bookings", path: "/admin-enquiries" }],
+    },
+    {
       title: "Management",
       items: [
         { icon: Layers, label: "Services", path: "/admin-services" },
         { icon: Image, label: "Gallery", path: "/admin-gallery" },
         { icon: ShoppingBag, label: "Shop", path: "/admin-shop" },
         { icon: FileText, label: "Blogs", path: "/admin-blogs" },
+        { icon: BookOpen, label: "About Page", path: "/admin-about" },
         { icon: Users, label: "Users", path: "/admin-users" },
         { icon: Star, label: "Testimonials", path: "/admin-testimonials" },
         { icon: TvMinimalPlay, label: "Hero Banner", path: "/admin-hero" },
@@ -56,10 +63,7 @@ const Sidebar = () => {
     },
     {
       title: "Data",
-      items: [
-        { icon: MessageSquare, label: "Enquiries", path: "/admin-enquiries" },
-        { icon: FileText, label: "Reports", path: "/admin-reports" },
-      ],
+      items: [{ icon: FileText, label: "Reports", path: "/admin-reports" }],
     },
   ];
 

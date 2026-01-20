@@ -206,17 +206,20 @@ export const signupUser = async (req, res) => {
       email,
       password,
       phone: phone || "",
-      status: "pending", // Needs admin approval
+      status: "approved", // Auto-approved
     });
 
     await newUser.save();
 
     res.status(201).json({
-      message: "Account created! Awaiting admin approval.",
+      message: "Account created successfully! You can now login.",
       user: {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
+        phone: newUser.phone,
+        role: newUser.role,
+        discount: newUser.discount,
         status: newUser.status,
       },
     });
@@ -244,15 +247,6 @@ export const loginUser = async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid email or password" });
-    }
-
-    if (user.status !== "approved") {
-      return res.status(403).json({
-        message:
-          user.status === "pending"
-            ? "Your account is pending approval"
-            : "Your account has been rejected",
-      });
     }
 
     res.status(200).json({

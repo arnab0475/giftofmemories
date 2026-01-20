@@ -38,7 +38,7 @@ const Row = ({ images, direction, speed = 150 }) => {
         {[...images, ...images, ...images].map((src, i) => (
           <div
             key={i}
-            className="relative h-[250px] w-[350px] md:h-[300px] md:w-[450px] shrink-0 rounded-xl overflow-hidden grayscale hover:grayscale-0 transition-all duration-500"
+            className="relative h-[250px] w-[350px] md:h-[300px] md:w-[450px] shrink-0 rounded-xl overflow-hidden transition-all duration-500"
           >
             <img
               src={src}

@@ -69,12 +69,6 @@ const GalleryPage = () => {
 
       <div className="relative z-10 bg-warm-ivory">
         <VideoGallery />
-        <main className="container mx-auto px-6 py-12">
-          <h3 className="font-playfair text-3xl text-center mb-8 text-charcoal-black">
-            Explore More Moments
-          </h3>
-          <ExplorationTags />
-        </main>
         <GalleryCTA />
       </div>
     </motion.div>
