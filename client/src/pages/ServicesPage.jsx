@@ -10,30 +10,65 @@ import MostBookedPackages from "../components/services/MostBookedPackages";
 
 const ServicesPage = () => {
   const [services, setServices] = useState([]);
+  const [packages, setPackages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState({
-    category: "All Services",
-    priceRange: [0, 100000],
-    location: "All",
-    duration: "All",
-    sortBy: "Recommended",
+    packageId: "all",
+    priceRange: [0, 500000],
   });
 
   useEffect(() => {
-    const fetchServices = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/services/services`
-        );
-        setServices(response.data);
+        const [servicesResponse, packagesResponse] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_NODE_URL}/api/services/services`),
+          axios.get(
+            `${
+              import.meta.env.VITE_NODE_URL
+            }/api/services/packages-with-services`
+          ),
+        ]);
+        setServices(servicesResponse.data);
+        setPackages(packagesResponse.data);
       } catch (error) {
-        console.error("Error fetching services:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchServices();
+    fetchData();
   }, []);
+
+  // Filter packages based on active filters
+  const filteredPackages = packages
+    .map((pkg) => {
+      // Filter services within this package
+      let filteredServices = pkg.services || [];
+
+      // Apply price range filter
+      if (activeFilter.priceRange) {
+        filteredServices = filteredServices.filter((service) => {
+          const priceMatch = service.price?.match(/[\d,]+/);
+          if (!priceMatch) return true;
+          const price = parseInt(priceMatch[0].replace(/,/g, ""));
+          return (
+            price >= activeFilter.priceRange[0] &&
+            price <= activeFilter.priceRange[1]
+          );
+        });
+      }
+
+      return {
+        ...pkg,
+        services: filteredServices,
+      };
+    })
+    .filter((pkg) => {
+      // Only show package if it matches the selected package or "all" is selected
+      if (activeFilter.packageId === "all") return true;
+      return pkg._id === activeFilter.packageId;
+    })
+    .filter((pkg) => pkg.services.length > 0); // Only show packages with services
 
   return (
     <motion.div
@@ -47,9 +82,13 @@ const ServicesPage = () => {
       <ServiceFilter
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}
+        packages={packages}
       />
       <div className="py-12">
-        <ServiceCategoryGrid />
+        <ServiceCategoryGrid
+          packages={filteredPackages}
+          isLoading={isLoading}
+        />
       </div>
       <CustomPackageCTA />
       <ServiceTrustStrip />

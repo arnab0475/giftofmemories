@@ -7,6 +7,7 @@ import ServiceSidebar from "../components/services/ServiceSidebar";
 import ServiceBookingForm from "../components/services/ServiceBookingForm";
 import RevealOnScroll from "../components/RevealOnScroll";
 import { useClientAuth } from "../context/ClientAuthContext";
+import Loader from "../components/Loader";
 
 const ServiceDetailsPage = () => {
   const { id } = useParams();

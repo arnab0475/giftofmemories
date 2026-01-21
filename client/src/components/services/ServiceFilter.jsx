@@ -2,19 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Filter, X, ChevronDown } from "lucide-react";
 
-// Filter Options
-const categories = [
-  "All Services",
-  "Weddings",
-  "Events",
-  "Portraits",
-  "Commercial",
-  "Custom Packages",
-];
-
-const sortOptions = ["Recommended", "Price: Low to High", "Price: High to Low"];
-
-const ServiceFilter = ({ activeFilter, setActiveFilter }) => {
+const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const toggleRef = useRef(null);
   const filterRef = useRef(null);
@@ -43,20 +31,30 @@ const ServiceFilter = ({ activeFilter, setActiveFilter }) => {
     <div className="sticky top-[80px] z-40 bg-warm-ivory border-b border-muted-beige/30 py-4 shadow-sm">
       <div className="container mx-auto px-6 py-2">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          {/* Quick Category Filter (Pills) */}
+          {/* Quick Package Filter (Pills) */}
           <div className="flex-1 overflow-x-auto no-scrollbar">
             <div className="flex space-x-3 min-w-max">
-              {categories.map((cat) => (
+              <button
+                onClick={() => updateFilter("packageId", "all")}
+                className={`px-5 py-2 rounded-full text-sm font-inter font-semibold transition-all duration-300 border whitespace-nowrap ${
+                  activeFilter.packageId === "all"
+                    ? "bg-gradient-to-r from-gold-accent to-[#D4AF5F] text-charcoal-black border-transparent shadow-md"
+                    : "bg-transparent text-slate-gray border-slate-gray/20 hover:border-gold-accent hover:text-gold-accent"
+                }`}
+              >
+                All Packages
+              </button>
+              {packages.map((pkg) => (
                 <button
-                  key={cat}
-                  onClick={() => updateFilter("category", cat)}
+                  key={pkg._id}
+                  onClick={() => updateFilter("packageId", pkg._id)}
                   className={`px-5 py-2 rounded-full text-sm font-inter font-semibold transition-all duration-300 border whitespace-nowrap ${
-                    activeFilter.category === cat
+                    activeFilter.packageId === pkg._id
                       ? "bg-gradient-to-r from-gold-accent to-[#D4AF5F] text-charcoal-black border-transparent shadow-md"
                       : "bg-transparent text-slate-gray border-slate-gray/20 hover:border-gold-accent hover:text-gold-accent"
                   }`}
                 >
-                  {cat}
+                  {pkg.title}
                 </button>
               ))}
             </div>
@@ -88,7 +86,7 @@ const ServiceFilter = ({ activeFilter, setActiveFilter }) => {
             >
               <div
                 ref={filterRef}
-                className="mt-4 p-6 bg-white rounded-xl shadow-lg border border-gray-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                className="mt-4 p-6 bg-white rounded-xl shadow-lg border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6"
               >
                 {/* Price Range */}
                 <div className="space-y-4">
@@ -132,70 +130,63 @@ const ServiceFilter = ({ activeFilter, setActiveFilter }) => {
                       />
                     </div>
                   </div>
-                  <div className="px-1">
+                  <div className="px-1 space-y-2">
                     <input
                       type="range"
                       min="0"
-                      max="100000"
-                      step="1000"
+                      max="500000"
+                      step="5000"
                       value={activeFilter.priceRange[1]}
                       onChange={(e) =>
-                        updateFilter("priceRange", [
-                          activeFilter.priceRange[0],
-                          Number(e.target.value),
-                        ])
+                        updateFilter("priceRange", [0, Number(e.target.value)])
                       }
                       className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gold-accent hover:accent-[#D4AF5F] transition-all"
                     />
+                    <div className="flex justify-between text-xs text-gray-500">
+                      <span>₹0</span>
+                      <span>₹5L</span>
+                    </div>
                   </div>
                 </div>
 
-                {/* Category */}
+                {/* Selected Package Info */}
                 <div className="space-y-4">
                   <h4 className="font-playfair font-semibold text-charcoal-black">
-                    Category
+                    Selected Package
                   </h4>
-                  <div className="relative">
-                    <select
-                      value={activeFilter.category}
-                      onChange={(e) => updateFilter("category", e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm appearance-none focus:outline-none focus:border-gold-accent cursor-pointer transition-colors"
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      size={16}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                    />
+                  <div className="bg-gradient-to-br from-gold-accent/10 to-gold-accent/5 border border-gold-accent/20 rounded-lg p-4">
+                    {activeFilter.packageId === "all" ? (
+                      <p className="text-sm text-slate-gray">
+                        Showing services from all packages
+                      </p>
+                    ) : (
+                      <div>
+                        <p className="font-semibold text-charcoal-black mb-1">
+                          {
+                            packages.find(
+                              (p) => p._id === activeFilter.packageId
+                            )?.title
+                          }
+                        </p>
+                        <p className="text-sm text-slate-gray">
+                          {packages.find(
+                            (p) => p._id === activeFilter.packageId
+                          )?.description || "Custom package services"}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                </div>
-
-                {/* Sort By */}
-                <div className="space-y-3">
-                  <h4 className="font-playfair font-semibold text-charcoal-black">
-                    Sort By
-                  </h4>
-                  <div className="relative">
-                    <select
-                      value={activeFilter.sortBy}
-                      onChange={(e) => updateFilter("sortBy", e.target.value)}
-                      className="w-full px-4 py-2 bg-gray-50 border rounded-lg text-sm appearance-none focus:outline-gold-accent cursor-pointer"
-                    >
-                      {sortOptions.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      size={16}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-                    />
-                  </div>
+                  <button
+                    onClick={() => {
+                      setActiveFilter({
+                        packageId: "all",
+                        priceRange: [0, 500000],
+                      });
+                    }}
+                    className="w-full px-4 py-2 text-sm font-semibold text-gold-accent border border-gold-accent rounded-lg hover:bg-gold-accent hover:text-white transition-all duration-300"
+                  >
+                    Reset All Filters
+                  </button>
                 </div>
               </div>
             </motion.div>

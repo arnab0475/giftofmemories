@@ -1,30 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Loader from "../Loader";
 
-const ServiceCategoryGrid = () => {
-  const [packages, setPackages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/services/packages-with-services`
-        );
-        setPackages(response.data);
-      } catch (error) {
-        console.error("Error fetching service packages:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchPackages();
-  }, []);
-
+const ServiceCategoryGrid = ({ packages, isLoading }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -33,10 +13,13 @@ const ServiceCategoryGrid = () => {
     );
   }
 
-  if (!packages.length) {
+  if (!packages || packages.length === 0) {
     return (
       <div className="text-center py-12 text-slate-gray">
-        No service packages available right now.
+        <p className="text-lg font-semibold mb-2">No services found</p>
+        <p className="text-sm">
+          Try adjusting your filters to see more results
+        </p>
       </div>
     );
   }
@@ -78,7 +61,7 @@ const ServiceCard = ({ category }) => {
       >
         {/* Left Content - Title */}
         <div className="flex-1 p-6 flex flex-col justify-center z-10">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-2">
             <h3 className="font-playfair text-2xl text-charcoal-black font-semibold">
               {category.title}
             </h3>
@@ -86,6 +69,16 @@ const ServiceCard = ({ category }) => {
               <ChevronUp className="w-5 h-5 text-gold-accent" />
             ) : (
               <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gold-accent/10 text-gold-accent border border-gold-accent/20">
+              {serviceCount} {serviceCount === 1 ? "Service" : "Services"}
+            </span>
+            {category.startingPrice && (
+              <span className="text-sm text-slate-gray">
+                Starting from ₹{category.startingPrice.toLocaleString()}
+              </span>
             )}
           </div>
         </div>
