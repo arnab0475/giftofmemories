@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Hero from "../components/Hero";
 import TrustStrip from "../components/TrustStrip";
 import CombinedSections from "../components/CombinedSections";
@@ -13,6 +15,25 @@ import ProductCategoryGrid from "../components/products/ProductCategoryGrid";
 import Gallery from "../components/Gallery";
 
 const HomePage = () => {
+  const [packages, setPackages] = useState([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/services/packages-with-services`,
+        );
+        setPackages(response.data);
+      } catch (error) {
+        console.error("Error fetching packages:", error);
+      } finally {
+        setIsLoadingServices(false);
+      }
+    };
+    fetchPackages();
+  }, []);
+
   return (
     <>
       <Hero />
@@ -41,7 +62,10 @@ const HomePage = () => {
             </div>
 
             {/* Service Grid */}
-            <ServiceCategoryGrid />
+            <ServiceCategoryGrid
+              packages={packages}
+              isLoading={isLoadingServices}
+            />
 
             <div className="text-center mt-12">
               <a
