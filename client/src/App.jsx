@@ -9,6 +9,16 @@ import { AnimatePresence } from "framer-motion";
 import LoadingScreen from "./components/LoadingScreen";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { FloatingDock } from "./components/FloatingDock";
+import {
+  IconHome,
+  IconTools,
+  IconShoppingBag,
+  IconPhoto,
+  IconArticle,
+  IconInfoCircle,
+  IconPhoneCall,
+} from "@tabler/icons-react";
 import HomePage from "./pages/HomePage";
 import ServicesPage from "./pages/ServicesPage";
 import ServiceDetailsPage from "./pages/ServiceDetailsPage";
@@ -34,6 +44,8 @@ import AdminShopPage from "./pages/AdminShopPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
 import AdminAboutPage from "./pages/AdminAboutPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
+import AdminHomepageSettings from "./pages/AdminHomepageSettings";
+import AdminPageHeroes from "./pages/AdminPageHeroes";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ClientAuthProvider } from "./context/ClientAuthContext";
@@ -49,6 +61,44 @@ const ScrollToTop = () => {
 
   return null;
 };
+
+const navLinks = [
+  {
+    title: "Home",
+    icon: <IconHome className="h-full w-full text-neutral-500" />,
+    href: "/",
+  },
+  {
+    title: "Services",
+    icon: <IconTools className="h-full w-full text-neutral-500" />,
+    href: "/services",
+  },
+  {
+    title: "Shop",
+    icon: <IconShoppingBag className="h-full w-full text-neutral-500" />,
+    href: "/shop",
+  },
+  {
+    title: "Gallery",
+    icon: <IconPhoto className="h-full w-full text-neutral-500" />,
+    href: "/gallery",
+  },
+  {
+    title: "Blog",
+    icon: <IconArticle className="h-full w-full text-neutral-500" />,
+    href: "/blog",
+  },
+  {
+    title: "About",
+    icon: <IconInfoCircle className="h-full w-full text-neutral-500" />,
+    href: "/about",
+  },
+  {
+    title: "Contact",
+    icon: <IconPhoneCall className="h-full w-full text-neutral-500" />,
+    href: "/contact",
+  },
+];
 
 const AppContent = () => {
   const location = useLocation();
@@ -66,25 +116,35 @@ const AppContent = () => {
     "/admin-users",
     "/admin-about",
     "/admin-reports",
+    "/admin-homepage-settings",
+    "/admin-page-heroes",
   ];
   const shouldHideNavbar = hideNavbarRoutes.some((route) =>
-    location.pathname.startsWith(route)
+    location.pathname.startsWith(route),
   );
-  const [isLoading, setIsLoading] = useState(true);
+
+  // Only show loading screen on home page
+  const isHomePage = location.pathname === "/";
+  const [isLoading, setIsLoading] = useState(isHomePage);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    if (isHomePage) {
+      setIsLoading(true);
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    } else {
       setIsLoading(false);
-    }, 2500);
-    return () => clearTimeout(timer);
-  }, []);
+    }
+  }, [isHomePage]);
 
   return (
     <>
       <ClientAuthProvider>
         <ScrollToTop />
         <AnimatePresence mode="wait">
-          {isLoading && <LoadingScreen key="loading" />}
+          {isLoading && isHomePage && <LoadingScreen key="loading" />}
         </AnimatePresence>
 
         <div className="min-h-screen bg-warm-ivory selection:bg-gold-accent selection:text-white">
@@ -127,10 +187,28 @@ const AppContent = () => {
                 <Route path="/admin-about" element={<AdminAboutPage />} />
                 <Route path="/admin-users" element={<AdminUsersPage />} />
                 <Route path="/admin-reports" element={<AdminReportsPage />} />
+                <Route
+                  path="/admin-homepage-settings"
+                  element={<AdminHomepageSettings />}
+                />
+                <Route
+                  path="/admin-page-heroes"
+                  element={<AdminPageHeroes />}
+                />
               </Route>
             </Routes>
           </main>
           {!shouldHideNavbar && <Footer />}
+          {/* Mobile floating navigation dock */}
+          {!shouldHideNavbar && (
+            <div className="fixed inset-x-0 bottom-4 z-50 flex justify-center md:hidden">
+              <FloatingDock
+                mobileClassName=""
+                desktopClassName="hidden"
+                items={navLinks}
+              />
+            </div>
+          )}
         </div>
       </ClientAuthProvider>
     </>

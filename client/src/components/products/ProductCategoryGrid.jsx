@@ -14,7 +14,7 @@ const ProductCategoryGrid = () => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`
+          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`,
         );
         // Get first 6 products for homepage display
         setProducts(response.data.slice(0, 6));
@@ -85,7 +85,7 @@ const ProductCard = ({ product, index }) => {
         {/* Category Badge */}
         {product.category && (
           <div className="absolute top-3 left-3 bg-gold-accent text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
-            {product.category}
+            {product.category?.name || product.category}
           </div>
         )}
 

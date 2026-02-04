@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const ProductsHero = () => {
+  const [heroData, setHeroData] = useState({
+    title: "Our Products",
+    description:
+      "Curated photography products crafted to preserve your memories forever.",
+    backgroundImage: "",
+  });
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/page-hero/get/shop`,
+        );
+        setHeroData(response.data);
+      } catch (error) {
+        console.error("Error fetching shop hero:", error);
+      }
+    };
+    fetchHeroData();
+  }, []);
+
   return (
     <div className="relative h-[40vh] min-h-[400px] w-full overflow-hidden flex items-center justify-center">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src="/shop-bg.jpg"
+          src={heroData.backgroundImage || "/shop-bg.jpg"}
           alt=""
           aria-hidden="true"
           className="h-full w-full object-cover"
@@ -24,7 +46,7 @@ const ProductsHero = () => {
           transition={{ duration: 0.8 }}
           className="text-4xl md:text-5xl font-playfair font-bold text-warm-ivory mb-4"
         >
-          Our Products
+          {heroData.title}
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -32,8 +54,7 @@ const ProductsHero = () => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-warm-ivory/90 text-lg font-inter max-w-2xl mx-auto"
         >
-          Curated photography products crafted to preserve your memories
-          forever.
+          {heroData.description}
         </motion.p>
       </div>
     </div>

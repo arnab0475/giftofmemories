@@ -19,13 +19,34 @@ const BlogPage = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [heroData, setHeroData] = useState({
+    title: "Stories from the Lens",
+    description:
+      "Photography tips, behind-the-scenes moments, and inspiration for your next shoot.",
+    breadcrumb: "Gift of memories • Blogs",
+    backgroundImage: "",
+  });
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/page-hero/get/blog`,
+        );
+        setHeroData(response.data);
+      } catch (error) {
+        console.error("Error fetching blog hero:", error);
+      }
+    };
+    fetchHeroData();
+  }, []);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/blogs`
+          `${import.meta.env.VITE_NODE_URL}/api/blogs`,
         );
         setPosts(response.data);
       } catch (err) {
@@ -58,6 +79,11 @@ const BlogPage = () => {
       </div>
     );
 
+  const breadcrumbParts = heroData.breadcrumb?.split("•") || [
+    "Gift of memories",
+    "Blogs",
+  ];
+
   return (
     <div className="min-h-screen bg-warm-ivory">
       {/* Hero Section */}
@@ -76,7 +102,10 @@ const BlogPage = () => {
                 transition: { duration: 0.5, ease: "easeInOut" },
               },
             }}
-            src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&q=100&w=2880"
+            src={
+              heroData.backgroundImage ||
+              "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&q=100&w=2880"
+            }
             alt="Photography Services"
             className="w-full h-full object-cover"
             loading="eager"
@@ -97,7 +126,7 @@ const BlogPage = () => {
               transition={{ duration: 0.6 }}
               className="font-playfair text-4xl md:text-5xl lg:text-6xl text-warm-ivory mb-4 font-bold tracking-tight"
             >
-              Stories from the Lens
+              {heroData.title}
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -105,17 +134,18 @@ const BlogPage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="font-inter text-lg text-muted-beige mb-6 font-light"
             >
-              Photography tips, behind-the-scenes moments, and inspiration for
-              your next shoot.
+              {heroData.description}
             </motion.p>
 
             {/* Breadcrumbs */}
             <div className="flex items-center justify-center space-x-2 text-sm font-inter uppercase tracking-widest text-warm-ivory/60">
               <Link to="/" className="hover:text-gold-accent transition-colors">
-                Gift of memories
+                {breadcrumbParts[0]?.trim()}
               </Link>
               <span className="text-gold-accent">•</span>
-              <span className="text-warm-ivory">Blogs</span>
+              <span className="text-warm-ivory">
+                {breadcrumbParts[1]?.trim()}
+              </span>
             </div>
           </motion.div>
         </div>
@@ -222,7 +252,7 @@ const BlogPage = () => {
                   </div>
                 </motion.div>
               </Link>
-            )
+            ),
           )}
         </div>
       </div>

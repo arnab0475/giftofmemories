@@ -48,6 +48,16 @@ const Sidebar = () => {
         { icon: Star, label: "Testimonials", path: "/admin-testimonials" },
         { icon: TvMinimalPlay, label: "Hero Banner", path: "/admin-hero" },
         { icon: Bell, label: "Popups", path: "/admin-popups" },
+        {
+          icon: Settings,
+          label: "Homepage Settings",
+          path: "/admin-homepage-settings",
+        },
+        {
+          icon: Image,
+          label: "Page Heroes",
+          path: "/admin-page-heroes",
+        },
       ],
     },
     {
@@ -106,7 +116,7 @@ const Sidebar = () => {
                             {
                               method: "POST",
                               credentials: "include",
-                            }
+                            },
                           );
                           navigate("/admin-portal-secret");
                         } catch (error) {

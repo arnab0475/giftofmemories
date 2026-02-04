@@ -14,19 +14,11 @@ const ProductsPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeSort, setActiveSort] = useState("Popular");
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  const filters = [
-    "All",
-    "Photo Prints",
-    "Albums",
-    "Frames",
-    "Digital Products",
-    "Merchandise",
-  ];
 
   const sortOptions = [
     "Popular",
@@ -35,13 +27,31 @@ const ProductsPage = () => {
     "Newest",
   ];
 
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/product-categories/get-categories`,
+        );
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // Build filters array from categories
+  const filters = ["All", ...categories.map((cat) => cat.name)];
+
   // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`
+          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`,
         );
         setProducts(response.data);
         setFilteredProducts(response.data);
@@ -58,9 +68,12 @@ const ProductsPage = () => {
   useEffect(() => {
     let result = [...products];
 
-    // Filter
+    // Filter by category
     if (activeFilter !== "All") {
-      result = result.filter((product) => product.category === activeFilter);
+      result = result.filter((product) => {
+        const categoryName = product.category?.name || "";
+        return categoryName === activeFilter;
+      });
     }
 
     // Sort
@@ -72,7 +85,7 @@ const ProductsPage = () => {
         result.sort((a, b) => b.price - a.price);
         break;
       case "Newest":
-        result.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+        result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         break;
       case "Popular":
       default:

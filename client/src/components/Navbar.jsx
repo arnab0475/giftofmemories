@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import { servicesData } from "../data/servicesData";
@@ -9,7 +9,6 @@ import { useClientAuth } from "../context/ClientAuthContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isClientLoggedIn, logout } = useClientAuth();
 
   // Search State
@@ -41,7 +40,7 @@ const Navbar = () => {
     const filtered = servicesData.filter(
       (service) =>
         service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.category.toLowerCase().includes(searchQuery.toLowerCase())
+        service.category.toLowerCase().includes(searchQuery.toLowerCase()),
     );
     setSearchResults(filtered);
   }, [searchQuery]);
@@ -121,8 +120,8 @@ const Navbar = () => {
                 location.pathname === link.path
                   ? "text-gold-accent"
                   : !isScrolled && !isServiceDetails
-                  ? "text-warm-ivory/90 hover:text-gold-accent"
-                  : "text-charcoal-black/80 hover:text-gold-accent"
+                    ? "text-warm-ivory/90 hover:text-gold-accent"
+                    : "text-charcoal-black/80 hover:text-gold-accent"
               }`}
             >
               {link.name}
@@ -260,11 +259,11 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Mobile Menu Toggle */}
+        {/* Mobile Search Icon Only (hamburger menu removed - using FloatingDock instead) */}
         <div className="flex items-center md:hidden gap-4">
           {/* Mobile Search Icon */}
           <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)} // Simple toggle for now, ideally opens a search modal
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
             className={`transition-colors duration-300 ${
               !isScrolled && !isServiceDetails
                 ? "text-warm-ivory/90 hover:text-gold-accent"
@@ -273,69 +272,8 @@ const Navbar = () => {
           >
             <Search size={24} />
           </button>
-
-          <button
-            className={`text-charcoal-black focus:outline-none ${
-              !isScrolled && !isServiceDetails
-                ? "text-warm-ivory"
-                : "text-charcoal-black"
-            }`}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
         </div>
       </div>
-
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "100vh" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden absolute top-full left-0 w-full bg-warm-ivory flex flex-col items-center justify-center space-y-8 overflow-hidden"
-          >
-            {/* Mobile Search Bar */}
-            <form
-              onSubmit={handleSearch}
-              className="flex items-center rounded-full overflow-hidden bg-charcoal-black/5 border border-charcoal-black/10 focus-within:border-gold-accent/50 w-4/5 max-w-xs"
-            >
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-5 py-3 bg-transparent text-base font-inter text-charcoal-black placeholder:text-charcoal-black/50 outline-none"
-              />
-              <button
-                type="submit"
-                className="px-4 py-3 text-charcoal-black/60 hover:text-gold-accent transition-colors"
-              >
-                <Search size={20} />
-              </button>
-            </form>
-
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className="font-playfair text-3xl text-charcoal-black hover:text-gold-accent transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <Link
-              to="/contact"
-              className="mt-4 px-8 py-3 bg-charcoal-black text-warm-ivory font-inter text-lg uppercase tracking-widest"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Book Now
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Mobile Search Overlay separate from menu if needed, or integrated. 
            For now, let's keep it simple: if search is open on mobile, maybe show a full screen or top bar search. 

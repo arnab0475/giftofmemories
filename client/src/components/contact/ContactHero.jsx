@@ -1,7 +1,30 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 import contactHeroBg from "../../assets/images/contact-hero.png";
 
 const ContactHero = () => {
+  const [heroData, setHeroData] = useState({
+    title: "Get In Touch",
+    description:
+      "Ready to start your journey? We'd love to hear from you. Tell us about your vision, and we'll help bring it to life.",
+    backgroundImage: "",
+  });
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/page-hero/get/contact`,
+        );
+        setHeroData(response.data);
+      } catch (error) {
+        console.error("Error fetching contact hero:", error);
+      }
+    };
+    fetchHeroData();
+  }, []);
+
   return (
     <motion.section
       initial="initial"
@@ -23,7 +46,7 @@ const ContactHero = () => {
               },
             },
           }}
-          src={contactHeroBg}
+          src={heroData.backgroundImage || contactHeroBg}
           alt="Photography Studio"
           className="w-full h-full object-cover opacity-60"
         />
@@ -37,11 +60,10 @@ const ContactHero = () => {
           transition={{ duration: 0.8 }}
         >
           <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-warm-ivory mb-3 font-bold tracking-tight">
-            Get In Touch
+            {heroData.title}
           </h1>
           <p className="font-inter text-lg text-muted-beige/80 mb-0 font-light max-w-2xl mx-auto">
-            Ready to start your journey? We'd love to hear from you. Tell us
-            about your vision, and we'll help bring it to life.
+            {heroData.description}
           </p>
         </motion.div>
       </div>

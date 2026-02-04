@@ -2,17 +2,14 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import {
-  getAllProducts,
-  getAllProductsAdmin,
-  getProductById,
-  getProductsByCategory,
-  getBestsellerProducts,
-  addProduct,
-  updateProduct,
-  deleteProduct,
-  toggleBestseller,
-  toggleActiveStatus,
-} from "../Controller/ShopController.js";
+  getAllCategories,
+  getAllCategoriesAdmin,
+  getCategoryById,
+  addCategory,
+  updateCategory,
+  deleteCategory,
+  toggleCategoryStatus,
+} from "../Controller/ProductCategoryController.js";
 import { AdminMiddleware } from "../Middlewares/AuthMiddleware.js";
 
 const router = express.Router();
@@ -35,33 +32,30 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 5 * 1024 * 1024, // 5MB limit
   },
   fileFilter: fileFilter,
 });
 
 // Public routes
-router.get("/get-products", getAllProducts);
-router.get("/get-product/:id", getProductById);
-router.get("/get-products/category/:categoryId", getProductsByCategory);
-router.get("/get-bestsellers", getBestsellerProducts);
+router.get("/get-categories", getAllCategories);
+router.get("/get-category/:id", getCategoryById);
 
 // Admin routes (protected)
-router.get("/admin/get-products", AdminMiddleware, getAllProductsAdmin);
+router.get("/admin/get-categories", AdminMiddleware, getAllCategoriesAdmin);
 router.post(
-  "/add-product",
+  "/add-category",
   AdminMiddleware,
   upload.single("image"),
-  addProduct,
+  addCategory,
 );
 router.put(
-  "/update-product/:id",
+  "/update-category/:id",
   AdminMiddleware,
   upload.single("image"),
-  updateProduct,
+  updateCategory,
 );
-router.delete("/delete-product/:id", AdminMiddleware, deleteProduct);
-router.patch("/toggle-bestseller/:id", AdminMiddleware, toggleBestseller);
-router.patch("/toggle-active/:id", AdminMiddleware, toggleActiveStatus);
+router.delete("/delete-category/:id", AdminMiddleware, deleteCategory);
+router.patch("/toggle-status/:id", AdminMiddleware, toggleCategoryStatus);
 
 export default router;

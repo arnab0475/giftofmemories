@@ -7,6 +7,7 @@ import VideoGallery from "../components/gallery/VideoGallery";
 import ExplorationTags from "../components/gallery/ExplorationTags";
 import GalleryCTA from "../components/gallery/GalleryCTA";
 import ImmersiveGallery from "../components/gallery/ImmersiveGallery";
+import GallerySectionDivider from "../components/gallery/GallerySectionDivider";
 
 import axios from "axios";
 
@@ -24,7 +25,7 @@ const GalleryPage = () => {
     const fetchGallery = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/gallery/get-gallery`
+          `${import.meta.env.VITE_NODE_URL}/api/gallery/get-gallery`,
         );
         setGalleryItems(response.data);
       } catch (error) {
@@ -67,7 +68,8 @@ const GalleryPage = () => {
         </>
       )}
 
-      <div className="relative z-10 bg-warm-ivory">
+      <div className="relative z-10">
+        <GallerySectionDivider />
         <VideoGallery />
         <GalleryCTA />
       </div>

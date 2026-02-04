@@ -1,8 +1,37 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import serviceHeroBg from "../../assets/images/service-hero.png";
 
 const ServiceHero = () => {
+  const [heroData, setHeroData] = useState({
+    title: "Our Photography Services",
+    description:
+      "Crafted experiences for weddings, events, portraits and brands. We turn moments into timeless memories.",
+    breadcrumb: "Gift of memories • Services",
+    backgroundImage: "",
+  });
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/page-hero/get/services`,
+        );
+        setHeroData(response.data);
+      } catch (error) {
+        console.error("Error fetching service hero:", error);
+      }
+    };
+    fetchHeroData();
+  }, []);
+
+  const breadcrumbParts = heroData.breadcrumb?.split("•") || [
+    "Gift of memories",
+    "Services",
+  ];
+
   return (
     <motion.section
       initial="initial"
@@ -24,7 +53,7 @@ const ServiceHero = () => {
               },
             },
           }}
-          src={serviceHeroBg}
+          src={heroData.backgroundImage || serviceHeroBg}
           alt="Photography Services"
           className="w-full h-full object-cover "
         />
@@ -38,20 +67,21 @@ const ServiceHero = () => {
           transition={{ duration: 0.8 }}
         >
           <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-warm-ivory mb-4 font-bold tracking-tight">
-            Our Photography Services
+            {heroData.title}
           </h1>
           <p className="font-inter text-lg text-muted-beige mb-6 font-light">
-            Crafted experiences for weddings, events, portraits and brands. We
-            turn moments into timeless memories.
+            {heroData.description}
           </p>
 
           {/* Breadcrumbs */}
           <div className="flex items-center justify-center space-x-2 text-sm font-inter uppercase tracking-widest text-warm-ivory/60">
             <Link to="/" className="hover:text-gold-accent transition-colors">
-              Gift of memories
+              {breadcrumbParts[0]?.trim()}
             </Link>
             <span className="text-gold-accent">•</span>
-            <span className="text-warm-ivory">Services</span>
+            <span className="text-warm-ivory">
+              {breadcrumbParts[1]?.trim()}
+            </span>
           </div>
         </motion.div>
       </div>

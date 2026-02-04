@@ -1,28 +1,33 @@
 import { Shop } from "../Model/Shop.js";
 import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
+
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Shop.find({ isActive: true }).sort({
-      createdAt: -1,
-    });
+    const products = await Shop.find({ isActive: true })
+      .populate("category", "name")
+      .sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
 export const getAllProductsAdmin = async (req, res) => {
   try {
-    const products = await Shop.find().sort({ createdAt: -1 });
+    const products = await Shop.find()
+      .populate("category", "name")
+      .sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
 export const getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Shop.findById(id);
+    const product = await Shop.findById(id).populate("category", "name");
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -33,20 +38,23 @@ export const getProductById = async (req, res) => {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
 export const getProductsByCategory = async (req, res) => {
   try {
-    const { category } = req.params;
-    const products = await Shop.find({ category, isActive: true }).sort({
-      createdAt: -1,
-    });
+    const { categoryId } = req.params;
+    const products = await Shop.find({ category: categoryId, isActive: true })
+      .populate("category", "name")
+      .sort({ createdAt: -1 });
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
   }
 };
+
 export const getBestsellerProducts = async (req, res) => {
   try {
     const products = await Shop.find({ isBestseller: true, isActive: true })
+      .populate("category", "name")
       .sort({ popularity: -1 })
       .limit(6);
     res.status(200).json(products);
@@ -82,7 +90,7 @@ export const addProduct = async (req, res) => {
         (error, result) => {
           if (error) reject(error);
           else resolve(result);
-        }
+        },
       );
       streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
     });
@@ -143,7 +151,7 @@ export const updateProduct = async (req, res) => {
           (error, result) => {
             if (error) reject(error);
             else resolve(result);
-          }
+          },
         );
         streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
       });

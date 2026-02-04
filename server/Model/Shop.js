@@ -17,15 +17,9 @@ const ShopSchema = new mongoose.Schema(
       min: [0, "Price cannot be negative"],
     },
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProductCategory",
       required: [true, "Product category is required"],
-      enum: [
-        "Photo Prints",
-        "Albums",
-        "Frames",
-        "Digital Products",
-        "Merchandise",
-      ],
     },
     image: {
       type: String,
@@ -48,7 +42,7 @@ const ShopSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const Shop = mongoose.model("Shop", ShopSchema);
