@@ -7,7 +7,7 @@ import { IconBrandWhatsapp } from "@tabler/icons-react";
 const FloatingChatButtons = () => {
   const whatsappNumber = "918335934679";
   const whatsappMessage = encodeURIComponent(
-    "Hi, I'm interested in your photography services!"
+    "Hi, I'm interested in your photography services!",
   );
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -46,7 +46,7 @@ const FloatingChatButtons = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4 items-end">
+    <div className="fixed bottom-24 md:bottom-6 right-6 z-50 flex flex-col gap-4 items-end">
       <AnimatePresence>
         {isOpen && (
           <motion.div
