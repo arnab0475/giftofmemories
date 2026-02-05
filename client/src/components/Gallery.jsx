@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   motion,
   AnimatePresence,
@@ -7,8 +7,9 @@ import {
   useSpring,
 } from "framer-motion";
 import { X } from "lucide-react";
+import axios from "axios";
 
-const galleryImages = [
+const defaultGalleryImages = [
   {
     id: 1,
     src: "/img1.jpeg",
@@ -48,26 +49,26 @@ const GalleryCard = ({ image, index, totalImages, containerRef, onClick }) => {
   const xRaw = useTransform(
     scrollYProgress,
     [start, start + segmentSize * 0.1, end - segmentSize * 0.1, end],
-    [0, 0, -100, -120] // Stay put, then smoothly slide out
+    [0, 0, -100, -120], // Stay put, then smoothly slide out
   );
 
   const opacityRaw = useTransform(
     scrollYProgress,
     [start, end - segmentSize * 0.2, end],
-    [1, 1, 0]
+    [1, 1, 0],
   );
 
   const scaleRaw = useTransform(
     scrollYProgress,
     [start, end - segmentSize * 0.15, end],
-    [1, 1, 0.95]
+    [1, 1, 0.95],
   );
 
   // Subtle rotation for a more dynamic feel
   const rotateRaw = useTransform(
     scrollYProgress,
     [start, end],
-    [0, -3] // Slight tilt as it slides out
+    [0, -3], // Slight tilt as it slides out
   );
 
   // Apply spring physics for buttery smooth motion
@@ -109,9 +110,33 @@ const GalleryCard = ({ image, index, totalImages, containerRef, onClick }) => {
 
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState(null);
+  const [galleryImages, setGalleryImages] = useState(defaultGalleryImages);
 
   // Ref for the scroll container
   const containerRef = useRef(null);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/homepage-gallery/section/stacked`,
+        );
+        if (response.data && response.data.length > 0) {
+          setGalleryImages(
+            response.data.map((img, index) => ({
+              id: img._id || index + 1,
+              src: img.imageUrl,
+              alt: img.alt || "Gallery Image",
+              category: img.category || "",
+            })),
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching stacked gallery images:", error);
+      }
+    };
+    fetchImages();
+  }, []);
 
   return (
     // Outer container: tall enough for vertical scrolling (each image gets ~100vh of scroll)

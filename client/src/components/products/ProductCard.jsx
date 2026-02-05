@@ -7,6 +7,11 @@ const ProductCard = ({ product, onClick }) => {
 
   const discountPrice = Math.round(product.price * 0.85);
 
+  const handleBuyNow = (e) => {
+    e.stopPropagation();
+    onClick(product); // Open the modal popup
+  };
+
   return (
     <motion.div
       onClick={() => onClick(product)}
@@ -53,7 +58,10 @@ const ProductCard = ({ product, onClick }) => {
               </span>
             )}
           </div>
-          <button className="px-5 py-2 rounded-[10px] border border-gold-accent text-gold-accent font-semibold text-[14px] transition-all duration-300 group-hover:bg-gold-accent group-hover:text-charcoal-black">
+          <button
+            onClick={handleBuyNow}
+            className="px-5 py-2 rounded-[10px] border border-gold-accent text-gold-accent font-semibold text-[14px] transition-all duration-300 group-hover:bg-gold-accent group-hover:text-charcoal-black"
+          >
             Buy Now
           </button>
         </div>

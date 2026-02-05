@@ -18,6 +18,7 @@ import UserRouter from "./Routes/User.js";
 import AboutRouter from "./Routes/About.js";
 import HomepageSettingsRouter from "./Routes/HomepageSettings.js";
 import PageHeroRouter from "./Routes/PageHero.js";
+import HomepageGalleryRouter from "./Routes/HomepageGallery.js";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -51,6 +52,7 @@ app.use("/api/users", UserRouter);
 app.use("/api/about", AboutRouter);
 app.use("/api/homepage-settings", HomepageSettingsRouter);
 app.use("/api/page-hero", PageHeroRouter);
+app.use("/api/homepage-gallery", HomepageGalleryRouter);
 app.listen(process.env.PORT, () => {
   console.log("Server is running on port", process.env.PORT);
 });

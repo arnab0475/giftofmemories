@@ -8,17 +8,20 @@ import {
   useTransform,
 } from "framer-motion";
 import { Check } from "lucide-react";
+import axios from "axios";
 
-// Mix of nowimg, img, and preimg for variety
-const nowimg1 = "/nowimg1.jpg";
-const nowimg2 = "/nowimg2.jpg";
-const nowimg3 = "/nowimg3.jpg";
-const img1 = "/img1.jpeg";
-const img2 = "/img2.jpeg";
-const img4 = "/img4.jpg";
-const preimg1 = "/preimg1.jpeg";
-const preimg2 = "/preimg2.jpeg";
-const preimg5 = "/preimg5.jpeg";
+// Default fallback images
+const defaultScrollImages = [
+  "/nowimg1.jpg",
+  "/nowimg2.jpg",
+  "/nowimg3.jpg",
+  "/img1.jpeg",
+  "/img2.jpeg",
+  "/img4.jpg",
+  "/preimg1.jpeg",
+  "/preimg2.jpeg",
+  "/preimg5.jpeg",
+];
 
 const skills = [
   { name: "Photography", level: 92 },
@@ -125,6 +128,28 @@ const CombinedSections = () => {
 
   const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const y2 = useTransform(scrollYProgress, [0, 1], [0, -150]);
+
+  const [scrollImages, setScrollImages] = useState(defaultScrollImages);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/homepage-gallery/section/scroll`,
+        );
+        if (response.data && response.data.length > 0) {
+          setScrollImages(response.data.map((img) => img.imageUrl));
+        }
+      } catch (error) {
+        console.error("Error fetching scroll gallery images:", error);
+      }
+    };
+    fetchImages();
+  }, []);
+
+  // Split images into two columns
+  const col1Images = scrollImages.filter((_, i) => i % 2 === 0);
+  const col2Images = scrollImages.filter((_, i) => i % 2 === 1);
 
   return (
     <section
@@ -239,80 +264,38 @@ const CombinedSections = () => {
               style={{ y: y1 }}
               className="space-y-4 flex flex-col pt-12"
             >
-              <div className="h-64 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={nowimg1}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-80 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={img1}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-64 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={preimg1}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-96 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={nowimg2}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-64 rounded-3xl overflow-hidden">
-                <img
-                  src={img4}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
+              {col1Images.map((src, index) => (
+                <div
+                  key={`col1-${index}`}
+                  className={`${
+                    index % 3 === 0 ? "h-64" : index % 3 === 1 ? "h-80" : "h-96"
+                  } rounded-3xl overflow-hidden shrink-0`}
+                >
+                  <img
+                    src={src}
+                    className="w-full h-full object-cover transition-all duration-500"
+                    alt="Gallery"
+                  />
+                </div>
+              ))}
             </motion.div>
 
             {/* Column 2 of Images */}
             <motion.div style={{ y: y2 }} className="space-y-4 flex flex-col">
-              <div className="h-96 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={preimg2}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-64 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={nowimg3}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-80 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={img2}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-64 rounded-3xl overflow-hidden shrink-0">
-                <img
-                  src={preimg5}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
-              <div className="h-80 rounded-3xl overflow-hidden shrink-1">
-                <img
-                  src={img1}
-                  className="w-full h-full object-cover transition-all duration-500"
-                  alt="Gallery"
-                />
-              </div>
+              {col2Images.map((src, index) => (
+                <div
+                  key={`col2-${index}`}
+                  className={`${
+                    index % 3 === 0 ? "h-96" : index % 3 === 1 ? "h-64" : "h-80"
+                  } rounded-3xl overflow-hidden shrink-0`}
+                >
+                  <img
+                    src={src}
+                    className="w-full h-full object-cover transition-all duration-500"
+                    alt="Gallery"
+                  />
+                </div>
+              ))}
             </motion.div>
           </div>
         </div>

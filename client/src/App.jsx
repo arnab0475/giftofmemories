@@ -46,6 +46,7 @@ import AdminAboutPage from "./pages/AdminAboutPage";
 import AdminReportsPage from "./pages/AdminReportsPage";
 import AdminHomepageSettings from "./pages/AdminHomepageSettings";
 import AdminPageHeroes from "./pages/AdminPageHeroes";
+import AdminHomepageGallery from "./pages/AdminHomepageGallery";
 import { ToastContainer } from "react-toastify";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ClientAuthProvider } from "./context/ClientAuthContext";
@@ -118,6 +119,7 @@ const AppContent = () => {
     "/admin-reports",
     "/admin-homepage-settings",
     "/admin-page-heroes",
+    "/admin-homepage-gallery",
   ];
   const shouldHideNavbar = hideNavbarRoutes.some((route) =>
     location.pathname.startsWith(route),
@@ -194,6 +196,10 @@ const AppContent = () => {
                 <Route
                   path="/admin-page-heroes"
                   element={<AdminPageHeroes />}
+                />
+                <Route
+                  path="/admin-homepage-gallery"
+                  element={<AdminHomepageGallery />}
                 />
               </Route>
             </Routes>

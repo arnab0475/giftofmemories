@@ -58,6 +58,11 @@ const Sidebar = () => {
           label: "Page Heroes",
           path: "/admin-page-heroes",
         },
+        {
+          icon: Layers,
+          label: "Homepage Gallery",
+          path: "/admin-homepage-gallery",
+        },
       ],
     },
     {

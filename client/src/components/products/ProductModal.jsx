@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useClientAuth } from "../../context/ClientAuthContext";
 import { triggerWhatsApp } from "../../utils/whatsappHandler";
 
-const userName = "Customer"
+const userName = "Customer";
 
 const ProductModal = ({ isOpen, onClose, product }) => {
   const { isClientLoggedIn } = useClientAuth();
@@ -64,7 +64,7 @@ const ProductModal = ({ isOpen, onClose, product }) => {
               {/* Info Section */}
               <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col">
                 <span className="text-gold-accent font-semibold text-sm tracking-wider uppercase mb-2">
-                  {product.category}
+                  {product.category?.name || product.category}
                 </span>
                 <h2 className="text-3xl md:text-4xl font-playfair font-bold text-charcoal-black mb-4">
                   {product.name}
@@ -113,14 +113,17 @@ const ProductModal = ({ isOpen, onClose, product }) => {
                         >
                           {opt}
                         </button>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
 
                 {/* Purchase Actions */}
                 <div className="mt-auto flex gap-4">
-                  <button className="flex-1 bg-gold-accent text-charcoal-black font-bold py-4 rounded-[10px] hover:brightness-105 transition-all text-lg shadow-lg shadow-gold-accent/20" onClick={() => triggerWhatsApp(userName, product.name)}>
+                  <button
+                    className="flex-1 bg-gold-accent text-charcoal-black font-bold py-4 rounded-[10px] hover:brightness-105 transition-all text-lg shadow-lg shadow-gold-accent/20"
+                    onClick={() => triggerWhatsApp(userName, product.name)}
+                  >
                     Buy Now
                   </button>
                   <button className="px-6 py-4 rounded-[10px] border border-charcoal-black text-charcoal-black font-semibold hover:bg-gray-50 transition-all">

@@ -1,7 +1,9 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import axios from "axios";
 
-const images = [
+// Default fallback images
+const defaultImages = [
   "/preimg1.jpeg",
   "/preimg2.jpeg",
   "/preimg3.jpeg",
@@ -25,7 +27,7 @@ const Row = ({ images, direction, speed = 150 }) => {
   const x = useTransform(
     scrollYProgress,
     [0, 1],
-    direction === "left" ? ["0%", "-50%"] : ["-50%", "0%"]
+    direction === "left" ? ["0%", "-50%"] : ["-50%", "0%"],
   );
 
   return (
@@ -53,6 +55,24 @@ const Row = ({ images, direction, speed = 150 }) => {
 };
 
 const ParallaxGallery = () => {
+  const [images, setImages] = useState(defaultImages);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/homepage-gallery/section/parallax`,
+        );
+        if (response.data && response.data.length > 0) {
+          setImages(response.data.map((img) => img.imageUrl));
+        }
+      } catch (error) {
+        console.error("Error fetching parallax gallery images:", error);
+      }
+    };
+    fetchImages();
+  }, []);
+
   return (
     <section className="py-24 bg-warm-ivory overflow-hidden relative">
       <div className="container mx-auto px-6 mb-16 text-center">

@@ -1,31 +1,52 @@
-let cachedTemplate = null;
+const PHONE_NUMBER = "918335934679";
 
-async function loadTemplate() {
-  if (cachedTemplate) return cachedTemplate;
+export function triggerWhatsApp(customerName, productName) {
+  const message = `Hi Gift of Memories! 📸
 
-  const response = await fetch("/whatsapp_template.txt");
-  const text = await response.text();
-  cachedTemplate = text;
+I'm interested in purchasing:
+*${productName}*
 
-  return text;
-}
+Customer Name: ${customerName}
 
-export async function triggerWhatsApp(name, orderType) {
-  if (!name || !orderType) {
-    alert("Missing name or order type");
-    return;
-  }
+Please share more details about pricing and availability.
 
-  const template = await loadTemplate();
-
-  const message = template
-    .replace("{{name}}", name)
-    .replace("{{order_type}}", orderType);
+Thank you! 🙏`;
 
   const encodedMessage = encodeURIComponent(message);
+  const whatsappURL = `https://wa.me/${PHONE_NUMBER}?text=${encodedMessage}`;
 
-  const PHONE_NUMBER = "91xxxxxxxxxx"; // Replace with the actual phone number
+  window.open(whatsappURL, "_blank");
+}
 
+export function triggerServiceWhatsApp(serviceName) {
+  const message = `Hi Gift of Memories! 📸
+
+I'm interested in your service:
+*${serviceName}*
+
+Please share more details about packages and pricing.
+
+Thank you! 🙏`;
+
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappURL = `https://wa.me/${PHONE_NUMBER}?text=${encodedMessage}`;
+
+  window.open(whatsappURL, "_blank");
+}
+
+export function triggerBookingWhatsApp(serviceName, packageName, price) {
+  const message = `Hi Gift of Memories! 📸
+
+I would like to book:
+*Service:* ${serviceName}
+*Package:* ${packageName}
+*Price:* ₹${price?.toLocaleString("en-IN") || "Contact for price"}
+
+Please confirm availability and next steps.
+
+Thank you! 🙏`;
+
+  const encodedMessage = encodeURIComponent(message);
   const whatsappURL = `https://wa.me/${PHONE_NUMBER}?text=${encodedMessage}`;
 
   window.open(whatsappURL, "_blank");
