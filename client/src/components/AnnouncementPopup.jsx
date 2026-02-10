@@ -2,7 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ExternalLink } from "lucide-react";
+import { IconBrandWhatsapp } from "@tabler/icons-react";
 import axios from "axios";
+
+const WHATSAPP_NUMBER = "918335934679";
 
 const AnnouncementPopup = () => {
   const [popupData, setPopupData] = useState(null);
@@ -12,7 +15,7 @@ const AnnouncementPopup = () => {
     const fetchPopup = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/pop/popup`
+          `${import.meta.env.VITE_NODE_URL}/api/pop/popup`,
         );
         const data = response.data;
 
@@ -92,38 +95,61 @@ const AnnouncementPopup = () => {
   );
 };
 
-const PopupContent = ({ data }) => (
-  <>
-    {data.image ? (
-      <img
-        src={data.image}
-        alt="Announcement"
-        className="w-full h-auto max-h-[80vh] object-cover"
-      />
-    ) : (
-      // Fallback if no image, keep it looking nice
-      <div className="w-full h-64 bg-warm-ivory flex items-center justify-center">
-        <p className="text-gray-400">No Image</p>
-      </div>
-    )}
+const PopupContent = ({ data }) => {
+  const handleWhatsAppClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const message = encodeURIComponent(
+      "Hi! I saw your announcement and would like to know more about your services.",
+    );
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+  };
 
-    {/* Text Overlay - Only shows if there is a message */}
-    {data.message && (
+  return (
+    <>
+      {data.image ? (
+        <img
+          src={data.image}
+          alt="Announcement"
+          className="w-full h-auto max-h-[80vh] object-cover"
+        />
+      ) : (
+        // Fallback if no image, keep it looking nice
+        <div className="w-full h-64 bg-warm-ivory flex items-center justify-center">
+          <p className="text-gray-400">No Image</p>
+        </div>
+      )}
+
+      {/* Bottom Section with Message and WhatsApp Button */}
       <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-8 px-8">
-        <p className="text-white font-playfair text-xl md:text-2xl font-medium leading-relaxed tracking-tight drop-shadow-md">
-          {data.message}
-        </p>
-
-        {/* Visual indicator that it's clickable (if linked) */}
-        {data.link && (
-          <div className="mt-4 flex items-center gap-2 text-gold-accent text-sm font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-            <span>Learn More</span>
-            <ExternalLink size={14} />
-          </div>
+        {data.message && (
+          <p className="text-white font-playfair text-xl md:text-2xl font-medium leading-relaxed tracking-tight drop-shadow-md">
+            {data.message}
+          </p>
         )}
+
+        {/* Actions Row */}
+        <div className="mt-4 flex items-center gap-4">
+          {/* WhatsApp Button */}
+          <button
+            onClick={handleWhatsAppClick}
+            aria-label="Contact on WhatsApp"
+            className="flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white p-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+          >
+            <IconBrandWhatsapp size={24} />
+          </button>
+
+          {/* Learn More Link */}
+          {data.link && (
+            <div className="flex items-center gap-2 text-gold-accent text-sm font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <span>Learn More</span>
+              <ExternalLink size={14} />
+            </div>
+          )}
+        </div>
       </div>
-    )}
-  </>
-);
+    </>
+  );
+};
 
 export default AnnouncementPopup;

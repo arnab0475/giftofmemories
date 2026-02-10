@@ -16,6 +16,8 @@ import {
   Star,
   BookOpen,
   Calendar,
+  Video,
+  Package,
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -42,6 +44,11 @@ const Sidebar = () => {
         { icon: Layers, label: "Services", path: "/admin-services" },
         { icon: Image, label: "Gallery", path: "/admin-gallery" },
         { icon: ShoppingBag, label: "Shop", path: "/admin-shop" },
+        {
+          icon: Package,
+          label: "Product Collections",
+          path: "/admin-product-collections",
+        },
         { icon: FileText, label: "Blogs", path: "/admin-blogs" },
         { icon: BookOpen, label: "About Page", path: "/admin-about" },
         { icon: Users, label: "Users", path: "/admin-users" },
@@ -62,6 +69,16 @@ const Sidebar = () => {
           icon: Layers,
           label: "Homepage Gallery",
           path: "/admin-homepage-gallery",
+        },
+        {
+          icon: Video,
+          label: "Page Videos",
+          path: "/admin-page-videos",
+        },
+        {
+          icon: MessageSquare,
+          label: "FAQs",
+          path: "/admin-faqs",
         },
       ],
     },

@@ -7,6 +7,7 @@ import ServiceCategoryGrid from "../components/services/ServiceCategoryGrid";
 import CustomPackageCTA from "../components/services/CustomPackageCTA";
 import ServiceTrustStrip from "../components/services/ServiceTrustStrip";
 import MostBookedPackages from "../components/services/MostBookedPackages";
+import PageVideoSection from "../components/PageVideoSection";
 
 const ServicesPage = () => {
   const [services, setServices] = useState([]);
@@ -25,7 +26,7 @@ const ServicesPage = () => {
           axios.get(
             `${
               import.meta.env.VITE_NODE_URL
-            }/api/services/packages-with-services`
+            }/api/services/packages-with-services`,
           ),
         ]);
         setServices(servicesResponse.data);
@@ -79,6 +80,11 @@ const ServicesPage = () => {
     >
       <ServiceHero />
       <MostBookedPackages />
+      <PageVideoSection
+        pageType="services"
+        title="How It Works"
+        subtitle="Watch Our Service Guides"
+      />
       <ServiceFilter
         activeFilter={activeFilter}
         setActiveFilter={setActiveFilter}

@@ -16,19 +16,19 @@ const MegaSearch = () => {
       try {
         // Fetch services
         const servicesRes = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/services/services`
+          `${import.meta.env.VITE_NODE_URL}/api/services/services`,
         );
         setServices(servicesRes.data || []);
 
         // Fetch products
         const productsRes = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`
+          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`,
         );
         setProducts(productsRes.data || []);
 
         // Fetch packages
         const packagesRes = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/services/packages`
+          `${import.meta.env.VITE_NODE_URL}/api/services/packages`,
         );
         setPackages(packagesRes.data || []);
       } catch (error) {
@@ -77,7 +77,7 @@ const MegaSearch = () => {
 
   return (
     <div
-      className="relative z-50 w-full max-w-5xl mx-auto"
+      className="relative z-[100] w-full max-w-5xl mx-auto"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
@@ -119,7 +119,7 @@ const MegaSearch = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl overflow-hidden border-t border-gold-accent/20"
+            className="absolute top-full left-0 right-0 bg-white shadow-2xl rounded-b-xl overflow-hidden border-t border-gold-accent/20 z-[100]"
           >
             <div className="p-6 flex flex-col gap-4 max-h-[65vh] overflow-y-auto custom-scrollbar">
               {/* Services grouped by packages - each package is a row */}

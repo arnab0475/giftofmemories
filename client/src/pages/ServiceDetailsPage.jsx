@@ -8,6 +8,7 @@ import ServiceBookingForm from "../components/services/ServiceBookingForm";
 import RevealOnScroll from "../components/RevealOnScroll";
 import { useClientAuth } from "../context/ClientAuthContext";
 import Loader from "../components/Loader";
+import PageVideoSection from "../components/PageVideoSection";
 
 const ServiceDetailsPage = () => {
   const { id } = useParams();
@@ -26,7 +27,7 @@ const ServiceDetailsPage = () => {
       if (!id) return;
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/services/service/${id}`
+          `${import.meta.env.VITE_NODE_URL}/api/services/service/${id}`,
         );
         setService(response.data);
       } catch (error) {
@@ -173,13 +174,13 @@ const ServiceDetailsPage = () => {
                                 <span className="text-white/50 line-through text-base">
                                   ₹
                                   {extractPrice(service.price).toLocaleString(
-                                    "en-IN"
+                                    "en-IN",
                                   )}
                                 </span>
                                 <span className="text-white font-semibold text-lg">
                                   ₹
                                   {Math.round(
-                                    extractPrice(service.price) * 0.85
+                                    extractPrice(service.price) * 0.85,
                                   ).toLocaleString("en-IN")}
                                 </span>
                               </div>
@@ -220,6 +221,14 @@ const ServiceDetailsPage = () => {
 
               {/* Right Column of Content: Sticky Form */}
               <div className="xl:col-span-1">
+                {/* Video Guide Section */}
+                <div className="mb-8">
+                  <PageVideoSection
+                    pageType="booking"
+                    title="Booking Guide"
+                    subtitle="How to Book"
+                  />
+                </div>
                 <ServiceBookingForm
                   serviceTitle={service.title}
                   servicePrice={service.price}

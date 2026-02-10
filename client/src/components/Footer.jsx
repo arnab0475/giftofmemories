@@ -1,4 +1,5 @@
 import { Instagram, Facebook, Twitter, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -24,36 +25,36 @@ const Footer = () => {
               </h4>
               <ul className="space-y-4 font-inter text-sm text-charcoal-black/70">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/"
                     className="hover:text-warm-ivory transition-colors"
                   >
                     Home
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#portfolio"
+                  <Link
+                    to="/gallery"
                     className="hover:text-warm-ivory transition-colors"
                   >
                     Portfolio
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#services"
+                  <Link
+                    to="/services"
                     className="hover:text-warm-ivory transition-colors"
                   >
                     Services
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#about"
+                  <Link
+                    to="/about"
                     className="hover:text-warm-ivory transition-colors"
                   >
                     About
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -63,28 +64,28 @@ const Footer = () => {
               </h4>
               <ul className="space-y-4 font-inter text-sm text-charcoal-black/70">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/contact"
                     className="hover:text-warm-ivory transition-colors"
                   >
                     Inquiries
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/services"
                     className="hover:text-warm-ivory transition-colors"
                   >
                     Pricing
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    to="/contact"
                     className="hover:text-warm-ivory transition-colors"
                   >
                     FAQ
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -97,25 +98,31 @@ const Footer = () => {
             </h4>
             <div className="flex space-x-6">
               <a
-                href="#"
+                href="https://www.instagram.com/gift.of.memories_/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-charcoal-black/70 hover:text-warm-ivory transition-colors"
               >
                 <Instagram size={20} />
               </a>
               <a
-                href="#"
+                href="https://www.facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-charcoal-black/70 hover:text-warm-ivory transition-colors"
               >
                 <Facebook size={20} />
               </a>
               <a
-                href="#"
+                href="https://www.twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-charcoal-black/70 hover:text-warm-ivory transition-colors"
               >
                 <Twitter size={20} />
               </a>
               <a
-                href="#"
+                href="mailto:info@giftofmemories.com"
                 className="text-charcoal-black/70 hover:text-warm-ivory transition-colors"
               >
                 <Mail size={20} />
@@ -127,12 +134,18 @@ const Footer = () => {
         <div className="pt-8 border-t border-charcoal-black/10 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 text-xs font-inter text-charcoal-black/60">
           <p>&copy; 2025 Gift of Memories Photography. All rights reserved.</p>
           <div className="flex space-x-6">
-            <a href="#" className="hover:text-warm-ivory transition-colors">
+            <Link
+              to="/privacy"
+              className="hover:text-warm-ivory transition-colors"
+            >
               Privacy Policy
-            </a>
-            <a href="#" className="hover:text-warm-ivory transition-colors">
+            </Link>
+            <Link
+              to="/terms"
+              className="hover:text-warm-ivory transition-colors"
+            >
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>

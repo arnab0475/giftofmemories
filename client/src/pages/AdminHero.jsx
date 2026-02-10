@@ -4,13 +4,16 @@ import TopBar from "../components/admin/TopBar";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Loader from "../components/Loader";
+import { X, GripVertical, Plus, Image as ImageIcon } from "lucide-react";
 
 const AdminHero = () => {
   const [hero, setHero] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [preview, setPreview] = useState(null);
-  const [fileName, setFileName] = useState(null);
+  const [previews, setPreviews] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [newFiles, setNewFiles] = useState([]);
+  const [draggedIndex, setDraggedIndex] = useState(null);
 
   const [form, setForm] = useState({
     title: "",
@@ -23,11 +26,10 @@ const AdminHero = () => {
     fetchHero();
   }, []);
 
-  // fetchHero: if populateForm=false it will update hero preview without populating the edit form
   const fetchHero = async ({ populateForm = true } = {}) => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_NODE_URL}/api/hero/hero`
+        `${import.meta.env.VITE_NODE_URL}/api/hero/hero`,
       );
       setHero(res.data);
       const cleared = localStorage.getItem("heroFormCleared") === "true";
@@ -38,9 +40,9 @@ const AdminHero = () => {
           buttonText: res.data.buttonText || "",
           buttonLink: res.data.buttonLink || "",
         });
-        setPreview(res.data.image || null);
+        setExistingImages(res.data.images || []);
+        setPreviews(res.data.images || []);
       }
-      // if populateForm is false we still update `hero` (used in the preview panel)
     } catch (err) {
       // no hero yet is okay
     } finally {
@@ -52,31 +54,76 @@ const AdminHero = () => {
     setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
   };
 
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-      setFileName(file.name);
-    } else {
-      setPreview(hero?.image || null);
-      setFileName(null);
-    }
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const newPreviews = files.map((file) => ({
+      url: URL.createObjectURL(file),
+      isNew: true,
+      file,
+    }));
+
+    setNewFiles((prev) => [...prev, ...files]);
+    setPreviews((prev) => [
+      ...prev.filter((p) => typeof p === "string" || !p.isNew),
+      ...prev.filter((p) => typeof p !== "string" && p.isNew),
+      ...newPreviews,
+    ]);
+
+    e.target.value = null;
   };
 
-  const handleClearImage = () => {
-    // Reset selected file and preview in the edit form (clear selection)
-    setPreview(null);
-    setFileName(null);
-    const inputEl = document.getElementById("hero-image-input");
-    if (inputEl) inputEl.value = null;
+  const handleRemoveImage = (index) => {
+    const preview = previews[index];
 
-    // Also clear the edit form entirely and remember preference so the form
-    // won't be populated automatically on next load/login
+    if (typeof preview === "string") {
+      setExistingImages((prev) => prev.filter((img) => img !== preview));
+    } else if (preview.isNew) {
+      setNewFiles((prev) => prev.filter((f) => f !== preview.file));
+      URL.revokeObjectURL(preview.url);
+    }
+
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragStart = (index) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newPreviews = [...previews];
+    const draggedItem = newPreviews[draggedIndex];
+    newPreviews.splice(draggedIndex, 1);
+    newPreviews.splice(index, 0, draggedItem);
+
+    setPreviews(newPreviews);
+    setDraggedIndex(index);
+
+    const existingOnly = newPreviews.filter((p) => typeof p === "string");
+    setExistingImages(existingOnly);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleClearAll = () => {
+    previews.forEach((p) => {
+      if (typeof p !== "string" && p.url) {
+        URL.revokeObjectURL(p.url);
+      }
+    });
+
+    setPreviews([]);
+    setExistingImages([]);
+    setNewFiles([]);
     setForm({ title: "", subtitle: "", buttonText: "", buttonLink: "" });
     localStorage.setItem("heroFormCleared", "true");
-    toast.info(
-      "Form cleared. Use 'Edit Hero' to load the current hero into the form."
-    );
+    toast.info("Form cleared. Use 'Edit Hero' to load the current hero.");
   };
 
   const handleSubmit = async (e) => {
@@ -88,15 +135,19 @@ const AdminHero = () => {
       data.append("subtitle", form.subtitle);
       data.append("buttonText", form.buttonText);
       data.append("buttonLink", form.buttonLink);
-      const fileInput = document.getElementById("hero-image-input");
-      if (fileInput && fileInput.files[0])
-        data.append("image", fileInput.files[0]);
+
+      const existingToKeep = previews.filter((p) => typeof p === "string");
+      data.append("existingImages", JSON.stringify(existingToKeep));
+
+      newFiles.forEach((file) => {
+        data.append("images", file);
+      });
 
       if (hero && hero._id) {
         const res = await axios.put(
           `${import.meta.env.VITE_NODE_URL}/api/hero/admin/hero/${hero._id}`,
           data,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         setHero(res.data.hero);
         toast.success("Hero updated");
@@ -104,29 +155,39 @@ const AdminHero = () => {
         const res = await axios.post(
           `${import.meta.env.VITE_NODE_URL}/api/hero/admin/hero`,
           data,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         setHero(res.data.hero);
         toast.success("Hero created");
       }
 
-      // Clear the edit form and file state after successful save per request
       setForm({ title: "", subtitle: "", buttonText: "", buttonLink: "" });
-      setFileName(null);
-      setPreview(null);
-      const fileInputEl = document.getElementById("hero-image-input");
-      if (fileInputEl) fileInputEl.value = null;
-
-      // Remember that the admin cleared/saved so the form doesn't auto-populate
+      setNewFiles([]);
+      setPreviews([]);
+      setExistingImages([]);
       localStorage.setItem("heroFormCleared", "true");
 
-      // Refresh hero preview but do not repopulate the edit form
       await fetchHero({ populateForm: false });
     } catch (err) {
       toast.error(err.response?.data?.message || "Save failed");
     } finally {
       setSaving(false);
     }
+  };
+
+  const loadHeroIntoForm = () => {
+    if (!hero) return;
+    setForm({
+      title: hero.title || "",
+      subtitle: hero.subtitle || "",
+      buttonText: hero.buttonText || "",
+      buttonLink: hero.buttonLink || "",
+    });
+    setExistingImages(hero.images || []);
+    setPreviews(hero.images || []);
+    setNewFiles([]);
+    localStorage.removeItem("heroFormCleared");
+    toast.info("Loaded hero into form for editing");
   };
 
   return (
@@ -141,198 +202,207 @@ const AdminHero = () => {
             </h2>
 
             <div className="bg-white p-6 rounded-[14px] shadow-sm border border-slate-gray/5">
-              <form
-                onSubmit={handleSubmit}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-                <input
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder="Title"
-                  className="p-3 border rounded"
-                  required
-                />
-                <input
-                  name="buttonText"
-                  value={form.buttonText}
-                  onChange={handleChange}
-                  placeholder="Button text (e.g. View Portfolio)"
-                  className="p-3 border rounded"
-                />
-                <input
-                  name="buttonLink"
-                  value={form.buttonLink}
-                  onChange={handleChange}
-                  placeholder="Button link (URL)"
-                  className="p-3 border rounded"
-                />
-                <textarea
-                  name="subtitle"
-                  value={form.subtitle}
-                  onChange={handleChange}
-                  placeholder="Subtitle / Description"
-                  rows={4}
-                  className="p-3 border rounded md:col-span-2"
-                />
-
-                <div className="md:col-span-2 flex gap-4 items-center">
-                  <div className="flex-1">
-                    <label
-                      htmlFor="hero-image-input"
-                      className="inline-flex items-center gap-3 py-2 px-4 bg-white border rounded cursor-pointer hover:bg-slate-50"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4 text-charcoal-black"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v6M8 8l4-4 4 4"
-                        />
-                      </svg>
-                      <span className="text-sm">Upload image</span>
-                    </label>
-                    <input
-                      id="hero-image-input"
-                      className="hidden"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFile}
-                    />
-                    <div className="text-sm text-slate-gray/60 mt-1">
-                      Max 10MB. Formats: jpg, png, webp, gif
-                    </div>
-                    {fileName && (
-                      <div className="text-xs text-slate-gray/60 mt-1">
-                        Selected: {fileName}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col items-center">
-                    <div className="w-48 h-32 rounded overflow-hidden bg-muted-beige flex items-center justify-center border">
-                      {preview ? (
-                        <img
-                          src={preview}
-                          alt="preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="p-2 text-xs text-slate-gray/60">
-                          No image selected
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleClearImage}
-                      className="mt-2 py-1 px-3 bg-white border rounded text-xs hover:bg-slate-50"
-                    >
-                      Clear
-                    </button>
-                  </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    name="title"
+                    value={form.title}
+                    onChange={handleChange}
+                    placeholder="Title"
+                    className="p-3 border rounded"
+                    required
+                  />
+                  <input
+                    name="buttonText"
+                    value={form.buttonText}
+                    onChange={handleChange}
+                    placeholder="Button text (e.g. View Portfolio)"
+                    className="p-3 border rounded"
+                  />
+                  <input
+                    name="buttonLink"
+                    value={form.buttonLink}
+                    onChange={handleChange}
+                    placeholder="Button link (URL)"
+                    className="p-3 border rounded"
+                  />
+                  <textarea
+                    name="subtitle"
+                    value={form.subtitle}
+                    onChange={handleChange}
+                    placeholder="Subtitle / Description"
+                    rows={3}
+                    className="p-3 border rounded md:col-span-2"
+                  />
                 </div>
 
-                <div className="md:col-span-2 flex gap-3">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-charcoal-black">
+                      Hero Images (Slider)
+                    </h3>
+                    <span className="text-xs text-slate-gray/60">
+                      Drag to reorder • Max 10MB per image
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {previews.map((preview, index) => {
+                      const imageUrl =
+                        typeof preview === "string" ? preview : preview.url;
+                      const isNew =
+                        typeof preview !== "string" && preview.isNew;
+
+                      return (
+                        <div
+                          key={index}
+                          draggable
+                          onDragStart={() => handleDragStart(index)}
+                          onDragOver={(e) => handleDragOver(e, index)}
+                          onDragEnd={handleDragEnd}
+                          className={`relative group aspect-[16/9] rounded-lg overflow-hidden border-2 cursor-move transition-all ${
+                            draggedIndex === index
+                              ? "border-gold-accent opacity-50"
+                              : "border-slate-gray/10 hover:border-gold-accent/50"
+                          }`}
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={`Slide ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+
+                          <div className="absolute inset-0 bg-charcoal-black/0 group-hover:bg-charcoal-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(index)}
+                              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+
+                          <div className="absolute top-2 left-2 p-1 bg-charcoal-black/50 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                            <GripVertical size={14} />
+                          </div>
+
+                          <div className="absolute bottom-2 right-2 px-2 py-0.5 bg-charcoal-black/70 text-white text-xs rounded">
+                            {index + 1}
+                          </div>
+
+                          {isNew && (
+                            <div className="absolute top-2 right-2 px-2 py-0.5 bg-gold-accent text-white text-xs rounded">
+                              New
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    <label className="aspect-[16/9] rounded-lg border-2 border-dashed border-slate-gray/30 flex flex-col items-center justify-center cursor-pointer hover:border-gold-accent hover:bg-gold-accent/5 transition-all">
+                      <Plus size={24} className="text-slate-gray/50 mb-1" />
+                      <span className="text-xs text-slate-gray/60">
+                        Add Images
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {previews.length === 0 && (
+                    <div className="text-center py-8 text-slate-gray/60">
+                      <ImageIcon
+                        size={48}
+                        className="mx-auto mb-2 opacity-30"
+                      />
+                      <p className="text-sm">
+                        No images selected. Add images to create a slider.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="py-2 px-4 bg-charcoal-black text-gold-accent rounded"
+                    className="py-2 px-6 bg-charcoal-black text-gold-accent rounded font-medium hover:bg-charcoal-black/90 transition-colors"
                   >
                     {saving
                       ? "Saving..."
                       : hero
-                      ? "Update Hero"
-                      : "Create Hero"}
+                        ? "Update Hero"
+                        : "Create Hero"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClearAll}
+                    className="py-2 px-4 bg-white border rounded text-sm hover:bg-slate-50"
+                  >
+                    Clear Form
                   </button>
                 </div>
               </form>
             </div>
 
             <div className="bg-white p-6 rounded-[14px] shadow-sm border border-slate-gray/5">
-              <h3 className="font-semibold mb-3">Current Hero Preview</h3>
+              <h3 className="font-semibold mb-4">Current Hero Preview</h3>
               {loading ? (
-                <div className="flex justify-center py-4">
+                <div className="flex justify-center py-8">
                   <Loader />
                 </div>
               ) : !hero ? (
-                <div className="text-sm text-slate-gray/60">
+                <div className="text-sm text-slate-gray/60 py-4">
                   No hero configured yet.
                 </div>
               ) : (
-                <div className="flex gap-4 items-center">
-                  <div className="w-48 h-32 rounded overflow-hidden bg-muted-beige flex items-center justify-center border">
-                    {hero.image ? (
-                      <img
-                        src={hero.image}
-                        alt={hero.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="p-2 text-xs text-slate-gray/60">
-                        No image
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-1">
+                      <div className="font-semibold text-lg">{hero.title}</div>
+                      <div className="text-sm text-slate-gray/70 mt-1">
+                        {hero.subtitle}
                       </div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="font-semibold">{hero.title}</div>
-                    <div className="text-sm text-slate-gray/70">
-                      {hero.subtitle}
+                      {hero.buttonText && (
+                        <div className="text-xs mt-2 text-slate-gray/60">
+                          CTA: {hero.buttonText} → {hero.buttonLink}
+                        </div>
+                      )}
+                      <div className="text-xs mt-2 text-gold-accent">
+                        {hero.images?.length || 0} slide
+                        {(hero.images?.length || 0) !== 1 ? "s" : ""}
+                      </div>
                     </div>
-                    {hero.buttonText && (
-                      <div className="text-xs mt-2">
-                        CTA: {hero.buttonText} → {hero.buttonLink}
-                      </div>
-                    )}
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Load current hero into the edit form (allow admin to edit)
-                          setForm({
-                            title: hero.title || "",
-                            subtitle: hero.subtitle || "",
-                            buttonText: hero.buttonText || "",
-                            buttonLink: hero.buttonLink || "",
-                          });
-                          setPreview(hero.image || null);
-                          setFileName(null);
-                          localStorage.removeItem("heroFormCleared");
-                          toast.info("Loaded hero into the form for editing");
-                        }}
-                        className="py-1 px-3 bg-white border rounded text-sm hover:bg-slate-50"
-                      >
-                        Edit Hero
-                      </button>
+                    <button
+                      type="button"
+                      onClick={loadHeroIntoForm}
+                      className="py-2 px-4 bg-charcoal-black text-gold-accent rounded text-sm hover:bg-charcoal-black/90"
+                    >
+                      Edit Hero
+                    </button>
+                  </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Clear persistent preference so form will not auto-populate
-                          localStorage.setItem("heroFormCleared", "true");
-                          setForm({
-                            title: "",
-                            subtitle: "",
-                            buttonText: "",
-                            buttonLink: "",
-                          });
-                          setPreview(hero.image || null);
-                          toast.info(
-                            "Form cleared; hero will not auto-populate on next load"
-                          );
-                        }}
-                        className="py-1 px-3 bg-white border rounded text-sm hover:bg-slate-50"
-                      >
-                        Clear Form
-                      </button>
+                  {hero.images && hero.images.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                      {hero.images.map((img, index) => (
+                        <div
+                          key={index}
+                          className="aspect-[16/9] rounded overflow-hidden bg-muted-beige"
+                        >
+                          <img
+                            src={img}
+                            alt={`Slide ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </div>

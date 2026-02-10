@@ -1,32 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus } from "lucide-react";
-
-const faqs = [
-  {
-    question: "What are your starting packages?",
-    answer:
-      "Our wedding packages start from ₹75,000 for single-day coverage. Portrait sessions begin at ₹15,000. Contact us for a detailed price guide tailored to your needs.",
-  },
-  {
-    question: "Do you travel for destination weddings?",
-    answer:
-      "Absolutely! We love capturing love stories across the globe. Travel and accommodation costs are additional for weddings outside Hyderabad.",
-  },
-  {
-    question: "How long does it take to receive the photos?",
-    answer:
-      "We deliver a sneak peek of 20-30 highlight images within 3 days. The full edited gallery is delivered within 4-6 weeks after the event.",
-  },
-  {
-    question: "Do you provide cinematic video services?",
-    answer:
-      "Yes, we have a dedicated team of cinematographers who specialize in creating wedding films, teasers, and event highlights.",
-  },
-];
+import axios from "axios";
 
 const FAQSection = () => {
+  const [faqs, setFaqs] = useState([]);
   const [activeIndex, setActiveIndex] = useState(null);
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/faqs`,
+        );
+        setFaqs(res.data || []);
+      } catch (err) {
+        setFaqs([]);
+      }
+    };
+    fetchFaqs();
+  }, []);
 
   const toggleAccordion = (index) => {
     setActiveIndex(activeIndex === index ? null : index);

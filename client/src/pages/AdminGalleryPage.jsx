@@ -17,7 +17,7 @@ const AdminGalleryPage = () => {
   // Upload State
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadCategory, setUploadCategory] = useState(
-    "Pre-Wedding Photoshoot"
+    "Pre-Wedding Photoshoot",
   );
   const [uploadPreview, setUploadPreview] = useState(null);
 
@@ -25,7 +25,7 @@ const AdminGalleryPage = () => {
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [youtubeTitle, setYoutubeTitle] = useState("");
   const [youtubeCategory, setYoutubeCategory] = useState(
-    "Pre-Wedding Cinematic"
+    "Pre-Wedding Cinematic",
   );
 
   const categories = [
@@ -48,7 +48,7 @@ const AdminGalleryPage = () => {
     try {
       setIsLoading(true);
       const response = await axios.get(
-        `${import.meta.env.VITE_NODE_URL}/api/gallery/get-gallery`
+        `${import.meta.env.VITE_NODE_URL}/api/gallery/get-gallery`,
       );
       setGalleryItems(response.data);
     } catch (error) {
@@ -96,7 +96,7 @@ const AdminGalleryPage = () => {
             "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
-        }
+        },
       );
 
       toast.success("Gallery item uploaded successfully");
@@ -131,7 +131,7 @@ const AdminGalleryPage = () => {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       toast.success("YouTube video added successfully");
@@ -143,7 +143,7 @@ const AdminGalleryPage = () => {
     } catch (error) {
       console.error("Error adding YouTube video:", error);
       toast.error(
-        error.response?.data?.message || "Failed to add YouTube video"
+        error.response?.data?.message || "Failed to add YouTube video",
       );
     } finally {
       setIsUploading(false);
@@ -157,7 +157,7 @@ const AdminGalleryPage = () => {
           `${import.meta.env.VITE_NODE_URL}/api/gallery/delete-gallery/${id}`,
           {
             withCredentials: true,
-          }
+          },
         );
         toast.success("Item deleted successfully");
         setGalleryItems((prev) => prev.filter((item) => item._id !== id));
@@ -294,6 +294,10 @@ const AdminGalleryPage = () => {
               <h2 className="text-xl font-bold text-[#0F0F0F] font-playfair">
                 Upload to Gallery
               </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Recommended: 16:9 (1920×1080px) for landscape or 4:5
+                (1080×1350px) for portrait
+              </p>
             </div>
 
             <form onSubmit={handleUpload} className="p-6 space-y-4">
@@ -319,6 +323,9 @@ const AdminGalleryPage = () => {
                     <div className="flex flex-col items-center text-gray-500">
                       <Image className="mb-2" size={32} />
                       <span className="text-sm">Click to upload image</span>
+                      <span className="text-xs text-gray-400 mt-1">
+                        16:9 (1920×1080px) or 4:5 (1080×1350px)
+                      </span>
                     </div>
                   )}
                 </div>

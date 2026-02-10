@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Hero from "../components/Hero";
-import TrustStrip from "../components/TrustStrip";
 import CombinedSections from "../components/CombinedSections";
 import Services from "../components/Services";
 import ParallaxGallery from "../components/ParallaxGallery";
@@ -13,6 +12,7 @@ import CTASection from "../components/CTASection";
 import ServiceCategoryGrid from "../components/services/ServiceCategoryGrid";
 import ProductCategoryGrid from "../components/products/ProductCategoryGrid";
 import Gallery from "../components/Gallery";
+import HomeVideoSection from "../components/HomeVideoSection";
 
 const HomePage = () => {
   const [packages, setPackages] = useState([]);
@@ -24,6 +24,16 @@ const HomePage = () => {
     showTestimonials: true,
     showScrollGallery: true,
     showStackedGallery: true,
+    showHomeVideo: true,
+    homeVideos: [],
+    productsSectionTitle: "Premium Products",
+    productsSectionDescription:
+      "Transform your cherished moments into timeless keepsakes. Discover our handcrafted albums, gallery-quality prints, and bespoke merchandise designed to last generations.",
+    productsSectionBadge: "Featured Collection",
+    servicesSectionTitle: "Our Services",
+    servicesSectionDescription:
+      "From intimate weddings to stunning fashion editorials, our team brings creativity and technical excellence to every project, capturing life's most precious moments.",
+    servicesSectionBadge: "What We Do",
   });
 
   useEffect(() => {
@@ -60,10 +70,6 @@ const HomePage = () => {
     <>
       <Hero />
 
-      <RevealOnScroll>
-        <TrustStrip />
-      </RevealOnScroll>
-
       {homepageSettings.showProducts && (
         <RevealOnScroll>
           {/* Products Section - Featured First */}
@@ -99,7 +105,8 @@ const HomePage = () => {
                 <div className="inline-flex items-center gap-3 px-6 py-3 bg-gold-accent/10 border border-gold-accent/30 rounded-full">
                   <span className="w-2 h-2 bg-gold-accent rounded-full animate-pulse" />
                   <span className="text-gold-accent font-inter text-xs uppercase tracking-[0.2em] font-bold">
-                    Featured Collection
+                    {homepageSettings.productsSectionBadge ||
+                      "Featured Collection"}
                   </span>
                   <span className="w-2 h-2 bg-gold-accent rounded-full animate-pulse" />
                 </div>
@@ -108,9 +115,19 @@ const HomePage = () => {
               {/* Header */}
               <div className="text-center max-w-3xl mx-auto mb-16">
                 <h2 className="font-playfair text-5xl md:text-7xl text-charcoal-black mb-6">
-                  Premium{" "}
+                  {(homepageSettings.productsSectionTitle || "Premium Products")
+                    .split(" ")
+                    .slice(0, -1)
+                    .join(" ")}{" "}
                   <span className="italic text-gold-accent relative">
-                    Products
+                    {
+                      (
+                        homepageSettings.productsSectionTitle ||
+                        "Premium Products"
+                      )
+                        .split(" ")
+                        .slice(-1)[0]
+                    }
                     <svg
                       className="absolute -bottom-2 left-0 w-full"
                       viewBox="0 0 200 8"
@@ -126,9 +143,8 @@ const HomePage = () => {
                   </span>
                 </h2>
                 <p className="font-inter text-slate-gray text-lg md:text-xl leading-relaxed font-light max-w-2xl mx-auto">
-                  Transform your cherished moments into timeless keepsakes.
-                  Discover our handcrafted albums, gallery-quality prints, and
-                  bespoke merchandise designed to last generations.
+                  {homepageSettings.productsSectionDescription ||
+                    "Transform your cherished moments into timeless keepsakes. Discover our handcrafted albums, gallery-quality prints, and bespoke merchandise designed to last generations."}
                 </p>
               </div>
 
@@ -174,15 +190,24 @@ const HomePage = () => {
               {/* Header */}
               <div className="text-center max-w-3xl mx-auto mb-16">
                 <span className="inline-block text-gold-accent font-inter text-xs uppercase tracking-[0.3em] mb-4 font-bold">
-                  What We Do
+                  {homepageSettings.servicesSectionBadge || "What We Do"}
                 </span>
                 <h2 className="font-playfair text-4xl md:text-6xl text-charcoal-black mb-6">
-                  Our <span className="italic text-gold-accent">Services</span>
+                  {(homepageSettings.servicesSectionTitle || "Our Services")
+                    .split(" ")
+                    .slice(0, -1)
+                    .join(" ")}{" "}
+                  <span className="italic text-gold-accent">
+                    {
+                      (homepageSettings.servicesSectionTitle || "Our Services")
+                        .split(" ")
+                        .slice(-1)[0]
+                    }
+                  </span>
                 </h2>
                 <p className="font-inter text-slate-gray text-lg leading-relaxed font-light">
-                  From intimate weddings to stunning fashion editorials, our
-                  team brings creativity and technical excellence to every
-                  project, capturing life's most precious moments.
+                  {homepageSettings.servicesSectionDescription ||
+                    "From intimate weddings to stunning fashion editorials, our team brings creativity and technical excellence to every project, capturing life's most precious moments."}
                 </p>
               </div>
 
@@ -218,6 +243,13 @@ const HomePage = () => {
           </section>
         </RevealOnScroll>
       )}
+
+      {homepageSettings.showHomeVideo &&
+        homepageSettings.homeVideos?.length > 0 && (
+          <RevealOnScroll>
+            <HomeVideoSection videos={homepageSettings.homeVideos} />
+          </RevealOnScroll>
+        )}
 
       {homepageSettings.showGallery && (
         <RevealOnScroll>

@@ -93,6 +93,41 @@ const AdminHomepageGallery = () => {
 
   const handleBulkImageChange = (e) => {
     const files = Array.from(e.target.files);
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const MAX_FILES = 20;
+    const MAX_TOTAL_SIZE = 200 * 1024 * 1024; // 200MB
+
+    // Check number of files
+    if (files.length > MAX_FILES) {
+      toast.error(`Maximum ${MAX_FILES} images allowed per upload`);
+      return;
+    }
+
+    // Check individual file sizes and total size
+    let totalSize = 0;
+    const oversizedFiles = [];
+
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        oversizedFiles.push(file.name);
+      }
+      totalSize += file.size;
+    }
+
+    if (oversizedFiles.length > 0) {
+      toast.error(
+        `${oversizedFiles.length} file(s) exceed 10MB limit: ${oversizedFiles.slice(0, 3).join(", ")}${oversizedFiles.length > 3 ? "..." : ""}`,
+      );
+      return;
+    }
+
+    if (totalSize > MAX_TOTAL_SIZE) {
+      toast.error(
+        `Total size (${(totalSize / 1024 / 1024).toFixed(1)}MB) exceeds 200MB limit`,
+      );
+      return;
+    }
+
     setBulkFiles(files);
     setBulkPreviews(files.map((file) => URL.createObjectURL(file)));
   };
@@ -592,9 +627,14 @@ const AdminHomepageGallery = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                  <h3 className="text-xl font-bold text-charcoal-black">
-                    Bulk Upload to {sectionConfig[selectedSection].label}
-                  </h3>
+                  <div>
+                    <h3 className="text-xl font-bold text-charcoal-black">
+                      Bulk Upload to {sectionConfig[selectedSection].label}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Max 20 images • 10MB each • Total 200MB
+                    </p>
+                  </div>
                   <button
                     onClick={() => {
                       setIsBulkModalOpen(false);
@@ -608,6 +648,31 @@ const AdminHomepageGallery = () => {
                 </div>
 
                 <div className="p-6">
+                  {/* Upload Requirements */}
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <h4 className="font-semibold text-amber-800 mb-2">
+                      Upload Requirements
+                    </h4>
+                    <ul className="text-sm text-amber-700 space-y-1">
+                      <li>
+                        • <strong>Max Images:</strong> 20 images per upload
+                      </li>
+                      <li>
+                        • <strong>Max File Size:</strong> 10MB per image
+                      </li>
+                      <li>
+                        • <strong>Total Size:</strong> 200MB maximum
+                      </li>
+                      <li>
+                        • <strong>Recommended Resolution:</strong> 1920×1080px
+                        (landscape) or 1080×1350px (portrait)
+                      </li>
+                      <li>
+                        • <strong>Formats:</strong> JPG, PNG, WebP
+                      </li>
+                    </ul>
+                  </div>
+
                   {/* Upload Area */}
                   <div
                     className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-gold-accent transition-colors mb-6"
@@ -620,12 +685,12 @@ const AdminHomepageGallery = () => {
                       Click to select multiple images
                     </p>
                     <p className="text-gray-400 text-sm mt-1">
-                      Up to 20 images at once
+                      Drag & drop or click to browse
                     </p>
                     <input
                       id="bulk-upload"
                       type="file"
-                      accept="image/*"
+                      accept="image/jpeg,image/png,image/webp"
                       multiple
                       onChange={handleBulkImageChange}
                       className="hidden"

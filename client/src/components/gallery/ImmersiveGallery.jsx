@@ -43,7 +43,7 @@ const ImmersiveGallery = ({ viewMode, setViewMode, items = [] }) => {
 
 const Card = ({ item, index, total, viewMode, setViewMode }) => {
   return (
-    <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden bg-charcoal-black">
+    <div className="relative w-full bg-charcoal-black">
       <div className="fixed bottom-7 right-28 z-50 md:flex items-center space-x-2 bg-muted-beige/30 p-1 rounded-lg">
         <button
           onClick={() => setViewMode("masonry")}
@@ -68,24 +68,19 @@ const Card = ({ item, index, total, viewMode, setViewMode }) => {
           <GripHorizontal size={20} />
         </button>
       </div>
-      <div className="relative w-full h-full">
+      <div className="relative w-full">
         {item.type === "video" ? (
           <video
             src={item.image}
-            className="w-full h-full object-cover"
+            className="w-full h-auto"
             autoPlay
             muted
             loop
             playsInline
           />
         ) : (
-          <img
-            src={item.image}
-            alt="Gallery image"
-            className="w-full h-full object-cover"
-          />
+          <img src={item.image} alt="Gallery image" className="w-full h-auto" />
         )}
-        <div className="absolute inset-0 bg-black/20" />{" "}
         <div className="absolute bottom-12 left-6 md:left-12 text-warm-ivory z-10">
           <p className="font-inter text-xs uppercase tracking-[0.2em] mb-2">
             {item.location} — {item.year}

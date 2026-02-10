@@ -6,7 +6,6 @@ import axios from "axios";
 import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
 import MetricCard from "../components/admin/MetricCard";
-import QuickActions from "../components/admin/QuickActions";
 import RecentEnquiries from "../components/admin/RecentEnquiries";
 
 const DashboardPage = () => {
@@ -22,7 +21,7 @@ const DashboardPage = () => {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_NODE_URL}/api/admin/metrics`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
         setCounts(res.data);
       } catch (err) {
@@ -78,8 +77,6 @@ const DashboardPage = () => {
                 <MetricCard key={index} {...metric} />
               ))}
             </div>
-
-            <QuickActions />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-3">

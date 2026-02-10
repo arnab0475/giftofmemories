@@ -459,7 +459,7 @@ const AdminServicePage = () => {
                 className="bg-[#C9A24D] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#b08d42] transition-colors flex items-center gap-2 shadow-sm"
               >
                 <Plus size={20} />
-                Add Package
+                Add Service
               </button>
             </div>
 
@@ -542,7 +542,7 @@ const AdminServicePage = () => {
                             className="px-4 py-2 bg-[#C9A24D]/10 text-[#C9A24D] rounded-lg hover:bg-[#C9A24D]/20 transition-colors flex items-center gap-2 text-sm font-medium"
                           >
                             <Plus size={16} />
-                            Add Service
+                            Add Package
                           </button>
                           <button
                             onClick={() => openEditPackageModal(pkg)}

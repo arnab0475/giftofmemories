@@ -5,16 +5,18 @@ import ProductsHero from "../components/products/ProductsHero";
 import FilterSortBar from "../components/products/FilterSortBar";
 import ProductCard from "../components/products/ProductCard";
 import ProductModal from "../components/products/ProductModal";
-import FeaturedStrip from "../components/products/FeaturedStrip";
 import TrustStrip from "../components/products/TrustStrip";
 import CTASection from "../components/products/CTASection";
 import Loader from "../components/Loader";
+import PageVideoSection from "../components/PageVideoSection";
+import ProductCollectionBlock from "../components/products/ProductCollectionBlock";
 
 const ProductsPage = () => {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeSort, setActiveSort] = useState("Popular");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [collections, setCollections] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +42,21 @@ const ProductsPage = () => {
       }
     };
     fetchCategories();
+  }, []);
+
+  // Fetch collections
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_NODE_URL}/api/product-collections/get-collections`,
+        );
+        setCollections(response.data);
+      } catch (error) {
+        console.error("Error fetching collections:", error);
+      }
+    };
+    fetchCollections();
   }, []);
 
   // Build filters array from categories
@@ -111,18 +128,52 @@ const ProductsPage = () => {
       {/* 1. Hero Section */}
       <ProductsHero />
 
-      {/* 2. Filter & Sort Bar */}
-      <FilterSortBar
-        filters={filters}
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-        sortOptions={sortOptions}
-        activeSort={activeSort}
-        onSortChange={setActiveSort}
+      {/* Video Guides */}
+      <PageVideoSection
+        pageType="shop"
+        title="Shopping Guide"
+        subtitle="Learn How to Buy"
       />
 
-      {/* 3. Products Grid */}
-      <div className="max-w-[1240px] mx-auto px-4 md:px-8 py-12 md:py-20 min-h-[60vh]">
+      {/* 2. Product Collections - Show featured collections at top */}
+      {collections.length > 0 && (
+        <div className="space-y-4 relative z-0">
+          {collections.map((collection) => (
+            <ProductCollectionBlock
+              key={collection._id}
+              collection={collection}
+              onProductClick={handleProductClick}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* 3. All Products Section Header */}
+      <div className="bg-gradient-to-b from-warm-ivory to-white py-12">
+        <div className="max-w-[1240px] mx-auto px-4 md:px-8 text-center">
+          <h2 className="font-playfair text-3xl md:text-4xl text-charcoal-black mb-3">
+            All Products
+          </h2>
+          <p className="text-slate-gray font-inter max-w-2xl mx-auto">
+            Browse our complete collection of premium products
+          </p>
+        </div>
+      </div>
+
+      {/* 4. Filter & Sort Bar */}
+      <div className="relative z-50">
+        <FilterSortBar
+          filters={filters}
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+          sortOptions={sortOptions}
+          activeSort={activeSort}
+          onSortChange={setActiveSort}
+        />
+      </div>
+
+      {/* 5. Products Grid */}
+      <div className="max-w-[1240px] mx-auto px-4 md:px-8 py-12 md:py-20 min-h-[60vh] relative z-10">
         {isLoading ? (
           <div className="flex justify-center py-20">
             <Loader color="#C9A24D" />
@@ -162,12 +213,9 @@ const ProductsPage = () => {
         )}
       </div>
 
-      {/* 4. Featured / Bestsellers */}
-      <FeaturedStrip onProductClick={handleProductClick} />
-
-      {/* 5. CTA Section */}
+      {/* 6. CTA Section */}
       <CTASection />
-      {/* 6. Trust Assurance */}
+      {/* 7. Trust Assurance */}
       <TrustStrip />
 
       {/* Product Modal */}
