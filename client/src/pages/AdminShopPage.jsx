@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -40,6 +40,8 @@ const AdminShopPage = () => {
     category: "",
     popularity: "",
     isBestseller: false,
+    oldPrice: "",
+    tag:"",
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -95,6 +97,8 @@ const AdminShopPage = () => {
       category: categories.length > 0 ? categories[0]._id : "",
       popularity: "",
       isBestseller: false,
+      oldPrice: "",
+      tag:"",
     });
     setImageFile(null);
     setImagePreview(null);
@@ -122,6 +126,8 @@ const AdminShopPage = () => {
         category: product.category?._id || product.category,
         popularity: product.popularity?.toString() || "",
         isBestseller: product.isBestseller || false,
+        oldPrice: product.oldPrice ? product.oldPrice.toString() : "",
+        tag: product.tag || "new",
       });
       setImagePreview(product.image);
     } else {
@@ -306,12 +312,13 @@ const AdminShopPage = () => {
       setIsSubmitting(true);
       const data = new FormData();
       data.append("name", formData.name);
-      data.append("description", formData.description);
-      data.append("price", formData.price);
-      data.append("category", formData.category);
-      data.append("popularity", formData.popularity || "0");
-      data.append("isBestseller", formData.isBestseller);
-
+data.append("description", formData.description);
+data.append("price", formData.price);
+data.append("oldPrice", formData.oldPrice || "");
+data.append("tag", formData.tag || "");
+data.append("category", formData.category);
+data.append("popularity", formData.popularity || "0");
+data.append("isBestseller", formData.isBestseller);
       if (imageFile) {
         data.append("image", imageFile);
       }
@@ -401,17 +408,20 @@ const AdminShopPage = () => {
       toast.error("Failed to update product");
     }
   };
-
-  const filteredProducts = products.filter((product) => {
+const filteredProducts = useMemo(() => {
+  return products.filter((product) => {
     const matchesSearch = product.name
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
+
     const matchesCategory =
       categoryFilter === "All" ||
       product.category?._id === categoryFilter ||
       product.category === categoryFilter;
+
     return matchesSearch && matchesCategory;
   });
+}, [products, searchQuery, categoryFilter]);
 
   const getCategoryName = (product) => {
     if (product.category?.name) return product.category.name;
@@ -863,6 +873,38 @@ const AdminShopPage = () => {
                       required
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Old Price (₹)
+    </label>
+    <input
+      type="number"
+      name="oldPrice"
+      value={formData.oldPrice}
+      onChange={handleInputChange}
+      placeholder="0"
+      className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-[#C9A24D]"
+    />
+  </div>
+
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Product Tag
+    </label>
+    <select
+      name="tag"
+      value={formData.tag}
+      onChange={handleInputChange}
+      className="w-full px-4 py-3 border border-gray-200 rounded-lg outline-none focus:border-[#C9A24D]"
+    >
+      <option value="">None</option>
+      <option value="new">New</option>
+      <option value="sale">Sale</option>
+      <option value="popular">Popular</option>
+    </select>
+  </div>
+</div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Category *

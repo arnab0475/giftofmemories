@@ -16,6 +16,10 @@ const ShopSchema = new mongoose.Schema(
       required: [true, "Product price is required"],
       min: [0, "Price cannot be negative"],
     },
+    oldPrice: {
+      type: Number,
+      min: [0, "Old price cannot be negative"],
+    },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProductCategory",
@@ -30,6 +34,10 @@ const ShopSchema = new mongoose.Schema(
       default: 0,
       min: 0,
       max: 100,
+    },
+    tag:{
+      type: String,
+       default: "new",
     },
     isBestseller: {
       type: Boolean,

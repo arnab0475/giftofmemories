@@ -70,7 +70,7 @@ export const addProduct = async (req, res) => {
       return res.status(400).json({ message: "Product image is required" });
     }
 
-    const { name, description, price, category, popularity, isBestseller } =
+    const { name, description, price, category, popularity, isBestseller, tag ,oldPrice} =
       req.body;
 
     // Validate required fields
@@ -105,6 +105,8 @@ export const addProduct = async (req, res) => {
       image: result.secure_url,
       popularity: popularity ? Number(popularity) : 0,
       isBestseller: isBestseller === "true" || isBestseller === true,
+      tag: tag || "new",
+      oldPrice: oldPrice ? Number(oldPrice) : undefined,
     });
 
     await newProduct.save();
