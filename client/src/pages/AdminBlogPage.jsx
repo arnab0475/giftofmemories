@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, Search, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Plus, Edit2, Trash2, Search, ArrowLeft, BookX } from "lucide-react";
 import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
 import BlogEditor from "../components/admin/BlogEditor";
@@ -14,6 +14,9 @@ const AdminBlogPage = () => {
   const [currentBlog, setCurrentBlog] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  
+  // FIX 1: Mobile Sidebar State
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchBlogs = async () => {
     try {
@@ -24,7 +27,7 @@ const AdminBlogPage = () => {
       setBlogs(response.data);
     } catch (error) {
       console.error("Error fetching blogs:", error);
-      toast.error("Failed to fetch blogs");
+      toast.error("Failed to load journal entries");
     } finally {
       setIsLoading(false);
     }
@@ -45,14 +48,16 @@ const AdminBlogPage = () => {
   };
 
   const handleDeleteBlog = async (id) => {
-    if (window.confirm("Are you sure you want to delete this blog post?")) {
+    if (window.confirm("Are you sure you want to permanently delete this journal entry?")) {
       try {
-        await axios.delete(`${import.meta.env.VITE_NODE_URL}/api/blogs/${id}`);
-        toast.success("Blog deleted successfully");
+        await axios.delete(`${import.meta.env.VITE_NODE_URL}/api/blogs/${id}`, {
+          withCredentials: true // Ensure security cookie is sent for admin action
+        });
+        toast.success("Entry removed successfully");
         fetchBlogs();
       } catch (error) {
         console.error("Error deleting blog:", error);
-        toast.error("Failed to delete blog");
+        toast.error("Failed to delete entry");
       }
     }
   };
@@ -62,26 +67,26 @@ const AdminBlogPage = () => {
       setIsLoading(true);
 
       if (currentBlog) {
-        // Update
         await axios.put(
           `${import.meta.env.VITE_NODE_URL}/api/blogs/${currentBlog._id}`,
-          blogData
+          blogData,
+          { withCredentials: true }
         );
-        toast.success("Blog updated successfully");
+        toast.success("Journal updated beautifully");
       } else {
-        // Create
         await axios.post(
           `${import.meta.env.VITE_NODE_URL}/api/blogs`,
-          blogData
+          blogData,
+          { withCredentials: true }
         );
-        toast.success("Blog created successfully");
+        toast.success("New journal published");
       }
       setIsEditing(false);
       setCurrentBlog(null);
       fetchBlogs();
     } catch (error) {
       console.error("Error saving blog:", error);
-      toast.error("Failed to save blog. Please try again.");
+      toast.error("Failed to save. Please try again.");
       setIsLoading(false);
     }
   };
@@ -91,126 +96,155 @@ const AdminBlogPage = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#FAF9F6] font-inter">
-      <Sidebar />
+    <div className="flex min-h-screen bg-warm-ivory/20 font-inter">
+      {/* Connected Mobile Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <div className="flex-1 ml-[260px] flex flex-col min-h-screen">
-        <TopBar />
+      {/* Responsive Content Wrapper */}
+      <div className="flex-1 md:ml-[260px] flex flex-col min-h-screen transition-all duration-300">
+        <TopBar onMenuClick={() => setIsSidebarOpen(true)} />
 
-        <main className="flex-1 p-8 overflow-y-auto">
-          {isEditing ? (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-            >
-              <button
-                onClick={() => setIsEditing(false)}
-                className="flex items-center gap-2 text-gray-500 hover:text-gray-800 mb-6 transition-colors"
+        <main className="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
+          <AnimatePresence mode="wait">
+            {isEditing ? (
+              <motion.div
+                key="editor"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-5xl mx-auto"
               >
-                <ArrowLeft size={20} />
-                Back to Blog List
-              </button>
-              <BlogEditor
-                blog={currentBlog}
-                onSave={handleSaveBlog}
-                onCancel={() => setIsEditing(false)}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="max-w-[1600px] mx-auto"
-            >
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h1 className="font-playfair text-3xl font-bold text-[#0F0F0F] mb-2">
-                    Blog Management
-                  </h1>
-                  <p className="text-gray-500">
-                    Manage your blog posts, stories, and articles.
-                  </p>
-                </div>
                 <button
-                  onClick={handleAddBlog}
-                  className="bg-[#C9A24D] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#b08d42] transition-colors flex items-center gap-2 shadow-sm"
+                  onClick={() => setIsEditing(false)}
+                  className="flex items-center gap-2 text-slate-gray hover:text-charcoal-black mb-8 transition-colors text-[11px] font-bold uppercase tracking-widest group"
                 >
-                  <Plus size={20} />
-                  Add New Blog
+                  <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                  Back to Journal List
                 </button>
-              </div>
-
-              {/* Search and Filter */}
-              <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex items-center gap-4">
-                <Search className="text-gray-400" size={20} />
-                <input
-                  type="text"
-                  placeholder="Search blogs..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 outline-none text-gray-700 placeholder:text-gray-400"
+                <BlogEditor
+                  blog={currentBlog}
+                  onSave={handleSaveBlog}
+                  onCancel={() => setIsEditing(false)}
                 />
-              </div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-7xl mx-auto"
+              >
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                  <div>
+                    <span className="text-slate-gray text-[10px] font-bold uppercase tracking-[0.2em] mb-1 block">
+                      Content Management
+                    </span>
+                    <h1 className="font-playfair text-3xl md:text-4xl font-bold text-charcoal-black mb-2">
+                      Journal & Stories
+                    </h1>
+                  </div>
+                  <button
+                    onClick={handleAddBlog}
+                    className="w-full md:w-auto bg-charcoal-black text-gold-accent px-6 py-3.5 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2"
+                  >
+                    <Plus size={16} />
+                    Draft New Entry
+                  </button>
+                </div>
 
-              {isLoading ? (
-                <div className="flex justify-center py-20">
-                  <Loader />
+                {/* Search Bar */}
+                <div className="bg-white p-2 rounded-2xl shadow-sm mb-8 flex items-center gap-3 border border-charcoal-black/5 max-w-md">
+                  <div className="pl-4 text-slate-gray">
+                    <Search size={18} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search journal entries..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent outline-none text-charcoal-black placeholder:text-slate-gray/50 font-inter text-sm py-2 pr-4"
+                  />
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredBlogs.map((blog) => (
-                    <div
-                      key={blog._id}
-                      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group"
-                    >
-                      <div className="h-48 overflow-hidden relative">
-                        <img
-                          src={blog.image}
-                          alt={blog.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        <div className="absolute top-4 left-4 bg-white/90 px-3 py-1 text-xs font-bold uppercase tracking-wider text-charcoal-black rounded-sm backdrop-blur-sm">
-                          {blog.category}
+
+                {isLoading ? (
+                  <div className="flex justify-center py-32">
+                    <Loader color="#C9A24D" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {filteredBlogs.map((blog) => (
+                      <motion.div
+                        key={blog._id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-charcoal-black/5 group flex flex-col"
+                      >
+                        <div className="h-56 overflow-hidden relative">
+                          <img
+                            src={blog.image || "/placeholder.png"}
+                            alt={blog.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute top-4 left-4 bg-white/95 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-charcoal-black rounded-lg backdrop-blur-sm shadow-sm">
+                            {blog.category}
+                          </div>
                         </div>
-                      </div>
-                      <div className="p-6">
-                        <div className="text-xs text-gray-400 mb-2 font-inter uppercase tracking-wide">
-                          {blog.date}
+                        
+                        <div className="p-6 md:p-8 flex flex-col flex-1">
+                          <div className="text-[10px] text-slate-gray mb-3 font-inter font-bold uppercase tracking-widest">
+                            {blog.date}
+                          </div>
+                          <h3 className="font-playfair text-xl font-bold text-charcoal-black mb-3 line-clamp-2 leading-tight group-hover:text-gold-accent transition-colors">
+                            {blog.title}
+                          </h3>
+                          <p className="text-slate-gray text-sm mb-8 line-clamp-3 leading-relaxed flex-1">
+                            {blog.excerpt}
+                          </p>
+                          
+                          {/* Premium Action Buttons */}
+                          <div className="flex gap-3 pt-6 border-t border-charcoal-black/5 mt-auto">
+                            <button
+                              onClick={() => handleEditBlog(blog)}
+                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-warm-ivory/50 text-charcoal-black rounded-xl hover:bg-gold-accent hover:text-white transition-colors text-[11px] font-bold uppercase tracking-widest"
+                            >
+                              <Edit2 size={14} />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteBlog(blog._id)}
+                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-colors text-[11px] font-bold uppercase tracking-widest"
+                            >
+                              <Trash2 size={14} />
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <h3 className="font-playfair text-xl font-bold text-[#0F0F0F] mb-2 line-clamp-2">
-                          {blog.title}
-                        </h3>
-                        <p className="text-gray-500 text-sm mb-6 line-clamp-3">
-                          {blog.excerpt}
-                        </p>
-                        <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                          <button
-                            onClick={() => handleEditBlog(blog)}
-                            className="flex items-center gap-2 text-gray-600 hover:text-[#C9A24D] transition-colors text-sm font-medium"
-                          >
-                            <Edit2 size={16} />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteBlog(blog._id)}
-                            className="flex items-center gap-2 text-red-400 hover:text-red-600 transition-colors text-sm font-medium"
-                          >
-                            <Trash2 size={16} />
-                            Delete
-                          </button>
-                        </div>
-                      </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {/* FIX 3: Polished Empty Search State */}
+                {!isLoading && filteredBlogs.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[2rem] border border-charcoal-black/5 shadow-sm">
+                    <div className="w-16 h-16 bg-warm-ivory/50 rounded-full flex items-center justify-center text-slate-gray mb-4">
+                      <BookX size={24} />
                     </div>
-                  ))}
-                  {filteredBlogs.length === 0 && (
-                    <div className="col-span-full text-center py-12 text-gray-400">
-                      No blogs found matching your search.
-                    </div>
-                  )}
-                </div>
-              )}
-            </motion.div>
-          )}
+                    <h3 className="font-playfair text-xl font-bold text-charcoal-black mb-2">
+                      No Entries Found
+                    </h3>
+                    <p className="text-slate-gray text-sm text-center max-w-sm">
+                      {searchQuery ? `We couldn't find any journals matching "${searchQuery}". Try adjusting your search.` : "Your journal is currently empty. Start writing your first story!"}
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
     </div>

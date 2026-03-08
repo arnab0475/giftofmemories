@@ -10,97 +10,60 @@ import { X } from "lucide-react";
 import axios from "axios";
 
 const defaultGalleryImages = [
-  {
-    id: 1,
-    src: "/img1.jpeg",
-    alt: "Shubho Bibaho Ceremony",
-    category: "Wedding",
-  },
-  {
-    id: 2,
-    src: "/img2.jpeg",
-    alt: "Haldi Celebration",
-    category: "Pre-Wedding",
-  },
+  { id: 1, src: "/img1.jpeg", alt: "Shubho Bibaho Ceremony", category: "Wedding" },
+  { id: 2, src: "/img2.jpeg", alt: "Haldi Celebration", category: "Pre-Wedding" },
   { id: 3, src: "/img3.jpeg", alt: "Sindoor Daan Moment", category: "Wedding" },
   { id: 4, src: "/img4.jpg", alt: "Saat Paak Ritual", category: "Wedding" },
   { id: 5, src: "/img5.jpg", alt: "Bridal Portraits", category: "Portrait" },
   { id: 6, src: "/img7.jpg", alt: "Reception Elegance", category: "Reception" },
 ];
 
-// Spring config for smooth, natural motion
-const springConfig = { stiffness: 100, damping: 30, restDelta: 0.001 };
+const springConfig = { stiffness: 80, damping: 25, restDelta: 0.001 };
 
-// Single card component with its own scroll-driven animation
 const GalleryCard = ({ image, index, totalImages, containerRef, onClick }) => {
-  // Track scroll progress for this specific card
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
-  // Calculate the scroll range for this card
-  // Each card has its own segment of the total scroll
-  const segmentSize = 1 / totalImages;
-  const start = index * segmentSize;
-  const end = start + segmentSize;
+  const step = 1 / (totalImages - 1 || 1);
+  const start = (index - 1) * step; 
+  const end = index * step;         
 
-  // Raw transforms based on scroll position
-  const xRaw = useTransform(
-    scrollYProgress,
-    [start, start + segmentSize * 0.1, end - segmentSize * 0.1, end],
-    [0, 0, -100, -120], // Stay put, then smoothly slide out
-  );
-
-  const opacityRaw = useTransform(
-    scrollYProgress,
-    [start, end - segmentSize * 0.2, end],
-    [1, 1, 0],
-  );
-
-  const scaleRaw = useTransform(
-    scrollYProgress,
-    [start, end - segmentSize * 0.15, end],
-    [1, 1, 0.95],
-  );
-
-  // Subtle rotation for a more dynamic feel
-  const rotateRaw = useTransform(
+  const yRaw = useTransform(
     scrollYProgress,
     [start, end],
-    [0, -3], // Slight tilt as it slides out
+    [index === 0 ? "0%" : "100%", "0%"]
   );
 
-  // Apply spring physics for buttery smooth motion
-  const x = useSpring(xRaw, springConfig);
-  const opacity = useSpring(opacityRaw, springConfig);
-  const scale = useSpring(scaleRaw, springConfig);
-  const rotate = useSpring(rotateRaw, springConfig);
+  const nextStart = end;
+  const nextEnd = end + step;
+  const scaleRaw = useTransform(scrollYProgress, [nextStart, nextEnd], [1, 0.9]);
+  const opacityRaw = useTransform(scrollYProgress, [nextStart, nextEnd], [1, 0.4]);
 
-  // Z-index: cards at the bottom of the stack have lower z-index
-  // As we scroll, earlier cards slide away revealing cards beneath
-  const zIndex = totalImages - index;
+  const y = useSpring(yRaw, springConfig);
+  const scale = useSpring(scaleRaw, springConfig);
+  const opacity = useSpring(opacityRaw, springConfig);
+
+  const zIndex = index;
 
   return (
     <motion.div
-      className="absolute inset-0 w-full h-full cursor-pointer group origin-center"
-      style={{
-        x: useTransform(x, (v) => `${v}%`),
-        opacity,
-        scale,
-        rotate,
-        zIndex,
-      }}
+      className="absolute inset-0 w-full h-full cursor-pointer group origin-top shadow-[0_-15px_40px_rgba(0,0,0,0.15)] rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-charcoal-black border border-white/10"
+      style={{ y, scale, opacity, zIndex }}
       onClick={() => onClick(image)}
     >
       <img
         src={image.src}
         alt={image.alt}
-        className="w-full h-full object-cover rounded-2xl shadow-2xl"
+        className="w-full h-full object-cover transition-transform duration-1000 md:group-hover:scale-105"
       />
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-charcoal-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end justify-center pb-12 rounded-2xl">
-        <p className="text-warm-ivory font-playfair text-2xl tracking-wide drop-shadow-lg">
+      
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-black via-charcoal-black/60 to-transparent pt-32 pb-8 px-5 md:pb-12 md:px-8 flex flex-col items-center justify-end text-center pointer-events-none">
+        <span className="text-gold-accent text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold block mb-1.5 md:mb-2 drop-shadow-md">
+          {image.category || "Featured"}
+        </span>
+        <p className="text-warm-ivory font-playfair text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-wide drop-shadow-lg leading-tight">
           {image.alt}
         </p>
       </div>
@@ -111,15 +74,13 @@ const GalleryCard = ({ image, index, totalImages, containerRef, onClick }) => {
 const Gallery = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState(defaultGalleryImages);
-
-  // Ref for the scroll container
   const containerRef = useRef(null);
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/homepage-gallery/section/stacked`,
+          `${import.meta.env.VITE_NODE_URL}/api/homepage-gallery/section/stacked`
         );
         if (response.data && response.data.length > 0) {
           setGalleryImages(
@@ -128,7 +89,7 @@ const Gallery = () => {
               src: img.imageUrl,
               alt: img.alt || "Gallery Image",
               category: img.category || "",
-            })),
+            }))
           );
         }
       } catch (error) {
@@ -139,27 +100,27 @@ const Gallery = () => {
   }, []);
 
   return (
-    // Outer container: tall enough for vertical scrolling (each image gets ~100vh of scroll)
     <section
       id="portfolio"
       ref={containerRef}
       className="relative bg-warm-ivory"
-      style={{ height: `${galleryImages.length * 100}vh` }}
+      // FIX 1: Reduced height for mobile (40vh) vs desktop (65vh) to remove empty white space faster
+      style={{ height: `${galleryImages.length * (window.innerWidth < 768 ? 40 : 65)}vh` }}
     >
-      {/* Sticky wrapper: stays pinned while scrolling through the stack */}
-      <div className="sticky top-0 h-screen overflow-hidden flex flex-col justify-center py-20">
-        {/* Section header */}
-        <div className="text-center mb-8">
-          <span className="text-gold-accent font-inter text-sm uppercase tracking-widest">
+      {/* FIX 2: Tightened vertical padding (py-4 md:py-16) to hug the content */}
+      <div className="sticky top-20 md:top-28 w-full flex flex-col items-center py-4 md:py-16 z-10">
+        
+        <div className="text-center mb-6 md:mb-8 px-4 w-full shrink-0">
+          <span className="text-gold-accent font-inter text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold block mb-1">
             Portfolio
           </span>
-          <h2 className="font-playfair text-4xl md:text-5xl text-charcoal-black mt-4">
+          <h2 className="font-playfair text-3xl md:text-5xl lg:text-6xl text-charcoal-black font-bold leading-tight">
             Featured Works
           </h2>
         </div>
 
-        {/* Stacked gallery: 80% width, centered, images stacked on top of each other */}
-        <div className="w-[80%] mx-auto relative" style={{ height: "90vh" }}>
+        {/* Card Container - No extra overflow hidden to allow shadows to show */}
+        <div className="w-[92%] sm:w-[85%] max-w-5xl mx-auto relative aspect-[3/2] sm:aspect-video md:aspect-[16/9] rounded-[1.5rem] md:rounded-[2.5rem]">
           {galleryImages.map((image, index) => (
             <GalleryCard
               key={image.id}
@@ -172,35 +133,34 @@ const Gallery = () => {
           ))}
         </div>
 
-        {/* Scroll indicator */}
       </div>
 
-      {/* Lightbox Modal */}
       <AnimatePresence>
         {selectedImage && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-charcoal-black/95 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] bg-charcoal-black/95 flex items-center justify-center p-4 backdrop-blur-xl"
             onClick={() => setSelectedImage(null)}
           >
             <button
-              className="absolute top-6 right-6 text-warm-ivory hover:text-gold-accent transition-colors"
+              className="absolute top-6 right-6 w-10 h-10 md:w-12 md:h-12 bg-white/10 rounded-full flex items-center justify-center text-warm-ivory hover:bg-gold-accent hover:text-charcoal-black transition-colors z-[110]"
               onClick={() => setSelectedImage(null)}
             >
-              <X size={32} />
+              <X size={24} />
             </button>
             <motion.img
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
               src={selectedImage.src}
               alt={selectedImage.alt}
-              className="max-w-full max-h-[90vh] object-contain shadow-2xl"
+              className="max-w-full max-h-[85vh] object-contain shadow-2xl relative z-[105] rounded-xl"
               onClick={(e) => e.stopPropagation()}
             />
-            <div className="absolute bottom-6 left-0 w-full text-center text-warm-ivory/80 font-inter text-sm tracking-widest uppercase">
+            <div className="absolute bottom-8 left-0 w-full text-center text-warm-ivory font-inter text-xs md:text-sm font-bold tracking-widest uppercase z-[110]">
               {selectedImage.alt}
             </div>
           </motion.div>

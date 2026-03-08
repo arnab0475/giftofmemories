@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { motion, stagger, useAnimate } from "motion/react";
+import { motion, stagger, useAnimate } from "motion/react"; // Assuming you are using Framer Motion v12+
 import { cn } from "../lib/utils";
 
 export const TextGenerateEffect = ({
@@ -13,7 +13,7 @@ export const TextGenerateEffect = ({
   finalColor = "var(--color-charcoal-black)",
 }) => {
   const [scope, animate] = useAnimate();
-  let wordsArray = words.split(" ");
+  
   useEffect(() => {
     const enterAnimation = async () => {
       await animate(
@@ -37,26 +37,36 @@ export const TextGenerateEffect = ({
       );
     };
 
-    enterAnimation();
-  }, [scope.current]);
+    // Only run if scope is ready
+    if (scope.current) {
+      enterAnimation();
+    }
+  // FIX 1: Corrected dependency array to watch 'words' so it can re-animate if the text changes
+  }, [scope, animate, filter, duration, appearingColor, finalColor, words]);
 
   const renderWords = () => {
     const paragraphs = words.split(/\n{2,}/g);
+    
     return (
-      <motion.div ref={scope}>
+      // FIX 2: Added aria-hidden to the animated container so screen readers ignore the broken-up spans
+      <motion.div ref={scope} aria-hidden="true">
         {paragraphs.map((para, pIdx) => (
           <div key={pIdx} className="mb-8 min-h-[2.5em]">
             {para.split(" ").map((word, idx) => (
-              <motion.span
-                key={word + idx + pIdx}
-                className="opacity-0"
-                style={{
-                  filter: filter ? "blur(10px)" : "none",
-                  color: appearingColor,
-                }}
-              >
-                {word}{" "}
-              </motion.span>
+              // FIX 3: Moved the space OUTSIDE the span for natural line wrapping
+              <span key={word + idx + pIdx} className="inline-block">
+                <motion.span
+                  // FIX 4: Added inline-block so iOS Safari can properly render the blur filter
+                  className="inline-block opacity-0"
+                  style={{
+                    filter: filter ? "blur(10px)" : "none",
+                    color: appearingColor,
+                  }}
+                >
+                  {word}
+                </motion.span>
+                {" "}
+              </span>
             ))}
           </div>
         ))}
@@ -67,7 +77,12 @@ export const TextGenerateEffect = ({
   return (
     <div className={cn("font-normal", className)}>
       <div className={cn("mt-6 mb-6", containerClassName)}>
-        <div className="text-base md:text-lg leading-relaxed tracking-wide">
+        {/* FIX 5: Added the full string as an aria-label for screen readers to read flawlessly */}
+        <div 
+          className="text-base md:text-lg leading-relaxed tracking-wide"
+          aria-label={words}
+          role="text"
+        >
           {renderWords()}
         </div>
       </div>

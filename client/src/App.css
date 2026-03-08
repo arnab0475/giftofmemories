@@ -86,3 +86,21 @@
   }
 }
 
+/* Custom Scrollbar for Admin Tables */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px; /* Horizontal scrollbar height */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #FAF9F6; /* Matches your warm-ivory background */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #C9A24D; /* Your gold-accent color */
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0F0F0F; /* Turns charcoal on hover */
+}

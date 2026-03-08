@@ -56,6 +56,10 @@ import { ClientAuthProvider } from "./context/ClientAuthContext";
 import ClientLoginPage from "./pages/ClientLoginPage";
 import ClientSignupPage from "./pages/ClientSignupPage";
 
+// --- NEW WHATSAPP REMINDER IMPORTS ---
+import BookingForm from "./pages/BookingForm"; 
+import AdminDashboard from "./pages/AdminDashboard"; 
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
 
@@ -126,6 +130,7 @@ const AppContent = () => {
     "/admin-page-videos",
     "/admin-product-collections",
     "/admin-faqs",
+    "/admin-bookings", // <-- NEW: Hides navbar on the new WhatsApp bookings admin page
   ];
   const shouldHideNavbar = hideNavbarRoutes.some((route) =>
     location.pathname.startsWith(route),
@@ -162,6 +167,7 @@ const AppContent = () => {
           <ToastContainer position="top-center" />
           <main>
             <Routes>
+              {/* Public Routes */}
               <Route path="/" element={<HomePage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/services/:id" element={<ServiceDetailsPage />} />
@@ -174,7 +180,11 @@ const AppContent = () => {
               <Route path="/shop" element={<ProductsPage />} />
               <Route path="/login" element={<ClientLoginPage />} />
               <Route path="/signup" element={<ClientSignupPage />} />
+              
+              {/* NEW: Public Booking Route */}
+              <Route path="/book" element={<BookingForm />} />
 
+              {/* Protected Admin Routes */}
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/admin-popups" element={<AdminPopups />} />
@@ -216,6 +226,9 @@ const AppContent = () => {
                   element={<AdminProductCollections />}
                 />
                 <Route path="/admin-faqs" element={<AdminFAQPage />} />
+                
+                {/* NEW: Admin Bookings Dashboard Route */}
+                <Route path="/admin-bookings" element={<AdminDashboard />} />
               </Route>
             </Routes>
           </main>
@@ -235,6 +248,7 @@ const AppContent = () => {
     </>
   );
 };
+
 function App() {
   return (
     <Router>
@@ -242,4 +256,5 @@ function App() {
     </Router>
   );
 }
+
 export default App;

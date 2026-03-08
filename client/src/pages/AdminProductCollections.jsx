@@ -1,19 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus,
-  Edit2,
-  Trash2,
-  Search,
-  X,
-  Eye,
-  EyeOff,
-  Package,
-  GripVertical,
-  Check,
-  LayoutGrid,
-  Rows,
-  Star,
+  Plus, Edit2, Trash2, Search, X, Eye, EyeOff, Package,
+  GripVertical, Check, LayoutGrid, Rows, Star, Info, Save, Layers
 } from "lucide-react";
 import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
@@ -25,6 +14,9 @@ const AdminProductCollections = () => {
   const [collections, setCollections] = useState([]);
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile Layout State
+  
+  // Modals & Forms
   const [showModal, setShowModal] = useState(false);
   const [showProductsModal, setShowProductsModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,14 +24,12 @@ const AdminProductCollections = () => {
   const [selectedCollection, setSelectedCollection] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Form state
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     displayStyle: "grid",
   });
 
-  // Selected products for adding to collection
   const [selectedProducts, setSelectedProducts] = useState([]);
 
   const fetchCollections = async () => {
@@ -47,12 +37,12 @@ const AdminProductCollections = () => {
       setIsLoading(true);
       const response = await axios.get(
         `${import.meta.env.VITE_NODE_URL}/api/product-collections/admin/get-collections`,
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setCollections(response.data);
     } catch (error) {
       console.error("Error fetching collections:", error);
-      toast.error("Failed to fetch collections");
+      toast.error("Failed to load collections");
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +52,7 @@ const AdminProductCollections = () => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_NODE_URL}/api/shop/admin/get-products`,
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setProducts(response.data);
     } catch (error) {
@@ -75,20 +65,18 @@ const AdminProductCollections = () => {
     fetchProducts();
   }, []);
 
+  // ---------------- COLLECTION FORM LOGIC ----------------
   const resetForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      displayStyle: "grid",
-    });
+    setFormData({ name: "", description: "", displayStyle: "grid" });
     setEditingCollection(null);
   };
 
-  const handleOpenModal = (collection = null) => {
+  const handleOpenModal = (collection = null, e = null) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     if (collection) {
       setEditingCollection(collection);
       setFormData({
-        name: collection.name,
+        name: collection.name || "",
         description: collection.description || "",
         displayStyle: collection.displayStyle || "grid",
       });
@@ -105,10 +93,7 @@ const AdminProductCollections = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) {
-      toast.error("Collection name is required");
-      return;
-    }
+    if (!formData.name.trim()) return toast.error("Collection name is required");
 
     try {
       setIsSubmitting(true);
@@ -117,19 +102,17 @@ const AdminProductCollections = () => {
         const response = await axios.put(
           `${import.meta.env.VITE_NODE_URL}/api/product-collections/update/${editingCollection._id}`,
           formData,
-          { withCredentials: true },
+          { withCredentials: true }
         );
         setCollections((prev) =>
-          prev.map((c) =>
-            c._id === editingCollection._id ? response.data.collection : c,
-          ),
+          prev.map((c) => (c._id === editingCollection._id ? response.data.collection : c))
         );
         toast.success("Collection updated successfully");
       } else {
         const response = await axios.post(
           `${import.meta.env.VITE_NODE_URL}/api/product-collections/create`,
           formData,
-          { withCredentials: true },
+          { withCredentials: true }
         );
         setCollections((prev) => [...prev, response.data.collection]);
         toast.success("Collection created successfully");
@@ -137,51 +120,52 @@ const AdminProductCollections = () => {
 
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving collection:", error);
       toast.error(error.response?.data?.message || "Failed to save collection");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this collection?")) {
-      return;
-    }
+  const handleDelete = async (id, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    if (!window.confirm("Permanently delete this collection? Products will remain in your inventory.")) return;
 
     try {
       await axios.delete(
         `${import.meta.env.VITE_NODE_URL}/api/product-collections/delete/${id}`,
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setCollections((prev) => prev.filter((c) => c._id !== id));
-      toast.success("Collection deleted successfully");
+      toast.success("Collection removed");
     } catch (error) {
-      console.error("Error deleting collection:", error);
       toast.error("Failed to delete collection");
     }
   };
 
-  const handleToggleActive = async (id) => {
+  const handleToggleActive = async (id, e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     try {
       const response = await axios.patch(
         `${import.meta.env.VITE_NODE_URL}/api/product-collections/toggle-active/${id}`,
         {},
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setCollections((prev) =>
-        prev.map((c) => (c._id === id ? response.data.collection : c)),
+        prev.map((c) => (c._id === id ? response.data.collection : c))
       );
-      toast.success(response.data.message);
+      toast.success("Visibility updated");
     } catch (error) {
-      console.error("Error toggling collection:", error);
-      toast.error("Failed to toggle collection status");
+      toast.error("Failed to toggle status");
     }
   };
 
-  const handleOpenProductsModal = (collection) => {
+  // ---------------- PRODUCT CURATION LOGIC ----------------
+  const handleOpenProductsModal = (collection, e = null) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     setSelectedCollection(collection);
-    setSelectedProducts(collection.products.map((p) => p._id));
+    // Safely extract IDs whether populated or not
+    const productIds = collection.products.map((p) => typeof p === 'object' ? p._id : p);
+    setSelectedProducts(productIds);
     setShowProductsModal(true);
   };
 
@@ -194,9 +178,7 @@ const AdminProductCollections = () => {
 
   const toggleProductSelection = (productId) => {
     setSelectedProducts((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId],
+      prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
   };
 
@@ -208,237 +190,202 @@ const AdminProductCollections = () => {
       const response = await axios.put(
         `${import.meta.env.VITE_NODE_URL}/api/product-collections/update/${selectedCollection._id}`,
         { products: selectedProducts },
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setCollections((prev) =>
-        prev.map((c) =>
-          c._id === selectedCollection._id ? response.data.collection : c,
-        ),
+        prev.map((c) => (c._id === selectedCollection._id ? response.data.collection : c))
       );
-      toast.success("Products updated successfully");
+      toast.success("Inventory linked successfully");
       handleCloseProductsModal();
     } catch (error) {
-      console.error("Error updating products:", error);
       toast.error("Failed to update products");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleRemoveProduct = async (collectionId, productId) => {
+  const handleRemoveProduct = async (collectionId, productId, e = null) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     try {
       const response = await axios.delete(
         `${import.meta.env.VITE_NODE_URL}/api/product-collections/remove-product/${collectionId}/${productId}`,
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setCollections((prev) =>
-        prev.map((c) =>
-          c._id === collectionId ? response.data.collection : c,
-        ),
+        prev.map((c) => (c._id === collectionId ? response.data.collection : c))
       );
-      toast.success("Product removed from collection");
+      toast.success("Product unlinked from collection");
     } catch (error) {
-      console.error("Error removing product:", error);
-      toast.error("Failed to remove product");
+      toast.error("Failed to unlink product");
     }
   };
 
-  const filteredProducts = products.filter(
-    (product) =>
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category?.name?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+      product.category?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [products, searchQuery]);
 
   const displayStyleIcons = {
-    grid: <LayoutGrid size={16} />,
-    carousel: <Rows size={16} />,
-    featured: <Star size={16} />,
+    grid: <LayoutGrid size={14} />,
+    carousel: <Rows size={14} />,
+    featured: <Star size={14} />,
   };
 
   return (
-    <div className="flex min-h-screen bg-[#FAF9F6] font-inter">
-      <Sidebar />
+    <div className="flex min-h-screen bg-warm-ivory/20 font-inter overflow-x-hidden">
+      {/* Mobile-Responsive Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <div className="flex-1 ml-[260px] flex flex-col min-h-screen">
-        <TopBar />
+      {/* Main Layout Area */}
+      <div className="flex-1 w-full md:ml-[260px] flex flex-col min-h-screen transition-all duration-300 min-w-0">
+        <TopBar onMenuClick={() => setIsSidebarOpen(true)} />
 
-        <main className="flex-1 p-8 overflow-y-auto">
-          <div className="max-w-[1600px] mx-auto">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className="font-playfair text-3xl font-bold text-[#0F0F0F] mb-2">
-                  Product Collections
-                </h1>
-                <p className="text-gray-500">
-                  Create and manage custom product collections for your shop
-                  page
-                </p>
+        <main className="flex-1 p-4 md:p-10 overflow-x-hidden custom-scrollbar">
+          <div className="max-w-7xl mx-auto space-y-8">
+            
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-charcoal-black/5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gold-accent/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <Package className="text-gold-accent" size={24} />
+                </div>
+                <div>
+                  <h1 className="font-playfair text-2xl md:text-3xl font-bold text-charcoal-black">Store Collections</h1>
+                  <p className="text-[10px] font-bold text-slate-gray uppercase tracking-[0.2em] mt-1">Curate product groups</p>
+                </div>
               </div>
               <button
-                onClick={() => handleOpenModal()}
-                className="bg-[#C9A24D] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#b08d42] transition-colors flex items-center gap-2 shadow-sm"
+                type="button"
+                onClick={(e) => handleOpenModal(null, e)}
+                className="w-full md:w-auto px-6 py-3.5 bg-charcoal-black text-gold-accent rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg flex items-center justify-center gap-2"
               >
-                <Plus size={20} />
-                New Collection
+                <Plus size={16} /> New Collection
               </button>
             </div>
 
             {/* Info Banner */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-              <p className="text-blue-800 text-sm">
-                <strong>Tip:</strong> Collections appear at the top of the shop
-                page before all products. Create collections like "Most Sold",
-                "User Favourites", "New Arrivals" to highlight specific
-                products.
-              </p>
+            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 flex items-start gap-4 shadow-sm">
+              <Info className="text-amber-500 shrink-0 mt-0.5" size={20} />
+              <div>
+                <h4 className="text-amber-800 font-bold text-sm mb-1">Visual Hierarchy Tip</h4>
+                <p className="text-amber-700/80 text-xs leading-relaxed">
+                  Active collections appear at the top of your shop page before the main inventory list. Create thematic groups like "Bestsellers" or "New Arrivals" to guide your clients.
+                </p>
+              </div>
             </div>
 
             {/* Collections List */}
             {isLoading ? (
-              <div className="flex justify-center py-20">
-                <Loader />
-              </div>
+              <div className="flex justify-center py-32"><Loader color="#C9A24D" /></div>
             ) : collections.length === 0 ? (
-              <div className="bg-white rounded-xl p-12 text-center shadow-sm">
-                <Package size={64} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  No Collections Yet
-                </h3>
-                <p className="text-gray-500 mb-6">
-                  Create your first collection to showcase featured products
-                </p>
+              <div className="bg-white rounded-[2rem] p-16 text-center shadow-sm border border-charcoal-black/5">
+                <div className="w-20 h-20 bg-warm-ivory/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Layers size={32} className="text-slate-gray/30" />
+                </div>
+                <h3 className="text-2xl font-playfair font-bold text-charcoal-black mb-2">No Collections Active</h3>
+                <p className="text-slate-gray text-sm mb-8 max-w-md mx-auto">Group your best products together to create visually stunning shop sections.</p>
                 <button
-                  onClick={() => handleOpenModal()}
-                  className="bg-[#C9A24D] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#b08d42] transition-colors inline-flex items-center gap-2"
+                  onClick={(e) => handleOpenModal(null, e)}
+                  className="px-6 py-3 bg-charcoal-black text-gold-accent rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg"
                 >
-                  <Plus size={20} />
-                  Create Collection
+                  Create First Collection
                 </button>
               </div>
             ) : (
-              <div className="space-y-6">
-                {collections.map((collection, index) => (
+              <div className="grid grid-cols-1 gap-6">
+                {collections.map((collection) => (
                   <motion.div
                     key={collection._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`bg-white rounded-xl shadow-sm overflow-hidden ${
-                      !collection.isActive ? "opacity-60" : ""
+                    className={`bg-white rounded-[2rem] shadow-sm border transition-all ${
+                      collection.isActive ? "border-charcoal-black/5 hover:border-gold-accent/30" : "border-charcoal-black/5 opacity-60 grayscale"
                     }`}
                   >
-                    {/* Collection Header */}
-                    <div className="p-6 border-b border-gray-100">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="p-2 bg-gray-100 rounded-lg cursor-grab">
-                            <GripVertical size={20} className="text-gray-400" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-3">
-                              <h3 className="font-semibold text-lg text-gray-800">
-                                {collection.name}
-                              </h3>
-                              <span
-                                className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  collection.isActive
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-gray-100 text-gray-500"
-                                }`}
-                              >
-                                {collection.isActive ? "Active" : "Hidden"}
-                              </span>
-                              <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 flex items-center gap-1">
-                                {displayStyleIcons[collection.displayStyle]}
-                                {collection.displayStyle}
-                              </span>
-                            </div>
-                            {collection.description && (
-                              <p className="text-gray-500 text-sm mt-1">
-                                {collection.description}
-                              </p>
-                            )}
-                            <p className="text-gray-400 text-xs mt-2">
-                              {collection.products.length} products
-                            </p>
-                          </div>
+                    {/* Collection Header Row */}
+                    <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-charcoal-black/5">
+                      <div className="flex items-start md:items-center gap-4 w-full md:w-auto">
+                        <div className="p-3 bg-warm-ivory/50 rounded-xl cursor-grab hover:bg-warm-ivory transition-colors shrink-0 hidden sm:block">
+                          <GripVertical size={20} className="text-slate-gray" />
                         </div>
+                        <div className="flex-1">
+                          <div className="flex flex-wrap items-center gap-3 mb-1">
+                            <h3 className="font-playfair text-xl md:text-2xl font-bold text-charcoal-black">{collection.name}</h3>
+                            <span className={`px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest ${collection.isActive ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-charcoal-black/5 text-slate-gray"}`}>
+                              {collection.isActive ? "Visible" : "Hidden"}
+                            </span>
+                            <span className="px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest bg-blue-50 text-blue-600 border border-blue-100 flex items-center gap-1.5">
+                              {displayStyleIcons[collection.displayStyle]} {collection.displayStyle}
+                            </span>
+                          </div>
+                          {collection.description && <p className="text-slate-gray text-xs md:text-sm line-clamp-1 mt-1 max-w-2xl">{collection.description}</p>}
+                        </div>
+                      </div>
 
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleOpenProductsModal(collection)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                            title="Manage Products"
-                          >
-                            <Plus size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleToggleActive(collection._id)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              collection.isActive
-                                ? "text-green-600 hover:bg-green-50"
-                                : "text-gray-400 hover:bg-gray-50"
-                            }`}
-                            title={collection.isActive ? "Hide" : "Show"}
-                          >
-                            {collection.isActive ? (
-                              <Eye size={18} />
-                            ) : (
-                              <EyeOff size={18} />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleOpenModal(collection)}
-                            className="p-2 text-gold-accent hover:bg-gold-accent/10 rounded-lg transition-colors"
-                            title="Edit"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(collection._id)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
+                      {/* Action Bar */}
+                      <div className="flex items-center gap-2 w-full md:w-auto pt-2 md:pt-0">
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenProductsModal(collection, e)}
+                          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-warm-ivory/50 text-charcoal-black hover:bg-gold-accent hover:text-white rounded-xl transition-colors text-[10px] font-bold uppercase tracking-widest"
+                        >
+                          <Plus size={14} /> Link Products
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleToggleActive(collection._id, e)}
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                            collection.isActive ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                          }`}
+                          title={collection.isActive ? "Hide Collection" : "Show Collection"}
+                        >
+                          {collection.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                        <button type="button" onClick={(e) => handleOpenModal(collection, e)} className="w-10 h-10 rounded-xl bg-charcoal-black/5 text-charcoal-black hover:bg-charcoal-black hover:text-gold-accent transition-colors flex items-center justify-center">
+                          <Edit2 size={14} />
+                        </button>
+                        <button type="button" onClick={(e) => handleDelete(collection._id, e)} className="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center">
+                          <Trash2 size={14} />
+                        </button>
                       </div>
                     </div>
 
-                    {/* Products Grid */}
-                    {collection.products.length > 0 && (
-                      <div className="p-6 bg-gray-50">
+                    {/* Linked Products Grid */}
+                    <div className="p-6 md:p-8 bg-warm-ivory/10">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-gray">Linked Inventory ({collection.products.length})</span>
+                      </div>
+                      
+                      {collection.products.length > 0 ? (
                         <div className="flex flex-wrap gap-3">
                           {collection.products.map((product) => (
-                            <div
-                              key={product._id}
-                              className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200 group"
-                            >
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-8 h-8 rounded object-cover"
-                              />
-                              <span className="text-sm font-medium text-gray-700 max-w-[150px] truncate">
-                                {product.name}
-                              </span>
+                            <div key={product._id} className="flex items-center gap-3 bg-white pl-2 pr-3 py-2 rounded-xl border border-charcoal-black/10 shadow-sm group hover:border-gold-accent/50 transition-colors">
+                              <div className="w-8 h-8 rounded-md overflow-hidden bg-warm-ivory shrink-0">
+                                {product.image && <img src={product.image} alt={product.name} className="w-full h-full object-cover" />}
+                              </div>
+                              <div className="flex flex-col max-w-[140px]">
+                                <span className="text-[11px] font-bold text-charcoal-black truncate">{product.name}</span>
+                                <span className="text-[9px] uppercase tracking-widest text-slate-gray truncate">{product.category?.name || "Product"}</span>
+                              </div>
                               <button
-                                onClick={() =>
-                                  handleRemoveProduct(
-                                    collection._id,
-                                    product._id,
-                                  )
-                                }
-                                className="opacity-0 group-hover:opacity-100 p-1 text-red-500 hover:bg-red-50 rounded transition-all"
+                                type="button"
+                                onClick={(e) => handleRemoveProduct(collection._id, product._id, e)}
+                                className="w-6 h-6 rounded-full bg-warm-ivory flex items-center justify-center text-slate-gray hover:text-red-500 hover:bg-red-50 transition-colors ml-1"
                               >
-                                <X size={14} />
+                                <X size={12} />
                               </button>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="p-5 rounded-xl border-2 border-dashed border-charcoal-black/10 bg-white text-center flex flex-col items-center justify-center text-sm text-slate-gray/60">
+                          <Package size={24} className="mb-2 text-slate-gray/30" />
+                          <span>Collection is empty. Click "Link Products" to curate.</span>
+                        </div>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -447,257 +394,151 @@ const AdminProductCollections = () => {
         </main>
       </div>
 
-      {/* Create/Edit Collection Modal */}
+      {/* ---------------- CREATE/EDIT COLLECTION MODAL ---------------- */}
       <AnimatePresence>
         {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={handleCloseModal}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-[#0F0F0F] font-playfair">
-                  {editingCollection ? "Edit Collection" : "Create Collection"}
-                </h2>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={handleCloseModal} className="absolute inset-0 bg-charcoal-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+              
+              <div className="p-6 md:p-8 border-b border-charcoal-black/5 bg-warm-ivory/30 flex justify-between items-center shrink-0">
+                <div>
+                  <h2 className="font-playfair text-2xl font-bold text-charcoal-black">{editingCollection ? "Edit Configuration" : "New Collection"}</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-gray mt-1">Define layout behavior</p>
+                </div>
+                <button type="button" onClick={handleCloseModal} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-gray hover:text-red-500 transition-colors shadow-sm"><X size={16} /></button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Collection Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="e.g. Most Sold, User Favourites"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A24D] focus:border-transparent outline-none"
-                    required
-                  />
+              <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-charcoal-black ml-1">Collection Title <span className="text-red-500">*</span></label>
+                  <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. Wedding Bestsellers" className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all text-charcoal-black" required />
                 </div>
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    placeholder="A short description for this collection"
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A24D] focus:border-transparent outline-none resize-none"
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-charcoal-black ml-1">Short Description</label>
+                  <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Optional context..." rows={3} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all resize-none text-charcoal-black" />
                 </div>
 
-                {/* Display Style */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Display Style
-                  </label>
-                  <div className="flex gap-3">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-charcoal-black ml-1">Presentation Style</label>
+                  <div className="grid grid-cols-3 gap-3">
                     {[
                       { value: "grid", label: "Grid", icon: LayoutGrid },
-                      { value: "carousel", label: "Carousel", icon: Rows },
-                      { value: "featured", label: "Featured", icon: Star },
+                      { value: "carousel", label: "Swipe", icon: Rows },
+                      { value: "featured", label: "Hero", icon: Star },
                     ].map((style) => (
                       <button
                         key={style.value}
                         type="button"
-                        onClick={() =>
-                          setFormData({
-                            ...formData,
-                            displayStyle: style.value,
-                          })
-                        }
-                        className={`flex-1 p-3 rounded-lg border-2 transition-all flex flex-col items-center gap-1 ${
-                          formData.displayStyle === style.value
-                            ? "border-[#C9A24D] bg-[#C9A24D]/10"
-                            : "border-gray-200 hover:border-gray-300"
+                        onClick={() => setFormData({ ...formData, displayStyle: style.value })}
+                        className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${
+                          formData.displayStyle === style.value ? "border-gold-accent bg-gold-accent/5 text-gold-accent shadow-sm" : "border-charcoal-black/10 text-slate-gray hover:bg-warm-ivory"
                         }`}
                       >
-                        <style.icon
-                          size={20}
-                          className={
-                            formData.displayStyle === style.value
-                              ? "text-[#C9A24D]"
-                              : "text-gray-400"
-                          }
-                        />
-                        <span
-                          className={`text-sm ${
-                            formData.displayStyle === style.value
-                              ? "text-[#C9A24D] font-medium"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          {style.label}
-                        </span>
+                        <style.icon size={20} />
+                        <span className="text-[10px] font-bold uppercase tracking-widest">{style.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
-
-                {/* Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 bg-[#C9A24D] text-white rounded-lg hover:bg-[#b08d42] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting
-                      ? "Saving..."
-                      : editingCollection
-                        ? "Update"
-                        : "Create"}
-                  </button>
-                </div>
               </form>
+
+              <div className="p-6 md:p-8 border-t border-charcoal-black/5 bg-white shrink-0 flex gap-3">
+                <button type="button" onClick={handleCloseModal} className="px-6 py-3.5 border border-charcoal-black/10 text-charcoal-black rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-warm-ivory transition-colors">Cancel</button>
+                <button type="submit" onClick={handleSubmit} disabled={isSubmitting} className="flex-1 py-3.5 bg-charcoal-black text-gold-accent rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50">
+                  {isSubmitting ? <Loader color="#C9A24D" size={14} /> : <Save size={14} />}
+                  {isSubmitting ? "Processing..." : "Save Configuration"}
+                </button>
+              </div>
+
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* Add Products Modal */}
+      {/* ---------------- CURATION MODAL ---------------- */}
       <AnimatePresence>
         {showProductsModal && selectedCollection && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={handleCloseProductsModal}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-xl max-h-[80vh] flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-6 border-b border-gray-100">
-                <h2 className="text-xl font-bold text-[#0F0F0F] font-playfair">
-                  Manage Products - {selectedCollection.name}
-                </h2>
-                <p className="text-gray-500 text-sm mt-1">
-                  Select products to add to this collection
-                </p>
-              </div>
-
-              {/* Search */}
-              <div className="p-4 border-b border-gray-100">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={handleCloseProductsModal} className="absolute inset-0 bg-charcoal-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-3xl shadow-2xl relative z-10 flex flex-col max-h-[85vh] overflow-hidden">
+              
+              {/* Curation Header & Search */}
+              <div className="p-6 md:p-8 border-b border-charcoal-black/5 bg-warm-ivory/30 shrink-0">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="font-playfair text-2xl font-bold text-charcoal-black">Curate Items</h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gold-accent mt-1">Target: {selectedCollection.name}</p>
+                  </div>
+                  <button type="button" onClick={handleCloseProductsModal} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-gray hover:text-red-500 transition-colors shadow-sm"><X size={16} /></button>
+                </div>
+                
                 <div className="relative">
-                  <Search
-                    size={20}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  />
+                  <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-gray" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search products..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#C9A24D] focus:border-transparent outline-none"
+                    placeholder="Search by product name or category..."
+                    className="w-full pl-12 pr-4 py-3.5 bg-white border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all text-charcoal-black shadow-sm"
                   />
                 </div>
               </div>
 
-              {/* Products List */}
-              <div className="flex-1 overflow-y-auto p-4">
-                <div className="space-y-2">
+              {/* Product List Grid */}
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-white custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {filteredProducts.map((product) => {
                     const isSelected = selectedProducts.includes(product._id);
                     return (
                       <div
                         key={product._id}
                         onClick={() => toggleProductSelection(product._id)}
-                        className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-all ${
-                          isSelected
-                            ? "bg-[#C9A24D]/10 border border-[#C9A24D]"
-                            : "bg-gray-50 border border-transparent hover:bg-gray-100"
+                        className={`flex items-center gap-4 p-3 rounded-xl cursor-pointer transition-all border-2 ${
+                          isSelected ? "border-gold-accent bg-gold-accent/5 shadow-sm" : "border-transparent bg-warm-ivory/20 hover:bg-warm-ivory/50"
                         }`}
                       >
-                        <div
-                          className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                            isSelected
-                              ? "bg-[#C9A24D] border-[#C9A24D]"
-                              : "border-gray-300"
-                          }`}
-                        >
-                          {isSelected && (
-                            <Check size={14} className="text-white" />
-                          )}
+                        <div className={`w-5 h-5 rounded flex items-center justify-center transition-all shrink-0 ${isSelected ? "bg-gold-accent" : "border border-charcoal-black/20 bg-white"}`}>
+                          {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
                         </div>
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-white shrink-0 border border-charcoal-black/5">
+                          {product.image && <img src={product.image} alt={product.name} className="w-full h-full object-cover" />}
+                        </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-gray-800 truncate">
-                            {product.name}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {product.category?.name} • ₹{product.price}
-                          </p>
+                          <h4 className="text-sm font-bold text-charcoal-black truncate">{product.name}</h4>
+                          <p className="text-[10px] uppercase tracking-widest text-slate-gray truncate mt-0.5">{product.category?.name || "Product"}</p>
                         </div>
-                        {product.isBestseller && (
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded font-medium">
-                            Bestseller
-                          </span>
-                        )}
                       </div>
                     );
                   })}
+                  {filteredProducts.length === 0 && (
+                    <div className="col-span-full py-10 text-center text-slate-gray">
+                      No products match your search.
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="p-4 border-t border-gray-100 flex items-center justify-between">
-                <p className="text-sm text-gray-500">
-                  {selectedProducts.length} products selected
+              {/* Curation Footer */}
+              <div className="p-6 md:p-8 border-t border-charcoal-black/5 bg-white shrink-0 flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-gray">
+                  <strong className="text-charcoal-black">{selectedProducts.length}</strong> Selected
                 </p>
                 <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={handleCloseProductsModal}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveProducts}
-                    disabled={isSubmitting}
-                    className="px-6 py-2 bg-[#C9A24D] text-white rounded-lg hover:bg-[#b08d42] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? "Saving..." : "Save Products"}
+                  <button type="button" onClick={handleCloseProductsModal} className="px-5 py-3 border border-charcoal-black/10 text-charcoal-black rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-warm-ivory transition-colors">Cancel</button>
+                  <button type="button" onClick={handleSaveProducts} disabled={isSubmitting} className="px-8 py-3 bg-charcoal-black text-gold-accent rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg disabled:opacity-50 flex items-center gap-2">
+                    {isSubmitting ? <Loader color="#C9A24D" size={14} /> : <Save size={14} />} 
+                    {isSubmitting ? "Linking..." : "Confirm Selection"}
                   </button>
                 </div>
               </div>
+
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
+
     </div>
   );
 };

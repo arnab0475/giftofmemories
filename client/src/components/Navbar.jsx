@@ -1,21 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { servicesData } from "../data/servicesData";
-import { useRef } from "react";
 import logo from "../assets/images/logo-negative-gom.png";
 import { useClientAuth } from "../context/ClientAuthContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { isClientLoggedIn, logout } = useClientAuth();
+  const navigate = useNavigate();
 
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const searchRef = useRef(null);
+  
+  // FIX 1: Ref attached to the entire nav so clicking the mobile input doesn't trigger a close
+  const navRef = useRef(null);
 
   const location = useLocation();
   const isServiceDetails =
@@ -48,16 +50,26 @@ const Navbar = () => {
   // Click outside to close search
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+      // If the click is outside the entire navbar, close the search
+      if (navRef.current && !navRef.current.contains(event.target)) {
         setIsSearchOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
     };
   }, []);
+
+  // Close search on route change
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setSearchQuery("");
+  }, [location.pathname]);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -68,24 +80,16 @@ const Navbar = () => {
     { name: "About", path: "/about" },
   ];
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Handle search - you can navigate to a search results page or filter content
-      console.log("Searching for:", searchQuery);
-      // Example: navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-    }
-  };
-
   return (
     <nav
+      ref={navRef}
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        isScrolled
-          ? "bg-warm-ivory/90 backdrop-blur-md shadow-sm py-4"
+        isScrolled || isSearchOpen
+          ? "bg-warm-ivory/95 backdrop-blur-md shadow-sm py-4"
           : "bg-transparent py-6"
       }`}
       style={
-        !isScrolled && !isServiceDetails
+        !isScrolled && !isServiceDetails && !isSearchOpen
           ? { textShadow: "0 1px 8px rgba(0,0,0,0.25)" }
           : {}
       }
@@ -95,7 +99,7 @@ const Navbar = () => {
         <Link
           to="/"
           className={`font-playfair text-2xl md:text-3xl font-bold tracking-tighter transition-colors duration-300 flex items-center gap-3 ${
-            !isScrolled && !isServiceDetails
+            !isScrolled && !isServiceDetails && !isSearchOpen
               ? "text-warm-ivory"
               : "text-charcoal-black"
           }`}
@@ -119,7 +123,7 @@ const Navbar = () => {
               className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 ${
                 location.pathname === link.path
                   ? "text-gold-accent"
-                  : !isScrolled && !isServiceDetails
+                  : !isScrolled && !isServiceDetails && !isSearchOpen
                     ? "text-warm-ivory/90 hover:text-gold-accent"
                     : "text-charcoal-black/80 hover:text-gold-accent"
               }`}
@@ -133,7 +137,7 @@ const Navbar = () => {
             <button
               onClick={logout}
               className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 mr-4 ${
-                !isScrolled && !isServiceDetails
+                !isScrolled && !isServiceDetails && !isSearchOpen
                   ? "text-warm-ivory/90 hover:text-gold-accent"
                   : "text-charcoal-black/80 hover:text-gold-accent"
               }`}
@@ -144,7 +148,7 @@ const Navbar = () => {
             <Link
               to="/login"
               className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 mr-4 ${
-                !isScrolled && !isServiceDetails
+                !isScrolled && !isServiceDetails && !isSearchOpen
                   ? "text-warm-ivory/90 hover:text-gold-accent"
                   : "text-charcoal-black/80 hover:text-gold-accent"
               }`}
@@ -153,21 +157,21 @@ const Navbar = () => {
             </Link>
           )}
 
-          {/* Search Bar */}
-          <div className="relative" ref={searchRef}>
+          {/* Desktop Search Bar */}
+          <div className="relative">
             {isSearchOpen ? (
               <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: "300px" }}
                 exit={{ opacity: 0, width: 0 }}
-                className="flex items-center bg-white/10 backdrop-blur-md rounded-full border border-gold-accent/50 overflow-hidden"
+                className="flex items-center bg-white/50 backdrop-blur-md rounded-full border border-gold-accent/50 overflow-hidden"
               >
                 <input
                   type="text"
                   placeholder="Search services..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full px-4 py-2 bg-transparent focus:outline-none text-sm placeholder-gray-400 ${
+                  className={`w-full px-4 py-2 bg-transparent focus:outline-none text-sm placeholder-gray-500 ${
                     !isScrolled && !isServiceDetails
                       ? "text-warm-ivory"
                       : "text-charcoal-black"
@@ -197,7 +201,7 @@ const Navbar = () => {
               </button>
             )}
 
-            {/* Search Results Dropdown */}
+            {/* Desktop Search Results Dropdown */}
             <AnimatePresence>
               {isSearchOpen && searchQuery && (
                 <motion.div
@@ -250,7 +254,7 @@ const Navbar = () => {
           <Link
             to="/contact"
             className={`px-6 py-2.5 font-inter text-sm uppercase tracking-widest transition-colors duration-300 ${
-              !isScrolled && !isServiceDetails
+              !isScrolled && !isServiceDetails && !isSearchOpen
                 ? "bg-gold-accent text-charcoal-black hover:bg-warm-ivory hover:text-gold-accent border border-warm-ivory"
                 : "bg-charcoal-black text-warm-ivory hover:bg-gold-accent hover:text-charcoal-black"
             }`}
@@ -259,41 +263,30 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Mobile Search Icon Only (hamburger menu removed - using FloatingDock instead) */}
+        {/* Mobile Search Icon Only */}
         <div className="flex items-center md:hidden gap-4">
-          {/* Mobile Search Icon */}
           <button
             onClick={() => setIsSearchOpen(!isSearchOpen)}
             className={`transition-colors duration-300 ${
-              !isScrolled && !isServiceDetails
+              !isScrolled && !isServiceDetails && !isSearchOpen
                 ? "text-warm-ivory/90 hover:text-gold-accent"
                 : "text-charcoal-black/80 hover:text-gold-accent"
             }`}
           >
-            <Search size={24} />
+            {isSearchOpen ? <X size={24} /> : <Search size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Search Overlay separate from menu if needed, or integrated. 
-           For now, let's keep it simple: if search is open on mobile, maybe show a full screen or top bar search. 
-           But since I put the search icon next to the menu, I should probably handle mobile search UI too. 
-           Let's refine the mobile part in a subsequent step if it gets too complex here. 
-           Actually, the easiest way for mobile is to just show an input when clicking the icon in the navbar itself or in the menu.
-           Let's just use the same `isSearchOpen` state but maybe render differently for mobile?
-           
-           Wait, I used the same ref and state. On mobile, `hidden md:flex` hides the desktop search.
-           The `Mobile Search Icon` I added above will toggle it. 
-           I need a place to show the input on mobile.
-           Let's add a mobile specific search bar below the logo/menu/search row when active.
-       */}
+      {/* Mobile Search Overlay */}
       <AnimatePresence>
         {isSearchOpen && (
           <motion.div
             className="md:hidden absolute top-full left-0 w-full bg-white p-4 shadow-lg border-t border-gray-100"
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
           >
             <div className="relative">
               <input
@@ -301,26 +294,25 @@ const Navbar = () => {
                 placeholder="Search services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-gold-accent text-charcoal-black"
-                autoFocus
+                // Removed autoFocus on mobile to prevent jarring keyboard popups until the user is ready
+                className="w-full px-4 py-3 pr-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-gold-accent text-charcoal-black text-base"
               />
-              <button
-                onClick={() => {
-                  setIsSearchOpen(false);
-                  setSearchQuery("");
-                }}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-              >
-                <X size={18} />
-              </button>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-charcoal-black"
+                >
+                  <X size={18} />
+                </button>
+              )}
             </div>
 
             {/* Mobile Results */}
             {searchQuery && (
-              <div className="mt-4 max-h-[60vh] overflow-y-auto">
+              <div className="mt-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
                 {searchResults.length > 0 ? (
-                  <div>
-                    <h3 className="text-xs font-inter uppercase tracking-widest text-gray-400 mb-2">
+                  <div className="pb-2">
+                    <h3 className="text-xs font-inter uppercase tracking-widest text-gray-400 mb-3 px-2">
                       Matches
                     </h3>
                     {searchResults.map((service) => (
@@ -329,26 +321,29 @@ const Navbar = () => {
                         to={`/services/${service.id}`}
                         onClick={() => {
                           setIsSearchOpen(false);
-                          setIsMobileMenuOpen(false); // also close menu if open
                           setSearchQuery("");
+                          // FIX 2: Removed setIsMobileMenuOpen(false) to prevent fatal crash
                         }}
                         className="flex items-center p-2 mb-2 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <img
                           src={service.image}
                           alt={service.title}
-                          className="w-10 h-10 object-cover rounded-md mr-3"
+                          className="w-12 h-12 object-cover rounded-md mr-4"
                         />
                         <div>
                           <p className="font-playfair font-medium text-charcoal-black text-sm">
                             {service.title}
+                          </p>
+                          <p className="text-xs text-gray-500 font-inter mt-0.5">
+                            {service.category}
                           </p>
                         </div>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-sm text-center py-4">
+                  <p className="text-gray-500 text-sm text-center py-6">
                     No results for "{searchQuery}"
                   </p>
                 )}

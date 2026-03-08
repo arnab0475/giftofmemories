@@ -23,18 +23,20 @@ const AnnouncementPopup = () => {
           // Check if this specific popup has been seen in this session
           const seenPopup = sessionStorage.getItem(`popup_seen_${data._id}`);
 
+          // FIX 1: Actually stop the popup from showing if they've seen it!
+          if (seenPopup) return; 
+
           if (!data.image && !data.message) {
             data.message =
               "Welcome! This is a placeholder for your announcement. Please update it in the Admin Panel.";
           }
 
           setPopupData(data);
+          
           // Wait for the specified delay before showing
           setTimeout(() => {
-            console.log("Showing popup now");
             setIsVisible(true);
           }, data.delay || 3000);
-          // }
         }
       } catch (error) {
         console.error("Failed to fetch popup:", error);
@@ -51,29 +53,38 @@ const AnnouncementPopup = () => {
     }
   };
 
-  if (!isVisible || !popupData) return null;
-
   return (
     <AnimatePresence>
-      {isVisible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-charcoal-black/60 backdrop-blur-sm">
+      {/* FIX 2: AnimatePresence requires the direct child to be a motion component to exit properly */}
+      {isVisible && popupData && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          // FIX 3: Clicking the dark backdrop now closes the modal
+          onClick={handleClose}
+          // Bumped z-index to 120 so it completely clears your Loading Screen and Navbar
+          className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-6 bg-charcoal-black/70 backdrop-blur-sm"
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ scale: 0.95, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.95, y: 20 }}
             transition={{ type: "spring", damping: 30, stiffness: 400 }}
-            className="relative w-full max-w-[600px] overflow-hidden rounded-xl shadow-2xl"
+            // Prevents clicks inside the popup from bubbling up to the backdrop and closing it
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-[600px] overflow-hidden rounded-2xl shadow-2xl bg-charcoal-black"
           >
-            {/* Close Button - positioned absolutely on top of everything */}
+            {/* Close Button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all duration-300 z-50 border border-white/10"
+              className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all duration-300 z-50 border border-white/20"
               aria-label="Close popup"
             >
               <X size={20} />
             </button>
 
-            {/* Clickable Container if link exists, otherwise just a div */}
+            {/* Clickable Container if link exists */}
             {popupData.link ? (
               <a
                 href={popupData.link}
@@ -89,7 +100,7 @@ const AnnouncementPopup = () => {
               </div>
             )}
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
@@ -97,6 +108,7 @@ const AnnouncementPopup = () => {
 
 const PopupContent = ({ data }) => {
   const handleWhatsAppClick = (e) => {
+    // Prevent the parent <a> tag (Learn More) from also triggering when WhatsApp is clicked
     e.preventDefault();
     e.stopPropagation();
     const message = encodeURIComponent(
@@ -111,37 +123,39 @@ const PopupContent = ({ data }) => {
         <img
           src={data.image}
           alt="Announcement"
-          className="w-full h-auto max-h-[80vh] object-cover"
+          // Added object-top so faces/important details aren't cut off if the image is tall
+          className="w-full h-auto max-h-[70vh] object-cover object-top" 
         />
       ) : (
-        // Fallback if no image, keep it looking nice
         <div className="w-full h-64 bg-warm-ivory flex items-center justify-center">
-          <p className="text-gray-400">No Image</p>
+          <p className="text-gray-400 font-inter text-sm tracking-widest uppercase">No Image</p>
         </div>
       )}
 
       {/* Bottom Section with Message and WhatsApp Button */}
-      <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-16 pb-8 px-8">
+      <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-20 pb-6 px-6 md:px-8">
         {data.message && (
-          <p className="text-white font-playfair text-xl md:text-2xl font-medium leading-relaxed tracking-tight drop-shadow-md">
+          <p className="text-white font-playfair text-xl md:text-3xl font-medium leading-tight tracking-tight drop-shadow-lg">
             {data.message}
           </p>
         )}
 
         {/* Actions Row */}
-        <div className="mt-4 flex items-center gap-4">
+        <div className="mt-4 md:mt-6 flex items-center gap-4">
+          
           {/* WhatsApp Button */}
           <button
             onClick={handleWhatsAppClick}
             aria-label="Contact on WhatsApp"
-            className="flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white p-3 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+            className="flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white p-3 md:p-3.5 rounded-full transition-all duration-300 shadow-lg shadow-[#25D366]/20 hover:shadow-xl hover:scale-105"
           >
             <IconBrandWhatsapp size={24} />
           </button>
 
           {/* Learn More Link */}
           {data.link && (
-            <div className="flex items-center gap-2 text-gold-accent text-sm font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            // FIX 4: Mobile fix! Opacity is 100 on mobile (md:opacity-0), revealing on hover only for desktop
+            <div className="flex items-center gap-2 text-gold-accent text-xs md:text-sm font-bold uppercase tracking-widest opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md">
               <span>Learn More</span>
               <ExternalLink size={14} />
             </div>

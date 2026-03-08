@@ -19,7 +19,8 @@ const ServiceHero = () => {
         const response = await axios.get(
           `${import.meta.env.VITE_NODE_URL}/api/page-hero/get/services`,
         );
-        setHeroData(response.data);
+        // Only update if we actually get data
+        if (response.data) setHeroData(response.data);
       } catch (error) {
         console.error("Error fetching service hero:", error);
       }
@@ -36,53 +37,61 @@ const ServiceHero = () => {
     <motion.section
       initial="initial"
       whileHover="hover"
-      className="relative h-[55vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
+      // FIX 3: Adjusted height for mobile (60vh) vs desktop (55vh) for better proportions
+      className="relative h-[60vh] md:h-[55vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
     >
-      {/* Background Image */}
-      <div className="absolute inset-0 w-full h-full">
+      {/* Background Image Container */}
+      <div className="absolute inset-0 w-full h-full z-0">
         <motion.img
           variants={{
-            initial: { scale: 1, opacity: 0.5, x: 0 },
+            initial: { scale: 1, opacity: 0.6 },
+            // FIX 1: Replaced the 'jittery x-axis shake' with a smooth cinematic zoom
             hover: {
-              scale: 1.02,
-              opacity: 1,
-              x: [0, 10, 0, -10, -5, 0],
-              transition: {
-                opacity: { duration: 0.5, ease: "easeInOut" },
-                x: { duration: 0.5, ease: "easeInOut" },
-              },
+              scale: 1.1,
+              opacity: 0.8,
+              transition: { duration: 2, ease: "easeOut" },
             },
           }}
           src={heroData.backgroundImage || serviceHeroBg}
           alt="Photography Services"
-          className="w-full h-full object-cover "
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-charcoal-black/60 to-charcoal-black/80" />
+        {/* FIX 2: Added a dual-layer gradient for better text contrast across all image types */}
+        <div className="absolute inset-0 bg-gradient-to-b from-charcoal-black/70 via-charcoal-black/40 to-charcoal-black/80" />
       </div>
 
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }} // Cinematic ease
         >
-          <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-warm-ivory mb-4 font-bold tracking-tight">
-            {heroData.title}
-          </h1>
-          <p className="font-inter text-lg text-muted-beige mb-6 font-light">
-            {heroData.description}
-          </p>
-
-          {/* Breadcrumbs */}
-          <div className="flex items-center justify-center space-x-2 text-sm font-inter uppercase tracking-widest text-warm-ivory/60">
-            <Link to="/" className="hover:text-gold-accent transition-colors">
+          {/* Breadcrumbs - Moved above Title for a more modern 'editorial' look */}
+          <div className="flex items-center justify-center space-x-2 text-[10px] md:text-xs font-inter uppercase tracking-[0.3em] text-gold-accent mb-4 md:mb-6 font-bold">
+            <Link to="/" className="hover:text-warm-ivory transition-colors">
               {breadcrumbParts[0]?.trim()}
             </Link>
-            <span className="text-gold-accent">•</span>
-            <span className="text-warm-ivory">
+            <span className="opacity-50 text-warm-ivory">•</span>
+            <span className="text-warm-ivory/80">
               {breadcrumbParts[1]?.trim()}
             </span>
           </div>
+
+          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl text-warm-ivory mb-6 font-bold tracking-tight drop-shadow-xl">
+            {heroData.title}
+          </h1>
+          
+          <p className="font-inter text-base md:text-xl text-muted-beige/90 mb-8 font-light max-w-2xl mx-auto leading-relaxed">
+            {heroData.description}
+          </p>
+
+          {/* Decorative Divider Line */}
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: "80px" }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="h-[1px] bg-gold-accent mx-auto"
+          />
         </motion.div>
       </div>
     </motion.section>

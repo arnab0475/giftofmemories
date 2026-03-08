@@ -41,15 +41,15 @@ const PageVideoSection = ({ pageType, title, subtitle }) => {
 
   return (
     <>
-      <section className="py-16 bg-gradient-to-b from-warm-ivory to-white">
-        <div className="container mx-auto px-6">
+      <section className="py-16 md:py-24 bg-gradient-to-b from-warm-ivory to-white">
+        <div className="container mx-auto px-4 md:px-6">
           {/* Section Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-10 md:mb-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-flex items-center gap-2 bg-gold-accent/10 text-gold-accent px-4 py-2 rounded-full text-sm font-medium mb-4"
+              className="inline-flex items-center gap-2 bg-gold-accent/10 text-gold-accent px-4 py-2 rounded-full text-xs md:text-sm font-medium mb-4"
             >
               <Video size={16} />
               {title || "Video Guides"}
@@ -59,7 +59,7 @@ const PageVideoSection = ({ pageType, title, subtitle }) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="font-playfair text-3xl md:text-4xl font-bold text-charcoal-black mb-4"
+              className="font-playfair text-3xl md:text-4xl font-bold text-charcoal-black mb-3 md:mb-4"
             >
               {subtitle || "Learn How It Works"}
             </motion.h2>
@@ -68,7 +68,7 @@ const PageVideoSection = ({ pageType, title, subtitle }) => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-gray-600 max-w-2xl mx-auto"
+              className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base px-2"
             >
               Watch our helpful video tutorials to understand our process better
             </motion.p>
@@ -109,13 +109,13 @@ const PageVideoSection = ({ pageType, title, subtitle }) => {
           ) : (
             // More than 3 videos - Carousel
             <div className="relative max-w-4xl mx-auto">
-              <div className="overflow-hidden">
+              <div className="overflow-hidden rounded-xl">
                 <motion.div
                   className="flex transition-transform duration-500 ease-out"
                   style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                 >
                   {videos.map((video) => (
-                    <div key={video._id} className="w-full flex-shrink-0 px-4">
+                    <div key={video._id} className="w-full flex-shrink-0 px-2 md:px-4">
                       <VideoCard
                         video={video}
                         onClick={() => setSelectedVideo(video)}
@@ -125,18 +125,18 @@ const PageVideoSection = ({ pageType, title, subtitle }) => {
                 </motion.div>
               </div>
 
-              {/* Carousel Navigation */}
+              {/* Carousel Navigation - Pushed inward on mobile so they don't bleed off screen */}
               <button
                 onClick={handlePrev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+                className="absolute left-4 md:-left-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-sm shadow-lg rounded-full flex items-center justify-center hover:bg-gold-accent hover:text-white transition-colors z-10"
               >
-                <ChevronLeft size={20} className="text-charcoal-black" />
+                <ChevronLeft size={20} className="text-charcoal-black hover:text-white" />
               </button>
               <button
                 onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors z-10"
+                className="absolute right-4 md:-right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/90 backdrop-blur-sm shadow-lg rounded-full flex items-center justify-center hover:bg-gold-accent hover:text-white transition-colors z-10"
               >
-                <ChevronRight size={20} className="text-charcoal-black" />
+                <ChevronRight size={20} className="text-charcoal-black hover:text-white" />
               </button>
 
               {/* Dots */}
@@ -145,11 +145,12 @@ const PageVideoSection = ({ pageType, title, subtitle }) => {
                   <button
                     key={index}
                     onClick={() => setCurrentIndex(index)}
-                    className={`w-2 h-2 rounded-full transition-all ${
+                    className={`h-2 rounded-full transition-all ${
                       index === currentIndex
                         ? "w-6 bg-gold-accent"
-                        : "bg-gray-300 hover:bg-gray-400"
+                        : "w-2 bg-gray-300 hover:bg-gray-400"
                     }`}
+                    aria-label={`Go to slide ${index + 1}`}
                   />
                 ))}
               </div>
@@ -165,54 +166,60 @@ const PageVideoSection = ({ pageType, title, subtitle }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-charcoal-black/95 backdrop-blur-sm z-[100] flex items-center justify-center p-4 md:p-8"
             onClick={() => setSelectedVideo(null)}
           >
+            {/* FIX 1: Mobile-safe Close Button */}
+            <button
+              onClick={() => setSelectedVideo(null)}
+              className="fixed top-4 right-4 md:absolute md:-top-12 md:right-0 text-white/70 hover:text-gold-accent transition-colors z-[110] p-2 bg-black/20 md:bg-transparent rounded-full"
+            >
+              <X size={28} />
+            </button>
+
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative w-full max-w-4xl"
+              className="relative w-full max-w-4xl flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button */}
-              <button
-                onClick={() => setSelectedVideo(null)}
-                className="absolute -top-12 right-0 text-white hover:text-gold-accent transition-colors"
-              >
-                <X size={28} />
-              </button>
-
               {/* Video Player */}
-              <div className="aspect-video bg-black rounded-xl overflow-hidden">
+              <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl w-full">
                 {selectedVideo.videoType === "youtube" ? (
                   <iframe
                     src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`}
                     className="w-full h-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
+                    title={selectedVideo.title || "Video"}
                   />
                 ) : (
                   <video
                     src={selectedVideo.videoUrl}
                     controls
                     autoPlay
+                    playsInline // FIX 2: Prevents iOS from overriding the player
                     className="w-full h-full object-contain"
                   />
                 )}
               </div>
 
-              {/* Video Info */}
-              <div className="mt-4 text-white">
-                <h3 className="font-playfair text-xl font-semibold">
-                  {selectedVideo.title}
-                </h3>
-                {selectedVideo.description && (
-                  <p className="text-gray-400 mt-2">
-                    {selectedVideo.description}
-                  </p>
-                )}
-              </div>
+              {/* Video Info - Added padding and max-height for mobile */}
+              {(selectedVideo.title || selectedVideo.description) && (
+                <div className="mt-4 md:mt-6 text-white px-2">
+                  {selectedVideo.title && (
+                    <h3 className="font-playfair text-lg md:text-2xl font-semibold text-warm-ivory">
+                      {selectedVideo.title}
+                    </h3>
+                  )}
+                  {selectedVideo.description && (
+                    <p className="text-white/70 mt-2 text-sm md:text-base font-inter max-h-32 overflow-y-auto custom-scrollbar">
+                      {selectedVideo.description}
+                    </p>
+                  )}
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
@@ -234,15 +241,21 @@ const VideoCard = ({ video, onClick }) => {
           <img
             src={video.thumbnailUrl}
             alt={video.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <video src={video.videoUrl} className="w-full h-full object-cover" />
+          <video 
+            src={video.videoUrl} 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            muted 
+            playsInline // FIX 3: Required for inline playback on iOS
+            preload="metadata" // Speeds up loading and grabs the first frame
+          />
         )}
 
         {/* Play Overlay */}
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity">
-          <div className="w-14 h-14 rounded-full bg-white/95 flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-lg">
+          <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/95 flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-lg">
             <Play
               size={24}
               className="text-gold-accent ml-1"
@@ -254,7 +267,7 @@ const VideoCard = ({ video, onClick }) => {
         {/* Type Badge */}
         {video.videoType === "youtube" && (
           <div className="absolute top-3 left-3">
-            <span className="px-2 py-1 rounded bg-red-600 text-white text-xs font-medium">
+            <span className="px-2 py-1 rounded bg-[#FF0000] text-white text-[10px] md:text-xs font-medium uppercase tracking-wide shadow-md">
               YouTube
             </span>
           </div>
@@ -262,12 +275,12 @@ const VideoCard = ({ video, onClick }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <h3 className="font-semibold text-charcoal-black group-hover:text-gold-accent transition-colors line-clamp-1">
+      <div className="p-4 md:p-5">
+        <h3 className="font-playfair font-semibold text-base md:text-lg text-charcoal-black group-hover:text-gold-accent transition-colors line-clamp-1">
           {video.title}
         </h3>
         {video.description && (
-          <p className="text-gray-500 text-sm mt-1 line-clamp-2">
+          <p className="text-gray-500 font-inter text-xs md:text-sm mt-1.5 line-clamp-2 leading-relaxed">
             {video.description}
           </p>
         )}

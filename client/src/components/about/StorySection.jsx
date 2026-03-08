@@ -26,62 +26,79 @@ const StorySection = () => {
 
   if (isLoading) {
     return (
-      <section className="py-20 bg-warm-ivory">
-        <div className="container mx-auto px-6 flex justify-center">
-          <Loader color="#C9A24D" />
-        </div>
+      <section className="py-20 md:py-32 bg-warm-ivory min-h-[60vh] flex items-center justify-center">
+        <Loader color="#C9A24D" />
       </section>
     );
   }
 
   return (
-    <section className="py-20 bg-warm-ivory">
-      <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
-          {/* Image Side */}
+    <section className="py-16 md:py-32 bg-warm-ivory overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 md:px-12 max-w-7xl">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+          
+          {/* 1. Image Side: Editorial Frame */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="w-full md:w-1/2 aspect-[4/5] bg-muted-beige rounded-2xl shadow-xl overflow-hidden relative"
+            initial={{ opacity: 0, y: 30 }} // Changed to Y for better mobile entry
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full lg:w-1/2 relative px-4 md:px-0"
           >
-            <img
-              src={storyData?.storyImage || "/about-us.jpg"}
-              alt="Our Story"
-              className="w-full h-full object-cover"
-            />
+            {/* Background Offset Frame */}
+            <div className="absolute inset-0 border border-gold-accent/30 rounded-3xl translate-x-3 translate-y-3 md:translate-x-6 md:translate-y-6 -z-10" />
+            
+            <div className="aspect-[4/5] bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10">
+              <img
+                src={storyData?.storyImage || "/about-us.jpg"}
+                alt="Our Story"
+                className="w-full h-full object-cover transition-transform duration-[2s] hover:scale-110"
+                onError={(e) => { e.target.src = "/placeholder.png"; }}
+              />
+            </div>
           </motion.div>
 
-          {/* Text Side */}
+          {/* 2. Text Side: Boutique Narrative */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="w-full md:w-1/2"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="w-full lg:w-1/2 flex flex-col justify-center text-center lg:text-left"
           >
             <div className="relative">
-              <div className="absolute -inset-4 bg-gradient-to-br from-warm-ivory via-gold-accent/20 to-muted-beige/100 backdrop-blur-sm rounded-xl shadow-sm" />
-              <h2 className="font-playfair text-3xl md:text-4xl font-bold text-charcoal-black mb-6 relative">
+              <span className="text-gold-accent font-bold text-[9px] md:text-xs uppercase tracking-[0.3em] mb-4 block">
+                Our Philosophy
+              </span>
+              
+              <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-charcoal-black mb-6 md:mb-8 leading-tight">
                 {storyData?.storyTitle || "Crafting Memories Since 2016"}
               </h2>
-              <div className="mb-8 relative">
+              
+              <div className="mb-8 md:mb-10 min-h-[100px]">
                 <TextGenerateEffect
-                  words={storyData?.storyContent || "Default story content..."}
-                  className="font-inter leading-relaxed text-lg"
-                  duration={0.7}
-                  appearingColor="#A67B5B" // Light brown/gold for appearing
-                  finalColor="#2C2C2C" // Dark charcoal for final
-                  containerClassName="p-6 rounded-xl"
+                  words={storyData?.storyContent || "Every frame tells a story. We believe in capturing the fleeting moments that define a lifetime..."}
+                  className="font-inter leading-relaxed text-sm sm:text-base md:text-lg text-slate-gray/90"
+                  // FIX: Reduced duration from 1.5 to 0.5 for much faster generation
+                  duration={0.5} 
+                  appearingColor="#C9A24D" 
+                  finalColor="#4A4A4A" 
                 />
               </div>
 
-              <div className="mt-10 relative">
-                <span className="font-playfair text-2xl text-gold-accent italic">
-                  {storyData?.storySignature || "- Gift of Memories Team"}
+              {/* Signature Reveal */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                // FIX: Reduced delay from 1.5 to 0.6 so it appears right after the fast text
+                transition={{ delay: 0.6, duration: 1 }} 
+                className="mt-6 md:mt-8 border-t border-charcoal-black/5 pt-6 md:pt-8"
+              >
+                <span className="font-playfair text-xl md:text-3xl text-gold-accent italic drop-shadow-sm block">
+                  {storyData?.storySignature || "— Gift of Memories Team"}
                 </span>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>

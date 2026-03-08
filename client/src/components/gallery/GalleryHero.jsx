@@ -1,57 +1,67 @@
 import { motion } from "framer-motion";
-import galleryHeroBg from "../../assets/images/gallery-hero.png";
 import { Link } from "react-router-dom";
+import galleryHeroBg from "../../assets/images/gallery-hero.png";
 
 const GalleryHero = () => {
   return (
     <motion.section
       initial="initial"
       whileHover="hover"
-      className="relative h-[55vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
+      // FIX 1: Increased mobile height to 60vh to prevent "squishing" on small screens
+      className="relative h-[60vh] md:h-[55vh] w-full overflow-hidden bg-charcoal-black flex items-center justify-center"
     >
-      {/* Background Image */}
-      <div className="absolute inset-0 w-full h-full">
+      {/* Background Image Container */}
+      <div className="absolute inset-0 w-full h-full z-0">
         <motion.img
           variants={{
-            initial: { scale: 1, opacity: 0.5, x: 0 },
+            initial: { scale: 1, opacity: 0.6 },
+            // FIX 2: Swapped the "shake" for a smooth, slow-motion zoom
             hover: {
-              scale: 1.02,
-              opacity: 1,
-              x: [0, 10, 0, -10, -5, 0],
-              transition: {
-                opacity: { duration: 0.5, ease: "easeInOut" },
-                x: { duration: 0.5, ease: "easeInOut" },
-              },
+              scale: 1.08,
+              opacity: 0.8,
+              transition: { duration: 3, ease: "easeOut" },
             },
           }}
           src={galleryHeroBg}
           alt="Photography Gallery"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-tr from-charcoal-black/80 to-charcoal-black/40" />
+        {/* Dual-layer gradient for better text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-charcoal-black/60 via-transparent to-charcoal-black/90" />
       </div>
 
       <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
         >
-          <h1 className="font-playfair text-4xl md:text-5xl lg:text-6xl text-warm-ivory mb-3 font-bold tracking-tight">
+          {/* FIX 3: Moved breadcrumbs ABOVE the title for an editorial look */}
+          <div className="flex items-center justify-center space-x-2 text-[10px] md:text-xs font-inter uppercase tracking-[0.3em] text-gold-accent mb-4 md:mb-6 font-bold">
+            <Link to="/" className="hover:text-warm-ivory transition-colors">
+              Gift of memories
+            </Link>
+            <span className="opacity-50 text-warm-ivory">•</span>
+            <span className="text-warm-ivory/80">Gallery</span>
+          </div>
+
+          <h1 className="font-playfair text-4xl md:text-6xl lg:text-7xl text-warm-ivory mb-6 font-bold tracking-tight drop-shadow-2xl">
             Our Work
           </h1>
-          <p className="font-inter text-lg text-muted-beige/80 mb-6 font-light max-w-2xl mx-auto">
+          
+          <p className="font-inter text-base md:text-xl text-muted-beige/90 mb-8 font-light max-w-2xl mx-auto leading-relaxed px-4">
             A glimpse into moments we’ve had the privilege to capture. Every
             image tells a unique story of love, joy, and connection.
           </p>
+
+          {/* Decorative element to anchor the design */}
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: "60px" }}
+            transition={{ delay: 0.6, duration: 1 }}
+            className="h-[1px] bg-gold-accent mx-auto"
+          />
         </motion.div>
-        <div className="flex items-center justify-center space-x-2 text-sm font-inter uppercase tracking-widest text-warm-ivory/60">
-          <Link to="/" className="hover:text-gold-accent transition-colors">
-            Gift of memories
-          </Link>
-          <span className="text-gold-accent">•</span>
-          <span className="text-warm-ivory">Gallery</span>
-        </div>
       </div>
     </motion.section>
   );

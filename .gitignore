@@ -42,3 +42,10 @@ server/.env
 *.njsproj
 *.sln
 *.sw?
+# =====================
+# WhatsApp Web Auth & Cache
+# =====================
+.wwebjs_auth/
+.wwebjs_cache/
+server/.wwebjs_auth/
+server/.wwebjs_cache/

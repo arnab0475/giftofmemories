@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Filter, X, ChevronDown } from "lucide-react";
+import { Filter, X, RotateCcw, ChevronRight } from "lucide-react";
 
-const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
+const ServiceFilter = ({ activeFilter, setActiveFilter, packages = [] }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const toggleRef = useRef(null);
   const filterRef = useRef(null);
@@ -28,30 +28,35 @@ const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
   };
 
   return (
-    <div className="sticky top-[80px] z-40 bg-warm-ivory border-b border-muted-beige/30 py-4 shadow-sm">
-      <div className="container mx-auto px-6 py-2">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    // FIX 2: Added backdrop-blur and standardized the top offset for consistency with your Navbar
+    <div className="sticky top-16 md:top-20 z-40 bg-warm-ivory/95 backdrop-blur-md border-b border-charcoal-black/5 py-3 md:py-4 shadow-sm transition-all duration-300">
+      <div className="container mx-auto px-4 md:px-12">
+        <div className="flex items-center justify-between gap-4">
+          
           {/* Quick Package Filter (Pills) */}
-          <div className="flex-1 overflow-x-auto no-scrollbar">
-            <div className="flex space-x-3 min-w-max">
+          <div className="relative flex-1 overflow-hidden">
+            {/* FIX 3: Added a subtle edge fade to hint that the row is scrollable on mobile */}
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-warm-ivory to-transparent z-10 pointer-events-none md:hidden" />
+            
+            <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
               <button
                 onClick={() => updateFilter("packageId", "all")}
-                className={`px-5 py-2 rounded-full text-sm font-inter font-semibold transition-all duration-300 border whitespace-nowrap ${
+                className={`px-5 py-2 rounded-full text-xs md:text-sm font-inter font-bold transition-all duration-300 border whitespace-nowrap uppercase tracking-wider ${
                   activeFilter.packageId === "all"
-                    ? "bg-gradient-to-r from-gold-accent to-[#D4AF5F] text-charcoal-black border-transparent shadow-md"
-                    : "bg-transparent text-slate-gray border-slate-gray/20 hover:border-gold-accent hover:text-gold-accent"
+                    ? "bg-charcoal-black text-gold-accent border-charcoal-black shadow-lg shadow-black/10"
+                    : "bg-white text-charcoal-black/60 border-charcoal-black/10 hover:border-gold-accent hover:text-gold-accent"
                 }`}
               >
-                All Packages
+                All
               </button>
               {packages.map((pkg) => (
                 <button
                   key={pkg._id}
                   onClick={() => updateFilter("packageId", pkg._id)}
-                  className={`px-5 py-2 rounded-full text-sm font-inter font-semibold transition-all duration-300 border whitespace-nowrap ${
+                  className={`px-5 py-2 rounded-full text-xs md:text-sm font-inter font-bold transition-all duration-300 border whitespace-nowrap uppercase tracking-wider ${
                     activeFilter.packageId === pkg._id
-                      ? "bg-gradient-to-r from-gold-accent to-[#D4AF5F] text-charcoal-black border-transparent shadow-md"
-                      : "bg-transparent text-slate-gray border-slate-gray/20 hover:border-gold-accent hover:text-gold-accent"
+                      ? "bg-charcoal-black text-gold-accent border-charcoal-black shadow-lg shadow-black/10"
+                      : "bg-white text-charcoal-black/60 border-charcoal-black/10 hover:border-gold-accent hover:text-gold-accent"
                   }`}
                 >
                   {pkg.title}
@@ -64,14 +69,14 @@ const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
           <button
             ref={toggleRef}
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-inter font-semibold transition-all duration-300 border ${
+            className={`flex items-center gap-2 px-4 md:px-6 py-2 rounded-full text-xs md:text-sm font-inter font-bold transition-all duration-300 border uppercase tracking-widest shrink-0 ${
               isFilterOpen
-                ? "bg-charcoal-black text-white border-charcoal-black"
-                : "bg-white text-charcoal-black border-gray-200 hover:border-gold-accent"
+                ? "bg-gold-accent text-charcoal-black border-gold-accent shadow-md"
+                : "bg-white text-charcoal-black border-charcoal-black/10 hover:border-gold-accent"
             }`}
           >
-            <Filter size={16} />
-            <span>Filters</span>
+            {isFilterOpen ? <X size={16} /> : <Filter size={16} />}
+            <span className="hidden sm:inline">Filters</span>
           </button>
         </div>
 
@@ -82,22 +87,21 @@ const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
               <div
                 ref={filterRef}
-                className="mt-4 p-6 bg-white rounded-xl shadow-lg border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-6"
+                className="mt-6 p-6 md:p-8 bg-white rounded-2xl shadow-2xl border border-charcoal-black/5 grid grid-cols-1 md:grid-cols-2 gap-8 mb-4"
               >
                 {/* Price Range */}
-                <div className="space-y-4">
-                  <h4 className="font-playfair font-semibold text-charcoal-black">
-                    Price Range
+                <div className="space-y-5">
+                  <h4 className="font-playfair font-bold text-xl text-charcoal-black">
+                    Investment Range
                   </h4>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className="relative flex-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
-                        ₹
-                      </span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-black/30 text-xs font-bold font-inter">₹</span>
                       <input
                         type="number"
                         placeholder="Min"
@@ -108,14 +112,12 @@ const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
                             activeFilter.priceRange[1],
                           ])
                         }
-                        className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gold-accent transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-charcoal-black/5 rounded-xl text-sm font-inter focus:outline-none focus:border-gold-accent transition-all"
                       />
                     </div>
-                    <span className="text-gray-400 font-medium">-</span>
+                    <span className="text-gray-300">—</span>
                     <div className="relative flex-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
-                        ₹
-                      </span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-black/30 text-xs font-bold font-inter">₹</span>
                       <input
                         type="number"
                         placeholder="Max"
@@ -126,56 +128,55 @@ const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
                             Number(e.target.value),
                           ])
                         }
-                        className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gold-accent transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full pl-7 pr-3 py-2.5 bg-gray-50 border border-charcoal-black/5 rounded-xl text-sm font-inter focus:outline-none focus:border-gold-accent transition-all"
                       />
                     </div>
                   </div>
-                  <div className="px-1 space-y-2">
+                  
+                  <div className="pt-2">
                     <input
                       type="range"
                       min="0"
                       max="500000"
                       step="5000"
                       value={activeFilter.priceRange[1]}
+                      // FIX 1: Corrected to keep the existing Min value when adjusting the Max slider
                       onChange={(e) =>
-                        updateFilter("priceRange", [0, Number(e.target.value)])
+                        updateFilter("priceRange", [activeFilter.priceRange[0], Number(e.target.value)])
                       }
-                      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-gold-accent hover:accent-[#D4AF5F] transition-all"
+                      className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-gold-accent"
                     />
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>₹0</span>
-                      <span>₹5L</span>
+                    <div className="flex justify-between text-[10px] text-slate-gray font-bold uppercase tracking-tighter mt-3">
+                      <span>Min: ₹{activeFilter.priceRange[0].toLocaleString()}</span>
+                      <span>Max: ₹{activeFilter.priceRange[1].toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Selected Package Info */}
-                <div className="space-y-4">
-                  <h4 className="font-playfair font-semibold text-charcoal-black">
-                    Selected Package
-                  </h4>
-                  <div className="bg-gradient-to-br from-gold-accent/10 to-gold-accent/5 border border-gold-accent/20 rounded-lg p-4">
-                    {activeFilter.packageId === "all" ? (
-                      <p className="text-sm text-slate-gray">
-                        Showing services from all packages
-                      </p>
-                    ) : (
-                      <div>
-                        <p className="font-semibold text-charcoal-black mb-1">
-                          {
-                            packages.find(
-                              (p) => p._id === activeFilter.packageId
-                            )?.title
-                          }
+                {/* Selected Package Details */}
+                <div className="flex flex-col justify-between space-y-4">
+                  <div>
+                    <h4 className="font-playfair font-bold text-xl text-charcoal-black mb-3">
+                      Current Selection
+                    </h4>
+                    <div className="bg-warm-ivory/50 border border-gold-accent/10 rounded-xl p-4 md:p-5">
+                      {activeFilter.packageId === "all" ? (
+                        <p className="text-sm font-inter text-slate-gray leading-relaxed">
+                          Currently viewing all photography and cinematography collections.
                         </p>
-                        <p className="text-sm text-slate-gray">
-                          {packages.find(
-                            (p) => p._id === activeFilter.packageId
-                          )?.description || "Custom package services"}
-                        </p>
-                      </div>
-                    )}
+                      ) : (
+                        <div>
+                          <p className="font-playfair font-bold text-charcoal-black text-lg mb-1">
+                            {packages.find(p => p._id === activeFilter.packageId)?.title}
+                          </p>
+                          <p className="text-xs md:text-sm font-inter text-slate-gray leading-relaxed line-clamp-2">
+                            {packages.find(p => p._id === activeFilter.packageId)?.description || "Custom collection details."}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  
                   <button
                     onClick={() => {
                       setActiveFilter({
@@ -183,9 +184,10 @@ const ServiceFilter = ({ activeFilter, setActiveFilter, packages }) => {
                         priceRange: [0, 500000],
                       });
                     }}
-                    className="w-full px-4 py-2 text-sm font-semibold text-gold-accent border border-gold-accent rounded-lg hover:bg-gold-accent hover:text-white transition-all duration-300"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-3 text-xs font-bold uppercase tracking-widest text-charcoal-black/40 hover:text-gold-accent border border-charcoal-black/5 hover:border-gold-accent rounded-xl transition-all duration-300"
                   >
-                    Reset All Filters
+                    <RotateCcw size={14} />
+                    Reset Filters
                   </button>
                 </div>
               </div>

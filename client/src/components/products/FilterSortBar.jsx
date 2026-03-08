@@ -1,72 +1,62 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 
 const FilterSortBar = ({
-  filters,
+  filters = [],
   activeFilter,
   onFilterChange,
-  sortOptions,
+  sortOptions = [],
   activeSort,
   onSortChange,
 }) => {
-  const [isSticky, setIsSticky] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setIsSticky(true);
-      } else {
-        setIsSticky(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
-    <>
-      {/* Spacer to prevent content jump when bar becomes fixed */}
-      {isSticky && <div className="h-[72px] md:h-[56px]" />}
-      <div
-        className={`w-full transition-all duration-300 ${
-          isSticky
-            ? "fixed top-[70px] left-0 right-0 shadow-lg bg-warm-ivory py-4 z-50"
-            : "relative py-8 bg-warm-ivory z-40"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          {/* Filters - Horizontal Scroll on Mobile */}
-          <div className="w-full md:w-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
-            <div className="flex gap-2">
-              {filters.map((filter) => (
+    // FIX 1: Swapped manual logic for CSS 'sticky'. 
+    // It's smoother, requires no JS scroll listeners, and needs no 'spacer' div.
+    <div className="sticky top-16 md:top-20 z-40 bg-warm-ivory/95 backdrop-blur-md border-b border-charcoal-black/5 py-4 transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 md:px-12 flex flex-col md:flex-row justify-between items-center gap-4">
+        
+        {/* Filters - With horizontal scroll hint */}
+        <div className="relative w-full md:w-auto overflow-hidden">
+          {/* Subtle mobile scroll fade indicator */}
+          <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-warm-ivory to-transparent z-10 pointer-events-none md:hidden" />
+          
+          <div className="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
+            {filters.map((filter) => {
+              const isActive = activeFilter === filter;
+              return (
                 <button
                   key={filter}
                   onClick={() => onFilterChange(filter)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 whitespace-nowrap border ${
-                    activeFilter === filter
-                      ? "bg-gold-accent text-charcoal-black border-gold-accent"
-                      : "bg-transparent text-slate-gray border-slate-gray/30 hover:border-gold-accent hover:text-charcoal-black"
+                  className={`relative px-5 py-2 rounded-full text-[11px] md:text-xs font-bold transition-colors duration-500 whitespace-nowrap uppercase tracking-widest ${
+                    isActive ? "text-charcoal-black" : "text-slate-gray hover:text-charcoal-black"
                   }`}
                 >
-                  {filter}
+                  {/* FIX 2: Added the 'Sliding Pill' animation for a premium feel */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeFilterPill"
+                      className="absolute inset-0 bg-gold-accent rounded-full shadow-md"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{filter}</span>
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
+        </div>
 
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2 text-sm text-slate-gray w-full md:w-auto justify-end relative">
-            <span className="hidden md:inline">Sort by:</span>
+        {/* Sort Dropdown - Bespoke Design */}
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+          <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-gray/60">
+            Sort By
+          </span>
+          <div className="relative group min-w-[160px]">
             <select
               value={activeSort}
               onChange={(e) => onSortChange(e.target.value)}
-              className="bg-white border border-slate-gray/30 rounded-lg px-3 py-2 focus:outline-none focus:border-gold-accent text-charcoal-black cursor-pointer font-inter appearance-none pr-8"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right 10px center",
-              }}
+              className="w-full bg-white border border-charcoal-black/5 rounded-xl pl-4 pr-10 py-2.5 text-xs font-bold uppercase tracking-wider text-charcoal-black cursor-pointer appearance-none focus:outline-none focus:border-gold-accent transition-all shadow-sm group-hover:shadow-md"
             >
               {sortOptions.map((option) => (
                 <option key={option} value={option}>
@@ -74,10 +64,14 @@ const FilterSortBar = ({
                 </option>
               ))}
             </select>
+            {/* Custom Icon replaces the hardcoded Data-URI SVG */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-gray group-hover:text-gold-accent transition-colors">
+              <ChevronDown size={14} strokeWidth={3} />
+            </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

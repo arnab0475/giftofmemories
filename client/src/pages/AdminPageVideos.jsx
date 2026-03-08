@@ -11,6 +11,9 @@ import {
   X,
   Upload,
   Play,
+  Film,
+  Layers,
+  Save
 } from "lucide-react";
 import Sidebar from "../components/admin/Sidebar";
 import TopBar from "../components/admin/TopBar";
@@ -22,9 +25,13 @@ const AdminPageVideos = () => {
   const [videos, setVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile Layout State
+  
+  // Modals
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showYoutubeModal, setShowYoutubeModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  
   const [activeFilter, setActiveFilter] = useState("all");
   const [editingVideo, setEditingVideo] = useState(null);
 
@@ -42,27 +49,11 @@ const AdminPageVideos = () => {
   const [youtubePageType, setYoutubePageType] = useState("services");
 
   const pageTypes = [
-    {
-      value: "services",
-      label: "Services Page",
-      description: "How to use our services",
-    },
+    { value: "services", label: "Services Page", description: "How to use our services" },
     { value: "shop", label: "Shop Page", description: "How to buy products" },
-    {
-      value: "booking",
-      label: "Booking Page",
-      description: "How to book services",
-    },
-    {
-      value: "service-details",
-      label: "Service Details",
-      description: "Service tutorials",
-    },
-    {
-      value: "product-details",
-      label: "Product Details",
-      description: "Product guides",
-    },
+    { value: "booking", label: "Booking Page", description: "How to book services" },
+    { value: "service-details", label: "Service Details", description: "Service tutorials" },
+    { value: "product-details", label: "Product Details", description: "Product guides" },
   ];
 
   const fetchVideos = async () => {
@@ -70,12 +61,12 @@ const AdminPageVideos = () => {
       setIsLoading(true);
       const response = await axios.get(
         `${import.meta.env.VITE_NODE_URL}/api/page-videos/admin/all`,
-        { withCredentials: true },
+        { withCredentials: true }
       );
       setVideos(response.data);
     } catch (error) {
       console.error("Error fetching videos:", error);
-      toast.error("Failed to fetch videos");
+      toast.error("Failed to load video library");
     } finally {
       setIsLoading(false);
     }
@@ -85,29 +76,23 @@ const AdminPageVideos = () => {
     fetchVideos();
   }, []);
 
+  // ---------------- HANDLERS ----------------
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith("video/")) {
-        toast.error("Please select a video file");
-        return;
+        return toast.error("Please select a valid video file");
       }
       setUploadFile(file);
-      const url = URL.createObjectURL(file);
-      setUploadPreview(url);
+      setUploadPreview(URL.createObjectURL(file));
     }
   };
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!uploadFile) {
-      toast.error("Please select a video file");
-      return;
-    }
-    if (!uploadTitle.trim()) {
-      toast.error("Please enter a title");
-      return;
-    }
+    if (!uploadFile) return toast.error("Please attach a video file");
+    if (!uploadTitle.trim()) return toast.error("Please enter a title");
 
     try {
       setIsUploading(true);
@@ -123,15 +108,14 @@ const AdminPageVideos = () => {
         {
           headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
-        },
+        }
       );
 
-      toast.success("Video uploaded successfully");
+      toast.success("Video published successfully");
       resetUploadModal();
       fetchVideos();
     } catch (error) {
-      console.error("Error uploading video:", error);
-      toast.error(error.response?.data?.message || "Failed to upload video");
+      toast.error("Upload failed");
     } finally {
       setIsUploading(false);
     }
@@ -139,14 +123,8 @@ const AdminPageVideos = () => {
 
   const handleYoutubeUpload = async (e) => {
     e.preventDefault();
-    if (!youtubeUrl.trim()) {
-      toast.error("Please enter a YouTube URL");
-      return;
-    }
-    if (!youtubeTitle.trim()) {
-      toast.error("Please enter a title");
-      return;
-    }
+    if (!youtubeUrl.trim()) return toast.error("Please enter a YouTube URL");
+    if (!youtubeTitle.trim()) return toast.error("Please enter a title");
 
     try {
       setIsUploading(true);
@@ -158,17 +136,14 @@ const AdminPageVideos = () => {
           description: youtubeDescription,
           pageType: youtubePageType,
         },
-        { withCredentials: true },
+        { withCredentials: true }
       );
 
-      toast.success("YouTube video added successfully");
+      toast.success("YouTube video integrated");
       resetYoutubeModal();
       fetchVideos();
     } catch (error) {
-      console.error("Error adding YouTube video:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to add YouTube video",
-      );
+      toast.error("Failed to add YouTube video");
     } finally {
       setIsUploading(false);
     }
@@ -187,50 +162,49 @@ const AdminPageVideos = () => {
           description: editingVideo.description,
           pageType: editingVideo.pageType,
         },
-        { withCredentials: true },
+        { withCredentials: true }
       );
 
-      toast.success("Video updated successfully");
+      toast.success("Settings updated");
       setShowEditModal(false);
       setEditingVideo(null);
       fetchVideos();
     } catch (error) {
-      console.error("Error updating video:", error);
-      toast.error("Failed to update video");
+      toast.error("Update failed");
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleToggleStatus = async (id) => {
+  const handleToggleStatus = async (id, e) => {
+    if (e) e.stopPropagation();
     try {
       await axios.patch(
         `${import.meta.env.VITE_NODE_URL}/api/page-videos/toggle-status/${id}`,
         {},
-        { withCredentials: true },
+        { withCredentials: true }
       );
-      toast.success("Video status updated");
+      toast.success("Visibility toggled");
       setVideos((prev) =>
-        prev.map((v) => (v._id === id ? { ...v, isActive: !v.isActive } : v)),
+        prev.map((v) => (v._id === id ? { ...v, isActive: !v.isActive } : v))
       );
     } catch (error) {
-      console.error("Error toggling status:", error);
       toast.error("Failed to update status");
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this video?")) return;
+  const handleDelete = async (id, e) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm("Permanently delete this video?")) return;
 
     try {
       await axios.delete(
         `${import.meta.env.VITE_NODE_URL}/api/page-videos/delete/${id}`,
-        { withCredentials: true },
+        { withCredentials: true }
       );
-      toast.success("Video deleted successfully");
+      toast.success("Video removed");
       setVideos((prev) => prev.filter((v) => v._id !== id));
     } catch (error) {
-      console.error("Error deleting video:", error);
       toast.error("Failed to delete video");
     }
   };
@@ -252,10 +226,7 @@ const AdminPageVideos = () => {
     setYoutubePageType("services");
   };
 
-  const filteredVideos =
-    activeFilter === "all"
-      ? videos
-      : videos.filter((v) => v.pageType === activeFilter);
+  const filteredVideos = activeFilter === "all" ? videos : videos.filter((v) => v.pageType === activeFilter);
 
   const getPageLabel = (type) => {
     const found = pageTypes.find((p) => p.value === type);
@@ -263,51 +234,53 @@ const AdminPageVideos = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#FAF9F6] font-inter">
-      <Sidebar />
+    <div className="flex min-h-screen bg-warm-ivory/20 font-inter overflow-x-hidden">
+      {/* Connected Mobile Sidebar */}
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <div className="flex-1 ml-[260px] flex flex-col min-h-screen">
-        <TopBar />
+      {/* Responsive Content Wrapper */}
+      <div className="flex-1 w-full md:ml-[260px] flex flex-col min-h-screen transition-all duration-300 min-w-0">
+        <TopBar onMenuClick={() => setIsSidebarOpen(true)} />
 
-        <main className="flex-1 p-8 overflow-y-auto">
-          <div className="max-w-[1600px] mx-auto">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className="font-playfair text-3xl font-bold text-[#0F0F0F] mb-2">
-                  Page Videos Management
-                </h1>
-                <p className="text-gray-500">
-                  Upload instructional videos for services, shop, and booking
-                  pages.
-                </p>
+        <main className="flex-1 p-4 md:p-10 overflow-x-hidden custom-scrollbar">
+          <div className="max-w-7xl mx-auto space-y-8">
+            
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-charcoal-black/5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gold-accent/10 rounded-2xl flex items-center justify-center shrink-0">
+                  <Film className="text-gold-accent" size={24} />
+                </div>
+                <div>
+                  <h1 className="font-playfair text-2xl md:text-3xl font-bold text-charcoal-black">Contextual Videos</h1>
+                  <p className="text-[10px] font-bold text-slate-gray uppercase tracking-[0.2em] mt-1">Manage page-specific tutorials & cinematics</p>
+                </div>
               </div>
-              <div className="flex gap-3">
+              
+              <div className="flex w-full md:w-auto gap-3">
                 <button
                   onClick={() => setShowYoutubeModal(true)}
-                  className="bg-red-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-sm"
+                  className="flex-1 md:flex-none px-5 py-3.5 bg-red-50 text-red-600 border border-red-100 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
-                  <Youtube size={20} />
-                  Add YouTube Video
+                  <Youtube size={16} /> Add YouTube
                 </button>
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="bg-[#C9A24D] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#b08d42] transition-colors flex items-center gap-2 shadow-sm"
+                  className="flex-1 md:flex-none px-6 py-3.5 bg-charcoal-black text-gold-accent rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg flex items-center justify-center gap-2"
                 >
-                  <Plus size={20} />
-                  Upload Video
+                  <Upload size={16} /> Upload MP4
                 </button>
               </div>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+            {/* Premium Filter Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
               <button
                 onClick={() => setActiveFilter("all")}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
+                className={`px-5 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${
                   activeFilter === "all"
-                    ? "bg-[#C9A24D] text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                    ? "bg-charcoal-black text-gold-accent shadow-md"
+                    : "bg-white border border-charcoal-black/5 text-slate-gray hover:bg-warm-ivory"
                 }`}
               >
                 All Pages
@@ -316,10 +289,10 @@ const AdminPageVideos = () => {
                 <button
                   key={page.value}
                   onClick={() => setActiveFilter(page.value)}
-                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
+                  className={`px-5 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all whitespace-nowrap ${
                     activeFilter === page.value
-                      ? "bg-[#C9A24D] text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                      ? "bg-charcoal-black text-gold-accent shadow-md"
+                      : "bg-white border border-charcoal-black/5 text-slate-gray hover:bg-warm-ivory"
                   }`}
                 >
                   {page.label}
@@ -329,516 +302,288 @@ const AdminPageVideos = () => {
 
             {/* Videos Grid */}
             {isLoading ? (
-              <div className="flex justify-center py-20">
-                <Loader />
-              </div>
+              <div className="flex justify-center py-32"><Loader color="#C9A24D" /></div>
             ) : filteredVideos.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-                <Video size={48} className="mx-auto text-gray-300 mb-4" />
-                <p className="text-gray-500 text-lg">No videos found</p>
-                <p className="text-gray-400 text-sm mt-1">
-                  Add videos to show instructional content on your pages
-                </p>
+              <div className="text-center py-24 bg-white rounded-[2rem] border border-dashed border-charcoal-black/10">
+                <Film size={48} className="mx-auto text-slate-gray/20 mb-4" />
+                <h3 className="text-xl font-playfair font-bold text-charcoal-black mb-1">No videos found</h3>
+                <p className="text-slate-gray text-sm">Upload or link tutorials for this section.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredVideos.map((video) => (
-                  <motion.div
-                    key={video._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`bg-white rounded-xl overflow-hidden shadow-sm border transition-all ${
-                      video.isActive
-                        ? "border-gray-200"
-                        : "border-red-200 opacity-60"
-                    }`}
-                  >
-                    {/* Thumbnail */}
-                    <div className="relative aspect-video bg-gray-100">
-                      {video.videoType === "youtube" ? (
-                        <img
-                          src={video.thumbnailUrl}
-                          alt={video.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <video
-                          src={video.videoUrl}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                          <Play size={20} className="text-[#0F0F0F] ml-1" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <AnimatePresence>
+                  {filteredVideos.map((video) => (
+                    <motion.div
+                      key={video._id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className={`bg-white rounded-2xl overflow-hidden shadow-sm border border-charcoal-black/5 group flex flex-col transition-all ${
+                        !video.isActive ? "grayscale opacity-70" : "hover:shadow-md"
+                      }`}
+                    >
+                      {/* Thumbnail Area */}
+                      <div className="relative aspect-video bg-warm-ivory overflow-hidden">
+                        {video.videoType === "youtube" ? (
+                          <img
+                            src={video.thumbnailUrl}
+                            alt={video.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                        ) : (
+                          <video
+                            src={video.videoUrl}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                        )}
+                        
+                        <div className="absolute inset-0 bg-charcoal-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px] pointer-events-none">
+                          <div className="w-12 h-12 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
+                            <Play size={20} className="text-charcoal-black ml-1" fill="currentColor" />
+                          </div>
                         </div>
-                      </div>
-                      {/* Type Badge */}
-                      <div className="absolute top-3 left-3">
-                        <span
-                          className={`px-2 py-1 rounded text-xs font-medium ${
-                            video.videoType === "youtube"
-                              ? "bg-red-600 text-white"
-                              : "bg-[#C9A24D] text-white"
-                          }`}
-                        >
-                          {video.videoType === "youtube"
-                            ? "YouTube"
-                            : "Uploaded"}
-                        </span>
-                      </div>
-                      {/* Status Badge */}
-                      {!video.isActive && (
-                        <div className="absolute top-3 right-3">
-                          <span className="px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-600">
-                            Inactive
+
+                        {/* Top Badges */}
+                        <div className="absolute top-3 left-3 flex gap-2">
+                          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest text-white shadow-sm backdrop-blur-md ${video.videoType === "youtube" ? "bg-red-600/90" : "bg-gold-accent/90"}`}>
+                            {video.videoType === "youtube" ? "YouTube" : "MP4 Upload"}
                           </span>
                         </div>
-                      )}
-                    </div>
 
-                    {/* Content */}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 className="font-semibold text-[#0F0F0F] line-clamp-1">
-                          {video.title}
-                        </h3>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 whitespace-nowrap">
-                          {getPageLabel(video.pageType)}
-                        </span>
+                        {!video.isActive && (
+                          <div className="absolute top-3 right-3">
+                            <span className="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest bg-red-500/90 text-white backdrop-blur-md shadow-sm flex items-center gap-1">
+                              <EyeOff size={10} /> Hidden
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      {video.description && (
-                        <p className="text-gray-500 text-sm line-clamp-2 mb-3">
-                          {video.description}
-                        </p>
-                      )}
 
-                      {/* Actions */}
-                      <div className="flex gap-2 pt-3 border-t border-gray-100">
-                        <button
-                          onClick={() => {
-                            setEditingVideo(video);
-                            setShowEditModal(true);
-                          }}
-                          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-sm"
-                        >
-                          <Edit2 size={14} />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(video._id)}
-                          className={`flex items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors text-sm ${
-                            video.isActive
-                              ? "bg-orange-100 text-orange-600 hover:bg-orange-200"
-                              : "bg-green-100 text-green-600 hover:bg-green-200"
-                          }`}
-                        >
-                          {video.isActive ? (
-                            <EyeOff size={14} />
-                          ) : (
-                            <Eye size={14} />
+                      {/* Content & Actions */}
+                      <div className="p-5 flex flex-col flex-1">
+                        <div className="mb-4 flex-1">
+                          <span className="text-[9px] font-bold uppercase tracking-widest text-slate-gray block mb-1">
+                            {getPageLabel(video.pageType)}
+                          </span>
+                          <h3 className="font-bold text-sm text-charcoal-black line-clamp-1 mb-1">
+                            {video.title}
+                          </h3>
+                          {video.description && (
+                            <p className="text-xs text-slate-gray line-clamp-2 leading-relaxed">
+                              {video.description}
+                            </p>
                           )}
-                        </button>
-                        <button
-                          onClick={() => handleDelete(video._id)}
-                          className="flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-sm"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        </div>
+
+                        <div className="flex gap-2 pt-4 border-t border-charcoal-black/5 mt-auto">
+                          <button
+                            onClick={() => { setEditingVideo(video); setShowEditModal(true); }}
+                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-warm-ivory/50 text-charcoal-black hover:bg-gold-accent hover:text-white transition-colors text-[10px] font-bold uppercase tracking-widest"
+                          >
+                            <Edit2 size={12} /> Edit
+                          </button>
+                          <button
+                            onClick={(e) => handleToggleStatus(video._id, e)}
+                            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-widest ${
+                              video.isActive ? "bg-amber-50 text-amber-600 hover:bg-amber-100" : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                            }`}
+                          >
+                            {video.isActive ? <><EyeOff size={12} /> Hide</> : <><Eye size={12} /> Show</>}
+                          </button>
+                          <button
+                            onClick={(e) => handleDelete(video._id, e)}
+                            className="w-10 flex items-center justify-center rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors shrink-0"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             )}
           </div>
         </main>
       </div>
 
-      {/* Upload Video Modal */}
+      {/* ---------------- UPLOAD MP4 MODAL (z-[100]) ---------------- */}
       <AnimatePresence>
         {showUploadModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => resetUploadModal()}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl w-full max-w-lg shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <h2 className="font-playfair text-xl font-bold text-[#0F0F0F]">
-                  Upload Video
-                </h2>
-                <button
-                  onClick={() => resetUploadModal()}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X size={20} />
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={resetUploadModal} className="absolute inset-0 bg-charcoal-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden">
+              
+              <div className="flex items-center justify-between p-6 md:p-8 border-b border-charcoal-black/5 bg-warm-ivory/30 shrink-0">
+                <div>
+                  <h2 className="font-playfair text-2xl font-bold text-charcoal-black">Upload MP4</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-gray mt-1">Direct server upload</p>
+                </div>
+                <button onClick={resetUploadModal} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-gray hover:text-red-500 transition-colors shadow-sm">
+                  <X size={16} />
                 </button>
               </div>
 
-              <form onSubmit={handleUpload} className="p-6 space-y-4">
-                {/* Video Upload */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Video File
-                  </label>
+              <form onSubmit={handleUpload} className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Video File <span className="text-red-500">*</span></label>
                   {uploadPreview ? (
-                    <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                      <video
-                        src={uploadPreview}
-                        controls
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setUploadFile(null);
-                          setUploadPreview(null);
-                        }}
-                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full"
-                      >
-                        <X size={16} />
+                    <div className="relative aspect-video bg-charcoal-black rounded-2xl overflow-hidden border border-charcoal-black/10 group shadow-sm max-h-56">
+                      <video src={uploadPreview} controls className="w-full h-full object-cover" />
+                      <button type="button" onClick={() => { setUploadFile(null); setUploadPreview(null); }} className="absolute top-3 right-3 px-3 py-1.5 bg-red-500 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 shadow-lg hover:bg-red-600 transition-colors z-10">
+                        <X size={14} /> Remove
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#C9A24D] transition-colors">
-                      <Upload size={32} className="text-gray-400 mb-2" />
-                      <span className="text-gray-500 text-sm">
-                        Click to upload video
-                      </span>
-                      <span className="text-gray-400 text-xs mt-1">
-                        MP4, MOV, AVI (max 100MB)
-                      </span>
-                      <input
-                        type="file"
-                        accept="video/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
+                    <label className="flex flex-col items-center justify-center w-full aspect-video max-h-56 border-2 border-dashed border-charcoal-black/10 rounded-2xl cursor-pointer hover:border-gold-accent hover:bg-gold-accent/5 transition-all bg-warm-ivory/20">
+                      <Upload size={28} className="text-gold-accent mb-3" />
+                      <span className="text-sm font-bold text-charcoal-black">Select Video File</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-gray mt-1">MP4, MOV (Max 100MB)</span>
+                      <input type="file" accept="video/*" onChange={handleFileChange} className="hidden" />
                     </label>
                   )}
                 </div>
 
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={uploadTitle}
-                    onChange={(e) => setUploadTitle(e.target.value)}
-                    placeholder="How to book a service"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A24D]"
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Title <span className="text-red-500">*</span></label>
+                  <input type="text" value={uploadTitle} onChange={(e) => setUploadTitle(e.target.value)} placeholder="e.g. How to book our services" className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all text-charcoal-black" />
                 </div>
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    value={uploadDescription}
-                    onChange={(e) => setUploadDescription(e.target.value)}
-                    placeholder="A step-by-step guide..."
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A24D] resize-none"
-                  />
-                </div>
-
-                {/* Page Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Display On
-                  </label>
-                  <select
-                    value={uploadPageType}
-                    onChange={(e) => setUploadPageType(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A24D]"
-                  >
-                    {pageTypes.map((page) => (
-                      <option key={page.value} value={page.value}>
-                        {page.label} - {page.description}
-                      </option>
-                    ))}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Target Page</label>
+                  <select value={uploadPageType} onChange={(e) => setUploadPageType(e.target.value)} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all text-charcoal-black cursor-pointer">
+                    {pageTypes.map((page) => <option key={page.value} value={page.value}>{page.label}</option>)}
                   </select>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isUploading}
-                  className="w-full bg-[#C9A24D] text-white py-3 rounded-lg font-medium hover:bg-[#b08d42] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isUploading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={18} />
-                      Upload Video
-                    </>
-                  )}
-                </button>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Description (Optional)</label>
+                  <textarea value={uploadDescription} onChange={(e) => setUploadDescription(e.target.value)} placeholder="Provide context..." rows={3} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all resize-none text-charcoal-black" />
+                </div>
               </form>
+
+              <div className="p-6 md:p-8 border-t border-charcoal-black/5 bg-white shrink-0 flex gap-3">
+                <button type="button" onClick={resetUploadModal} className="px-6 py-3.5 border border-charcoal-black/10 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-warm-ivory transition-all text-charcoal-black">Cancel</button>
+                <button type="button" onClick={handleUpload} disabled={isUploading} className="flex-1 py-3.5 bg-charcoal-black text-gold-accent rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+                  {isUploading ? <Loader color="#C9A24D" size={14} /> : <Upload size={14} />}
+                  {isUploading ? "Uploading..." : "Publish Video"}
+                </button>
+              </div>
+
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* YouTube Video Modal */}
+      {/* ---------------- YOUTUBE MODAL (z-[100]) ---------------- */}
       <AnimatePresence>
         {showYoutubeModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => resetYoutubeModal()}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl w-full max-w-lg shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <h2 className="font-playfair text-xl font-bold text-[#0F0F0F]">
-                  Add YouTube Video
-                </h2>
-                <button
-                  onClick={() => resetYoutubeModal()}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X size={20} />
-                </button>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={resetYoutubeModal} className="absolute inset-0 bg-charcoal-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-md overflow-hidden shadow-2xl relative z-10 flex flex-col max-h-[90vh]">
+              
+              <div className="p-6 md:p-8 border-b border-charcoal-black/5 bg-red-50 flex justify-between items-center shrink-0">
+                <div>
+                  <h2 className="font-playfair text-2xl font-bold text-charcoal-black">Link YouTube</h2>
+                  <p className="text-[10px] font-bold text-red-600 uppercase tracking-widest mt-1">Embed external cinematic</p>
+                </div>
+                <button onClick={resetYoutubeModal} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-gray hover:text-red-500 transition-colors shadow-sm"><X size={16} /></button>
               </div>
 
-              <form onSubmit={handleYoutubeUpload} className="p-6 space-y-4">
-                {/* YouTube URL */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    YouTube URL
-                  </label>
-                  <input
-                    type="text"
-                    value={youtubeUrl}
-                    onChange={(e) => setYoutubeUrl(e.target.value)}
-                    placeholder="https://www.youtube.com/watch?v=..."
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  />
+              <form onSubmit={handleYoutubeUpload} className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">YouTube URL <span className="text-red-500">*</span></label>
+                  <input type="url" value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-red-500 transition-all text-charcoal-black" required />
                 </div>
 
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={youtubeTitle}
-                    onChange={(e) => setYoutubeTitle(e.target.value)}
-                    placeholder="How to use our booking system"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Project Title <span className="text-red-500">*</span></label>
+                  <input type="text" value={youtubeTitle} onChange={(e) => setYoutubeTitle(e.target.value)} placeholder="e.g. Royal Heritage Wedding" className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all text-charcoal-black" required />
                 </div>
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description (Optional)
-                  </label>
-                  <textarea
-                    value={youtubeDescription}
-                    onChange={(e) => setYoutubeDescription(e.target.value)}
-                    placeholder="A helpful tutorial video..."
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
-                  />
-                </div>
-
-                {/* Page Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Display On
-                  </label>
-                  <select
-                    value={youtubePageType}
-                    onChange={(e) => setYoutubePageType(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  >
-                    {pageTypes.map((page) => (
-                      <option key={page.value} value={page.value}>
-                        {page.label} - {page.description}
-                      </option>
-                    ))}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Target Page</label>
+                  <select value={youtubePageType} onChange={(e) => setYoutubePageType(e.target.value)} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent text-charcoal-black cursor-pointer">
+                    {pageTypes.map((page) => <option key={page.value} value={page.value}>{page.label}</option>)}
                   </select>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isUploading}
-                  className="w-full bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isUploading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    <>
-                      <Youtube size={18} />
-                      Add YouTube Video
-                    </>
-                  )}
-                </button>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Description (Optional)</label>
+                  <textarea value={youtubeDescription} onChange={(e) => setYoutubeDescription(e.target.value)} placeholder="Briefly describe the cinematic..." rows={3} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all resize-none text-charcoal-black" />
+                </div>
               </form>
+
+              <div className="p-6 md:p-8 border-t border-charcoal-black/5 bg-white shrink-0 flex gap-3">
+                <button type="button" onClick={resetYoutubeModal} className="px-6 py-3.5 border border-charcoal-black/10 rounded-xl font-bold text-[11px] uppercase tracking-widest text-charcoal-black hover:bg-warm-ivory transition-all">Cancel</button>
+                <button type="submit" onClick={handleYoutubeUpload} disabled={isUploading} className="flex-1 py-3.5 bg-red-600 text-white rounded-xl font-bold text-[11px] uppercase tracking-widest shadow-lg hover:bg-red-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2">
+                  {isUploading ? <Loader color="#fff" size={14} /> : <Youtube size={14} />} 
+                  {isUploading ? "Linking..." : "Embed Video"}
+                </button>
+              </div>
+
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
-      {/* Edit Video Modal */}
+      {/* ---------------- EDIT MODAL (z-[100]) ---------------- */}
       <AnimatePresence>
         {showEditModal && editingVideo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-            onClick={() => {
-              setShowEditModal(false);
-              setEditingVideo(null);
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-xl w-full max-w-lg shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between p-6 border-b border-gray-100">
-                <h2 className="font-playfair text-xl font-bold text-[#0F0F0F]">
-                  Edit Video
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setEditingVideo(null);
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X size={20} />
-                </button>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setShowEditModal(false); setEditingVideo(null); }} className="absolute inset-0 bg-charcoal-black/60 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl relative z-10 flex flex-col max-h-[90vh] overflow-hidden">
+              
+              <div className="p-6 md:p-8 border-b border-charcoal-black/5 bg-warm-ivory/30 flex justify-between items-center shrink-0">
+                <div>
+                  <h2 className="font-playfair text-2xl font-bold text-charcoal-black">Edit Video Data</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-gray mt-1">Modify title and routing</p>
+                </div>
+                <button type="button" onClick={() => { setShowEditModal(false); setEditingVideo(null); }} className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-slate-gray hover:text-red-500 transition-colors shadow-sm"><X size={16} /></button>
               </div>
 
-              <form onSubmit={handleEdit} className="p-6 space-y-4">
-                {/* Preview */}
-                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
+              <form onSubmit={handleEdit} className="p-6 md:p-8 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+                
+                <div className="aspect-video bg-charcoal-black rounded-2xl overflow-hidden border border-charcoal-black/10 shadow-sm max-h-56">
                   {editingVideo.videoType === "youtube" ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${editingVideo.youtubeId}`}
-                      className="w-full h-full"
-                      allowFullScreen
-                    />
+                    <iframe src={`https://www.youtube.com/embed/${editingVideo.youtubeId}`} className="w-full h-full" allowFullScreen />
                   ) : (
-                    <video
-                      src={editingVideo.videoUrl}
-                      controls
-                      className="w-full h-full object-cover"
-                    />
+                    <video src={editingVideo.videoUrl} controls className="w-full h-full object-cover" />
                   )}
                 </div>
 
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={editingVideo.title}
-                    onChange={(e) =>
-                      setEditingVideo({
-                        ...editingVideo,
-                        title: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A24D]"
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Title</label>
+                  <input type="text" value={editingVideo.title} onChange={(e) => setEditingVideo({ ...editingVideo, title: e.target.value })} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all text-charcoal-black" />
                 </div>
 
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    value={editingVideo.description || ""}
-                    onChange={(e) =>
-                      setEditingVideo({
-                        ...editingVideo,
-                        description: e.target.value,
-                      })
-                    }
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A24D] resize-none"
-                  />
-                </div>
-
-                {/* Page Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Display On
-                  </label>
-                  <select
-                    value={editingVideo.pageType}
-                    onChange={(e) =>
-                      setEditingVideo({
-                        ...editingVideo,
-                        pageType: e.target.value,
-                      })
-                    }
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C9A24D]"
-                  >
-                    {pageTypes.map((page) => (
-                      <option key={page.value} value={page.value}>
-                        {page.label}
-                      </option>
-                    ))}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Target Page</label>
+                  <select value={editingVideo.pageType} onChange={(e) => setEditingVideo({ ...editingVideo, pageType: e.target.value })} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all text-charcoal-black cursor-pointer">
+                    {pageTypes.map((page) => <option key={page.value} value={page.value}>{page.label}</option>)}
                   </select>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isUploading}
-                  className="w-full bg-[#C9A24D] text-white py-3 rounded-lg font-medium hover:bg-[#b08d42] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isUploading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Changes"
-                  )}
-                </button>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-charcoal-black uppercase tracking-widest ml-1">Description</label>
+                  <textarea value={editingVideo.description || ""} onChange={(e) => setEditingVideo({ ...editingVideo, description: e.target.value })} rows={3} className="w-full px-5 py-3.5 bg-warm-ivory/30 border border-charcoal-black/10 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-gold-accent transition-all resize-none text-charcoal-black" />
+                </div>
               </form>
+
+              <div className="p-6 md:p-8 border-t border-charcoal-black/5 bg-white shrink-0 flex gap-3">
+                <button type="button" onClick={() => { setShowEditModal(false); setEditingVideo(null); }} className="px-6 py-3.5 border border-charcoal-black/10 rounded-xl font-bold text-[11px] uppercase tracking-widest text-charcoal-black hover:bg-warm-ivory transition-all">Cancel</button>
+                <button type="button" onClick={handleEdit} disabled={isUploading} className="flex-1 py-3.5 bg-charcoal-black text-gold-accent rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2">
+                  {isUploading ? <Loader color="#C9A24D" size={14} /> : <Save size={14} />} 
+                  {isUploading ? "Updating..." : "Save Changes"}
+                </button>
+              </div>
+
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
+
     </div>
   );
 };

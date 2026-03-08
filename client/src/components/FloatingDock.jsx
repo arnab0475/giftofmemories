@@ -1,13 +1,12 @@
 import { cn } from "../lib/utils";
-import { IconLayoutNavbarCollapse } from "@tabler/icons-react";
+import { Link } from "react-router-dom"; // CRITICAL: Use Link instead of <a>
 import {
   AnimatePresence,
   motion,
   useMotionValue,
   useSpring,
   useTransform,
-} from "motion/react";
-
+} from "framer-motion"; // Make sure this is "framer-motion", not "motion/react"
 import { useRef, useState } from "react";
 
 export const FloatingDock = ({ items, desktopClassName, mobileClassName }) => {
@@ -23,26 +22,27 @@ const MobileIconContainer = ({ title, icon, href }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={() => setIsHovered(true)}
       onTouchEnd={() => setTimeout(() => setIsHovered(false), 1500)}
-      className="relative"
+      className="relative shrink-0"
     >
       <motion.div
         animate={{
-          scale: isHovered ? 1.3 : 1,
+          scale: isHovered ? 1.2 : 1,
           y: isHovered ? -8 : 0,
         }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gold-accent/20"
+        // Scaled down to w-9 h-9 on mobile so 7 items can fit without overflowing
+        className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gold-accent/20"
       >
         <motion.div
-          animate={{ scale: isHovered ? 1.2 : 1 }}
+          animate={{ scale: isHovered ? 1.1 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="h-5 w-5"
+          className="h-4 w-4 sm:h-5 sm:w-5"
         >
           {icon}
         </motion.div>
@@ -53,13 +53,13 @@ const MobileIconContainer = ({ title, icon, href }) => {
             initial={{ opacity: 0, y: 5, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: 5, x: "-50%" }}
-            className="absolute -top-8 left-1/2 whitespace-nowrap rounded-md bg-charcoal-black px-2 py-1 text-xs text-white pointer-events-none"
+            className="absolute -top-8 left-1/2 whitespace-nowrap rounded-md bg-charcoal-black px-2 py-1 text-[10px] sm:text-xs text-white pointer-events-none drop-shadow-md"
           >
             {title}
           </motion.span>
         )}
       </AnimatePresence>
-    </a>
+    </Link>
   );
 };
 
@@ -70,7 +70,8 @@ const FloatingDockMobile = ({ items, className }) => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
       className={cn(
-        "flex md:hidden items-center gap-2 rounded-2xl bg-white/90 backdrop-blur-md px-3 py-3 shadow-lg border border-gray-200",
+        // Reduced gap-2 to gap-1.5, added max-w-[95vw] to prevent edge bleeding
+        "flex md:hidden items-center gap-1.5 sm:gap-2 rounded-full bg-white/90 backdrop-blur-md px-3 py-2 sm:py-3 shadow-lg border border-gray-200 max-w-[95vw] overflow-x-auto no-scrollbar",
         className,
       )}
     >
@@ -104,7 +105,6 @@ function IconContainer({ mouseX, title, icon, href }) {
 
   let distance = useTransform(mouseX, (val) => {
     let bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
-
     return val - bounds.x - bounds.width / 2;
   });
 
@@ -143,7 +143,7 @@ function IconContainer({ mouseX, title, icon, href }) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <a href={href}>
+    <Link to={href}>
       <motion.div
         ref={ref}
         style={{ width, height }}
@@ -157,7 +157,7 @@ function IconContainer({ mouseX, title, icon, href }) {
               initial={{ opacity: 0, y: 10, x: "-50%" }}
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 2, x: "-50%" }}
-              className="absolute -top-8 left-1/2 w-fit rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs whitespace-pre text-neutral-700 dark:border-neutral-900 dark:bg-neutral-800 dark:text-white"
+              className="absolute -top-8 left-1/2 w-fit rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs whitespace-pre text-neutral-700 dark:border-neutral-900 dark:bg-neutral-800 dark:text-white pointer-events-none drop-shadow-md"
             >
               {title}
             </motion.div>
@@ -170,6 +170,6 @@ function IconContainer({ mouseX, title, icon, href }) {
           {icon}
         </motion.div>
       </motion.div>
-    </a>
+    </Link>
   );
 }

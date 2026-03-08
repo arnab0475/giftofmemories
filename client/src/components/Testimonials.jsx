@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Quote, Star } from "lucide-react";
+import { Star } from "lucide-react";
 
 const defaultTestimonials = [
   {
@@ -60,69 +60,71 @@ const Testimonials = () => {
     fetchTestimonials();
   }, []);
 
-  // Duplicate testimonials to ensure seamless loop
-  const seamlessTestimonials = [
-    ...testimonials,
-    ...testimonials,
-    ...testimonials,
-  ];
+  // FIX 1: Duplicate exactly once to create a perfect 50% split for Framer Motion
+  const seamlessTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <section className="py-24 bg-charcoal-black text-warm-ivory relative overflow-hidden">
+    // Scaled down padding for mobile
+    <section className="py-16 md:py-24 bg-charcoal-black text-warm-ivory relative overflow-hidden">
+      
       {/* Header */}
-      <div className="container mx-auto px-6 text-center mb-16 relative z-10">
-        <div className="flex justify-center items-center gap-2 mb-4">
+      <div className="container mx-auto px-4 md:px-6 text-center mb-12 md:mb-16 relative z-10">
+        <div className="flex justify-center items-center gap-2 mb-3 md:mb-4">
           <div className="flex text-gold-accent">
             {[...Array(5)].map((_, i) => (
               <Star key={i} size={14} fill="currentColor" className="mr-0.5" />
             ))}
           </div>
-          <span className="text-xs font-inter tracking-widest text-muted-beige uppercase">
+          <span className="text-[10px] md:text-xs font-inter tracking-widest text-muted-beige uppercase font-semibold">
             Rated 4.9 Stars on Google
           </span>
         </div>
 
-        <h2 className="font-playfair text-4xl md:text-5xl text-warm-ivory mb-6 leading-tight">
+        <h2 className="font-playfair text-3xl sm:text-4xl md:text-5xl text-warm-ivory mb-4 md:mb-6 leading-tight px-2">
           Your feedback is what makes us{" "}
           <span className="italic text-gold-accent">better</span>
         </h2>
       </div>
 
       {/* Marquee Container */}
-      <div className="relative w-full overflow-hidden mask-linear-gradient">
+      {/* FIX 3: Replaced mask-linear-gradient with an inline Tailwind gradient for guaranteed edge-fading */}
+      <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
         <motion.div
-          className="flex gap-8 w-max"
-          animate={{ x: "-33.33%" }}
+          className="flex gap-6 md:gap-8 w-max"
+          // FIX 1 (Cont.): Animating exactly 50% guarantees a completely invisible reset
+          animate={{ x: "-50%" }}
           transition={{
-            duration: 30,
+            duration: 40, // Slightly slowed down so mobile users can read it easier
             repeat: Infinity,
             ease: "linear",
           }}
         >
           {seamlessTestimonials.map((testimonial, index) => (
             <div
-              key={`${testimonial.id}-${index}`}
-              className="w-[350px] md:w-[450px] p-8 shrink-0 select-none"
+              // Updated key to ensure no React rendering conflicts
+              key={`testimonial-${index}`}
+              // FIX 2: Sized down to 280px on small screens so they fit perfectly
+              className="w-[280px] sm:w-[350px] md:w-[450px] p-6 md:p-8 shrink-0 select-none bg-white/5 rounded-2xl border border-white/10"
             >
               {/* Stars */}
-              <div className="flex gap-1 mb-6 text-gold-accent">
+              <div className="flex gap-1 mb-4 md:mb-6 text-gold-accent">
                 {[...Array(STAR_COUNT)].map((_, i) => (
-                  <Star key={i} size={16} fill="currentColor" />
+                  <Star key={i} size={14} fill="currentColor" />
                 ))}
               </div>
 
               {/* Quote */}
-              <p className="font-inter text-lg leading-relaxed text-gray-300 font-light italic mb-8">
+              <p className="font-inter text-sm md:text-lg leading-relaxed text-gray-300 font-light italic mb-6 md:mb-8">
                 "{testimonial.text}"
               </p>
 
               {/* Author */}
               <div>
-                <h4 className="font-playfair text-xl text-warm-ivory mb-1">
+                <h4 className="font-playfair text-lg md:text-xl text-warm-ivory mb-1">
                   - {testimonial.author}
                 </h4>
                 {testimonial.role && (
-                  <span className="font-inter text-xs tracking-wider text-gray-500 uppercase">
+                  <span className="font-inter text-[10px] md:text-xs tracking-wider text-gray-500 uppercase">
                     {testimonial.role}
                   </span>
                 )}

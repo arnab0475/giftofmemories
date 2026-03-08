@@ -30,6 +30,12 @@ const BlogEditor = ({ blog, onSave, onCancel }) => {
       Color,
     ],
     content: blog?.content || "",
+    // FIX 3: Injecting Tailwind typography classes directly into ProseMirror
+    editorProps: {
+      attributes: {
+        class: "prose prose-sm sm:prose-base max-w-none focus:outline-none min-h-[350px] p-6 text-charcoal-black",
+      },
+    },
   });
 
   useEffect(() => {
@@ -42,6 +48,17 @@ const BlogEditor = ({ blog, onSave, onCancel }) => {
       }
     }
   }, [blog, editor]);
+
+  // FIX 1: Bulletproof Drag & Drop prevents accidental browser redirects
+  useEffect(() => {
+    const preventDefault = (e) => e.preventDefault();
+    window.addEventListener("dragover", preventDefault);
+    window.addEventListener("drop", preventDefault);
+    return () => {
+      window.removeEventListener("dragover", preventDefault);
+      window.removeEventListener("drop", preventDefault);
+    };
+  }, []);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -70,11 +87,9 @@ const BlogEditor = ({ blog, onSave, onCancel }) => {
   };
 
   const handleFile = (file) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
+    // FIX 2: Instant UI preview without blocking the main thread
+    const objectUrl = URL.createObjectURL(file);
+    setImagePreview(objectUrl);
 
     if (fileInputRef.current) {
       const dataTransfer = new DataTransfer();
@@ -91,7 +106,6 @@ const BlogEditor = ({ blog, onSave, onCancel }) => {
     e.preventDefault();
     const formData = new FormData(e.target);
 
-    // Automatically generate date if not present
     const date =
       blog?.date ||
       new Date().toLocaleDateString("en-US", {
@@ -117,51 +131,49 @@ const BlogEditor = ({ blog, onSave, onCancel }) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl mx-auto max-h-[90vh] overflow-y-auto no-scrollbar"
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ type: "spring", damping: 25, stiffness: 300 }}
+      className="bg-warm-ivory rounded-[2rem] shadow-2xl p-6 md:p-10 w-full max-w-5xl mx-auto max-h-[90vh] overflow-y-auto custom-scrollbar border border-charcoal-black/5"
     >
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-playfair font-bold text-gray-800">
-          {blog ? "Edit Blog Post" : "Create New Blog Post"}
+      <div className="flex justify-between items-center mb-8 border-b border-charcoal-black/10 pb-4">
+        <h2 className="text-3xl font-playfair font-bold text-charcoal-black">
+          {blog ? "Edit Journal Entry" : "Create Journal Entry"}
         </h2>
         <button
           onClick={onCancel}
-          className="text-gray-500 hover:text-red-500 transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-charcoal-black hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm"
         >
-          <X size={24} />
+          <X size={20} strokeWidth={2.5} />
         </button>
       </div>
 
-      <form
-        onSubmit={handleSave}
-        className="space-y-6"
-        encType="multipart/form-data"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title
+      <form onSubmit={handleSave} className="space-y-8" encType="multipart/form-data">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="md:col-span-2 space-y-2">
+            <label className="block text-[11px] font-bold text-charcoal-black uppercase tracking-widest">
+              Post Title
             </label>
             <input
               type="text"
               name="title"
               defaultValue={blog?.title}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C9A24D] focus:border-transparent outline-none"
+              placeholder="A beautiful autumn wedding..."
+              className="w-full px-5 py-4 bg-white border border-charcoal-black/10 rounded-xl focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-playfair text-xl text-charcoal-black placeholder:text-slate-gray/40"
             />
           </div>
 
           {/* Image Upload Section */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Featured Image
+          <div className="space-y-2">
+            <label className="block text-[11px] font-bold text-charcoal-black uppercase tracking-widest">
+              Featured Photography
             </label>
             <div
-              className={`relative border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center transition-colors cursor-pointer min-h-[150px] ${
+              className={`relative border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center transition-all duration-300 cursor-pointer min-h-[220px] overflow-hidden ${
                 dragActive
-                  ? "border-[#C9A24D] bg-[#C9A24D]/10"
-                  : "border-gray-300 hover:border-[#C9A24D]"
+                  ? "border-gold-accent bg-gold-accent/5 scale-[1.02]"
+                  : "border-charcoal-black/15 bg-white hover:border-gold-accent hover:bg-gold-accent/5"
               }`}
               onDragEnter={handleDrag}
               onDragLeave={handleDrag}
@@ -179,93 +191,91 @@ const BlogEditor = ({ blog, onSave, onCancel }) => {
               />
 
               {imagePreview ? (
-                <div className="relative w-full h-full flex flex-col items-center">
+                <div className="relative w-full h-full flex flex-col items-center group">
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="max-h-[200px] object-cover rounded-md shadow-sm mb-2"
+                    className="absolute inset-0 w-full h-full object-cover rounded-lg shadow-sm transition-transform duration-500 group-hover:scale-105"
                   />
-                  <p className="text-xs text-gray-500">
-                    Click or Drag to replace
-                  </p>
+                  <div className="absolute inset-0 bg-charcoal-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
+                    <p className="text-xs font-bold text-white uppercase tracking-widest bg-charcoal-black/50 px-4 py-2 rounded-full backdrop-blur-sm">
+                      Click to Replace
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center text-gray-500">
-                  <div className="bg-gray-100 p-3 rounded-full mb-2">
-                    <Upload size={24} />
+                <div className="flex flex-col items-center text-slate-gray">
+                  <div className="bg-warm-ivory p-4 rounded-full mb-4 shadow-sm text-gold-accent">
+                    <ImageIcon size={28} strokeWidth={1.5} />
                   </div>
-                  <p className="text-sm font-medium">
-                    Click to upload or drag and drop
+                  <p className="text-sm font-bold text-charcoal-black mb-1">
+                    Drag & Drop Image
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    SVG, PNG, JPG or GIF (max. 10MB)
+                  <p className="text-xs font-inter text-slate-gray/60">
+                    High-res JPG or PNG (max. 10MB)
                   </p>
                 </div>
               )}
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category
-            </label>
-            <select
-              name="category"
-              defaultValue={blog?.category || "Weddings"}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C9A24D] focus:border-transparent outline-none"
-            >
-              <option value="Weddings">Weddings</option>
-              <option value="Portraits">Portraits</option>
-              <option value="Events">Events</option>
-              <option value="Travel">Travel</option>
-            </select>
-          </div>
+          <div className="flex flex-col justify-between space-y-8">
+            <div className="space-y-2">
+              <label className="block text-[11px] font-bold text-charcoal-black uppercase tracking-widest">
+                Category
+              </label>
+              <select
+                name="category"
+                defaultValue={blog?.category || "Weddings"}
+                className="w-full px-5 py-4 bg-white border border-charcoal-black/10 rounded-xl focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-inter text-sm text-charcoal-black cursor-pointer appearance-none"
+              >
+                <option value="Weddings">Weddings</option>
+                <option value="Portraits">Portraits</option>
+                <option value="Events">Events</option>
+                <option value="Travel">Travel</option>
+              </select>
+            </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Excerpt (Short Description)
-            </label>
-            <textarea
-              name="excerpt"
-              defaultValue={blog?.excerpt}
-              rows={3}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#C9A24D] focus:border-transparent outline-none"
-            />
+            <div className="space-y-2 flex-grow">
+              <label className="block text-[11px] font-bold text-charcoal-black uppercase tracking-widest">
+                Excerpt (Preview Text)
+              </label>
+              <textarea
+                name="excerpt"
+                defaultValue={blog?.excerpt}
+                rows={4}
+                required
+                placeholder="A brief summary of this beautiful story..."
+                className="w-full h-[120px] px-5 py-4 bg-white border border-charcoal-black/10 rounded-xl focus:outline-none focus:border-gold-accent focus:ring-1 focus:ring-gold-accent transition-all font-inter text-sm text-charcoal-black placeholder:text-slate-gray/40 resize-none"
+              />
+            </div>
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Content
+        <div className="space-y-2">
+          <label className="block text-[11px] font-bold text-charcoal-black uppercase tracking-widest">
+            Journal Content
           </label>
-          <div className="border border-gray-300 rounded-md overflow-hidden bg-white text-black text-left blog-editor-params">
-            <RichTextEditor editor={editor} style={{ minHeight: "300px" }}>
-              <RichTextEditor.Toolbar sticky stickyOffset={0}>
+          {/* Custom Editor Wrapper */}
+          <div className="border border-charcoal-black/10 rounded-xl overflow-hidden bg-white text-black shadow-sm blog-editor-params">
+            <RichTextEditor editor={editor} className="border-0">
+              <RichTextEditor.Toolbar sticky stickyOffset={0} className="bg-warm-ivory border-b border-charcoal-black/10 p-2">
                 <RichTextEditor.ControlsGroup>
                   <RichTextEditor.Bold />
                   <RichTextEditor.Italic />
                   <RichTextEditor.Underline />
-                  <RichTextEditor.Strikethrough />
                   <RichTextEditor.ClearFormatting />
-                  <RichTextEditor.Highlight />
-                  <RichTextEditor.Code />
                 </RichTextEditor.ControlsGroup>
 
                 <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.H1 />
                   <RichTextEditor.H2 />
                   <RichTextEditor.H3 />
-                  <RichTextEditor.H4 />
+                  <RichTextEditor.Blockquote />
                 </RichTextEditor.ControlsGroup>
 
                 <RichTextEditor.ControlsGroup>
-                  <RichTextEditor.Blockquote />
-                  <RichTextEditor.Hr />
                   <RichTextEditor.BulletList />
                   <RichTextEditor.OrderedList />
-                  <RichTextEditor.Subscript />
-                  <RichTextEditor.Superscript />
                 </RichTextEditor.ControlsGroup>
 
                 <RichTextEditor.ControlsGroup>
@@ -276,50 +286,46 @@ const BlogEditor = ({ blog, onSave, onCancel }) => {
                 <RichTextEditor.ControlsGroup>
                   <RichTextEditor.AlignLeft />
                   <RichTextEditor.AlignCenter />
-                  <RichTextEditor.AlignJustify />
                   <RichTextEditor.AlignRight />
                 </RichTextEditor.ControlsGroup>
               </RichTextEditor.Toolbar>
 
-              <RichTextEditor.Content
-                className="min-h-[350px] p-4 cursor-text bg-white"
-                style={{ minHeight: "350px", cursor: "text" }}
-              />
+              <RichTextEditor.Content className="bg-white min-h-[400px]" />
             </RichTextEditor>
           </div>
         </div>
 
-        <div className="flex justify-end gap-4 pt-4">
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-4 pt-6 border-t border-charcoal-black/10">
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-8 py-4 border border-charcoal-black/10 rounded-xl text-charcoal-black font-bold text-xs uppercase tracking-widest hover:bg-white hover:shadow-sm transition-all"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-[#C9A24D] text-white rounded-md hover:bg-[#b08d42] transition-colors flex items-center gap-2"
+            className="px-8 py-4 bg-charcoal-black text-gold-accent rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gold-accent hover:text-charcoal-black transition-all shadow-lg hover:-translate-y-1 flex items-center gap-2"
           >
-            <Save size={18} />
-            {blog ? "Update Post" : "Publish Post"}
+            <Save size={16} />
+            {blog ? "Update Journal" : "Publish Journal"}
           </button>
         </div>
       </form>
+
+      {/* Scoped Styles for Mantine Override */}
       <style>{`
         .blog-editor-params .mantine-RichTextEditor-content {
-            min-height: 350px !important;
             background-color: white !important;
             cursor: text !important;
         }
-        .blog-editor-params .ProseMirror {
-            min-height: 350px !important;
-            padding: 1rem !important;
-            outline: none !important;
-        }
-        .mantine-RichTextEditor-root {
-            z-index: 1;
-            position: relative;
+        .blog-editor-params .ProseMirror p.is-editor-empty:first-child::before {
+            color: #94a3b8;
+            content: attr(data-placeholder);
+            float: left;
+            height: 0;
+            pointer-events: none;
         }
       `}</style>
     </motion.div>

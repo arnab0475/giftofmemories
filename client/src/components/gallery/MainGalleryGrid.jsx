@@ -1,129 +1,115 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Eye, Maximize2, Play } from "lucide-react";
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Eye, Maximize2 } from "lucide-react";
 import ImageLightbox from "./ImageLightbox";
 
 const MainGalleryGrid = ({ activeFilter, viewMode, items = [] }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
-  // Map DB items to component format
-  const mappedImages = items
-    // Gallery grid should show only images
-    .filter((item) => item?.type === "image")
-    .map((item) => ({
-      id: item._id,
-      src: item.url,
-      // Keep tags for filtering, but don't display them as alt/caption
-      category: item.tags?.[0] || "Uncategorized",
-      caption: "Gallery image",
-      type: item.type,
-      tags: item.tags || [],
-    }));
+  // FIX 1: Performance Optimization. Memoize the mapping and filtering 
+  // so it doesn't re-run on every hover/re-render.
+  const filteredImages = useMemo(() => {
+    const mapped = items
+      .filter((item) => item?.type === "image") // Strictly images for this grid
+      .map((item) => ({
+        id: item._id,
+        src: item.url,
+        category: item.tags?.[0] || "Uncategorized",
+        caption: item.title || "Gallery image",
+        type: item.type,
+        tags: item.tags || [],
+      }));
 
-  const filteredImages =
-    activeFilter === "All"
-      ? mappedImages
-      : mappedImages.filter(
-          (img) =>
-            img.tags.includes(activeFilter) || img.category === activeFilter
+    return activeFilter === "All"
+      ? mapped
+      : mapped.filter(
+          (img) => img.tags.includes(activeFilter) || img.category === activeFilter
         );
+  }, [items, activeFilter]);
 
-  const handleImageClick = (index) => {
-    setSelectedImageIndex(index);
-  };
-
-  const closeLightbox = () => {
-    setSelectedImageIndex(null);
-  };
-
-  const nextImage = () => {
-    setSelectedImageIndex((prev) => (prev + 1) % filteredImages.length);
-  };
-
-  const prevImage = () => {
-    setSelectedImageIndex(
-      (prev) => (prev - 1 + filteredImages.length) % filteredImages.length
-    );
-  };
+  const handleImageClick = (index) => setSelectedImageIndex(index);
+  const closeLightbox = () => setSelectedImageIndex(null);
+  const nextImage = () => setSelectedImageIndex((prev) => (prev + 1) % filteredImages.length);
+  const prevImage = () => setSelectedImageIndex((prev) => (prev - 1 + filteredImages.length) % filteredImages.length);
 
   return (
-    <section className="py-12 bg-warm-ivory min-h-screen">
-      <div className="container mx-auto px-6">
-        {/* Gallery Grid */}
-        <div
+    <section className="py-12 md:py-20 bg-warm-ivory min-h-screen">
+      <div className="container mx-auto px-4 md:px-12">
+        
+        {/* FIX 2: Layout Animation. Added 'layout' and 'AnimatePresence' 
+            to ensure cards slide into position when filtered. */}
+        <motion.div
+          layout
           className={
             viewMode === "masonry"
-              ? "columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
-              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              ? "columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6"
+              : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           }
         >
-          {filteredImages.map((image, index) => (
-            <motion.div
-              key={image.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="relative group break-inside-avoid overflow-hidden rounded-[14px] cursor-pointer"
-              onClick={() => handleImageClick(index)}
-            >
-              {image.type === "video" ? (
-                <div className="relative">
-                  <video
-                    src={image.src}
-                    className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                    muted
-                    loop
-                    playsInline
-                    onMouseOver={(e) => e.target.play()}
-                    onMouseOut={(e) => e.target.pause()}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="bg-black/30 p-3 rounded-full backdrop-blur-sm group-hover:opacity-0 transition-opacity">
-                      <Play className="text-white" size={24} fill="white" />
-                    </div>
-                  </div>
-                </div>
-              ) : (
+          <AnimatePresence mode="popLayout">
+            {filteredImages.map((image, index) => (
+              <motion.div
+                layout
+                key={image.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className={`relative group break-inside-avoid overflow-hidden rounded-2xl cursor-pointer bg-white shadow-sm hover:shadow-2xl transition-shadow duration-500 ${
+                  viewMode === "grid" ? "aspect-[4/5]" : "h-auto"
+                }`}
+                onClick={() => handleImageClick(index)}
+              >
                 <img
                   src={image.src}
                   alt={image.caption}
-                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
+                  // FIX 3: Object-cover ensures clean grids, scale-110 adds luxury feel
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   loading="lazy"
                 />
-              )}
 
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-charcoal-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
-                <div className="p-3 bg-warm-ivory/10 backdrop-blur-sm rounded-full text-warm-ivory border border-warm-ivory/20 hover:bg-gold-accent hover:text-charcoal-black hover:border-gold-accent transition-all">
-                  <Eye size={20} />
+                {/* Refined Luxury Hover Overlay */}
+                <div className="absolute inset-0 bg-charcoal-black/40 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center backdrop-blur-[2px]">
+                   <div className="flex space-x-3 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                      <div className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white border border-white/20 hover:bg-gold-accent hover:text-charcoal-black transition-colors">
+                        <Eye size={20} strokeWidth={1.5} />
+                      </div>
+                      <div className="p-3 bg-white/20 backdrop-blur-md rounded-full text-white border border-white/20 hover:bg-gold-accent hover:text-charcoal-black transition-colors">
+                        <Maximize2 size={20} strokeWidth={1.5} />
+                      </div>
+                   </div>
+                   {/* Optional: Show Category on Hover */}
+                   <span className="mt-4 text-[10px] text-warm-ivory/80 uppercase tracking-[0.2em] font-bold opacity-0 group-hover:opacity-100 transition-opacity delay-100">
+                     {image.category}
+                   </span>
                 </div>
-                <div className="p-3 bg-warm-ivory/10 backdrop-blur-sm rounded-full text-warm-ivory border border-warm-ivory/20 hover:bg-gold-accent hover:text-charcoal-black hover:border-gold-accent transition-all">
-                  <Maximize2 size={20} />
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
 
+        {/* Empty State */}
         {filteredImages.length === 0 && (
-          <div className="text-center py-20">
-            <p className="font-playfair text-xl text-slate-gray">
-              No images found for this category.
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }}
+            className="text-center py-32 bg-white/30 rounded-3xl border border-dashed border-charcoal-black/10"
+          >
+            <p className="font-playfair italic text-2xl text-slate-gray">
+              This collection is currently being curated.
             </p>
-          </div>
+            <p className="text-sm font-inter text-slate-gray/60 mt-2">Please check back soon or try another category.</p>
+          </motion.div>
         )}
 
+        {/* Lightbox Component */}
         <ImageLightbox
-          selectedImage={
-            selectedImageIndex !== null
-              ? filteredImages[selectedImageIndex]
-              : null
-          }
+          selectedImage={selectedImageIndex !== null ? filteredImages[selectedImageIndex] : null}
           onClose={closeLightbox}
           onNext={nextImage}
           onPrev={prevImage}
-          hasNext={selectedImageIndex !== null && filteredImages.length > 1}
-          hasPrev={selectedImageIndex !== null && filteredImages.length > 1}
+          hasNext={filteredImages.length > 1}
+          hasPrev={filteredImages.length > 1}
         />
       </div>
     </section>

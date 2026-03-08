@@ -1,23 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { ShoppingBag, ChevronRight } from "lucide-react";
+import { ShoppingBag, ChevronRight, AlertCircle } from "lucide-react";
 import Loader from "../Loader";
 
 const ProductCategoryGrid = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Handle screen resize to manage mobile-specific limits
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        // Fetch a few extra so we have enough for both desktop (6) and mobile (4)
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products`,
+          `${import.meta.env.VITE_NODE_URL}/api/shop/get-products?limit=6`
         );
-        // Get first 6 products for homepage display
-        setProducts(response.data.slice(0, 6));
+        setProducts(response.data || []);
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
@@ -27,25 +35,24 @@ const ProductCategoryGrid = () => {
     fetchProducts();
   }, []);
 
+  // FIX: Show only 4 items on mobile, up to 6 on desktop
+  const visibleProducts = isMobile ? products.slice(0, 4) : products;
+
   if (isLoading) {
     return (
-      <div className="flex justify-center py-12">
-        <Loader />
+      <div className="flex justify-center py-20">
+        <Loader color="#C9A24D" />
       </div>
     );
   }
 
-  if (!products.length) {
-    return (
-      <div className="text-center py-12 text-slate-gray">
-        No products available right now.
-      </div>
-    );
-  }
+  if (!products.length) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {products.map((product, index) => (
+    /* FIX: Changed grid-cols-1 to grid-cols-2 for mobile. 
+       This makes the cards smaller and look like a premium e-commerce store. */
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8 w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+      {visibleProducts.map((product, index) => (
         <ProductCard key={product._id} product={product} index={index} />
       ))}
     </div>
@@ -54,83 +61,79 @@ const ProductCategoryGrid = () => {
 
 const ProductCard = ({ product, index }) => {
   const navigate = useNavigate();
+  const isOutOfStock = product.stock === 0;
 
   const handleClick = () => {
-    navigate("/shop");
+    if (!isOutOfStock) {
+      navigate(`/shop/product/${product._id}`);
+    }
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
       onClick={handleClick}
-      className="group relative overflow-hidden rounded-xl bg-white shadow-md border border-gold-accent/20 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+      className={`group relative overflow-hidden rounded-xl md:rounded-2xl bg-white border border-charcoal-black/5 transition-all duration-500 shadow-sm ${
+        isOutOfStock 
+          ? "opacity-60 grayscale cursor-not-allowed" 
+          : "hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+      }`}
     >
-      {/* Product Image */}
-      <div className="relative h-64 overflow-hidden bg-warm-ivory">
+      {/* Product Image Container - FIX: Reduced height for mobile (h-40) */}
+      <div className="relative h-40 sm:h-56 md:h-72 overflow-hidden bg-warm-ivory">
         <img
           src={product.image || "/placeholder-product.jpg"}
           alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
         />
 
-        {/* Overlay on Hover */}
-        <div className="absolute inset-0 bg-charcoal-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <div className="bg-white rounded-full p-3 transform scale-75 group-hover:scale-100 transition-transform duration-300">
-            <ShoppingBag className="w-6 h-6 text-gold-accent" />
-          </div>
+        {/* Dynamic Badges - Scaled down for mobile */}
+        <div className="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col gap-1">
+          {product.category && (
+            <div className="bg-charcoal-black/80 backdrop-blur-md text-gold-accent px-2 py-1 rounded-md text-[7px] md:text-[10px] font-bold uppercase tracking-widest shadow-lg">
+              {typeof product.category === 'object' ? product.category.name : product.category}
+            </div>
+          )}
         </div>
 
-        {/* Category Badge */}
-        {product.category && (
-          <div className="absolute top-3 left-3 bg-gold-accent text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
-            {product.category?.name || product.category}
-          </div>
-        )}
-
-        {/* Stock Status */}
-        {product.stock <= 5 && product.stock > 0 && (
-          <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-            Only {product.stock} left
-          </div>
-        )}
-        {product.stock === 0 && (
-          <div className="absolute top-3 right-3 bg-gray-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-            Out of Stock
+        {/* Out of Stock Overlay */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-charcoal-black/40 flex items-center justify-center">
+            <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-3 py-1 rounded-full text-[10px] font-playfair italic">
+              Unavailable
+            </span>
           </div>
         )}
       </div>
 
-      {/* Product Details */}
-      <div className="p-5">
-        <h3 className="font-playfair text-xl text-charcoal-black font-semibold mb-2 line-clamp-1">
+      {/* Product Details - FIX: Compact padding and smaller fonts for mobile */}
+      <div className="p-3 md:p-6">
+        <h3 className="font-playfair text-sm md:text-xl lg:text-2xl text-charcoal-black font-bold mb-1 md:mb-2 group-hover:text-gold-accent transition-colors duration-300 line-clamp-1">
           {product.name}
         </h3>
 
-        <p className="font-inter text-slate-gray text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
+        {/* Description hidden on mobile to keep cards compact */}
+        <p className="hidden md:block font-inter text-slate-gray text-xs md:text-sm mb-6 line-clamp-2 leading-relaxed h-[40px]">
           {product.description}
         </p>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="font-inter text-2xl font-bold text-charcoal-black">
-              ₹{product.price}
-            </span>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <span className="ml-2 text-sm text-slate-gray line-through">
-                ₹{product.originalPrice}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-t border-charcoal-black/5 pt-3 md:pt-5 gap-2">
+          <div className="flex flex-col">
+            <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-slate-gray/50 font-bold">Price</span>
+            <div className="flex items-center gap-1.5 md:gap-2">
+              <span className="font-inter text-sm md:text-xl font-black text-charcoal-black">
+                ₹{Number(product.price).toLocaleString("en-IN")}
               </span>
-            )}
+            </div>
           </div>
 
-          <motion.div
-            className="flex items-center gap-1 text-gold-accent font-inter text-sm font-semibold group-hover:gap-2 transition-all duration-300"
-            whileHover={{ x: 5 }}
-          >
-            View
-            <ChevronRight className="w-4 h-4" />
-          </motion.div>
+          <div className="flex items-center gap-1 text-gold-accent font-inter text-[8px] md:text-xs font-black uppercase tracking-widest group-hover:gap-2 transition-all">
+            View <ChevronRight className="w-3 h-3" strokeWidth={3} />
+          </div>
         </div>
       </div>
     </motion.div>

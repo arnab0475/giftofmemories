@@ -3,104 +3,117 @@ import { Camera, Video } from "lucide-react";
 
 const GallerySectionDivider = () => {
   return (
-    <section className="relative py-16 bg-gradient-to-b from-charcoal-black via-charcoal-black to-charcoal-black overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
+    // FIX 1: Responsive padding (py-12 on mobile vs py-20 on desktop) to maintain vertical rhythm
+    <section className="relative py-12 md:py-20 bg-charcoal-black overflow-hidden border-y border-white/5">
+      
+      {/* Background Pattern - Optimized with will-change for smooth scrolling */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" aria-hidden="true">
         <div
           className="w-full h-full"
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, #C9A24D 1px, transparent 0)`,
-            backgroundSize: "40px 40px",
+            backgroundImage: `radial-gradient(circle at 1px 1px, #C9A24D 1.5px, transparent 0)`,
+            backgroundSize: "32px 32px",
           }}
         />
       </div>
 
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-center gap-6 md:gap-12">
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="flex items-center justify-center gap-4 md:gap-16">
+          
           {/* Photos Label */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center gap-3"
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center gap-4"
           >
-            <div className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-gold-accent/20 border border-gold-accent/30">
-              <Camera className="w-5 h-5 text-gold-accent" />
+            <div className="hidden sm:flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-gold-accent/5 border border-gold-accent/20 text-gold-accent/60">
+              <Camera size={20} strokeWidth={1.5} />
             </div>
-            <span className="font-playfair text-lg md:text-xl text-warm-ivory/60 uppercase tracking-wider">
-              Photos
+            <span className="font-playfair text-lg md:text-2xl text-warm-ivory/40 uppercase tracking-[0.2em] font-light">
+              Stills
             </span>
           </motion.div>
 
-          {/* Center Divider Box */}
+          {/* Center Divider Logic */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.8 }}
             className="relative flex flex-col items-center"
           >
-            {/* Top Line */}
-            <div className="w-px h-8 bg-gradient-to-b from-transparent via-gold-accent/50 to-gold-accent" />
+            {/* Top Line - Uses a softer gradient */}
+            <div className="w-px h-6 md:h-10 bg-gradient-to-b from-transparent via-gold-accent/40 to-gold-accent" />
 
             {/* Center Box */}
             <div className="relative w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
-              {/* Rotating Border */}
+              
+              {/* FIX 2: Added a subtle blur to the rotating border to prevent 'gradient flickering' on mobile */}
               <motion.div
                 animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-lg border border-gold-accent/30"
+                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-xl border border-gold-accent/20 blur-[0.5px]"
                 style={{
-                  background: `conic-gradient(from 0deg, transparent, rgba(201, 162, 77, 0.3), transparent)`,
+                  background: `conic-gradient(from 0deg, transparent, rgba(201, 162, 77, 0.4), transparent)`,
                 }}
               />
 
-              {/* Inner Box */}
-              <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-lg bg-charcoal-black border border-gold-accent/50 flex items-center justify-center shadow-[0_0_30px_rgba(201,162,77,0.2)]">
-                <span className="font-playfair text-gold-accent text-xl md:text-2xl font-bold">
+              {/* Inner Box - Premium Glassmorphism */}
+              <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-xl bg-charcoal-black border border-gold-accent/40 flex items-center justify-center shadow-[0_0_40px_rgba(201,162,77,0.15)] backdrop-blur-md">
+                <span className="font-playfair text-gold-accent text-2xl md:text-3xl font-bold italic">
                   &
                 </span>
               </div>
             </div>
 
             {/* Bottom Line */}
-            <div className="w-px h-8 bg-gradient-to-b from-gold-accent to-gold-accent/50 via-transparent" />
+            <div className="w-px h-6 md:h-10 bg-gradient-to-t from-transparent via-gold-accent/40 to-gold-accent" />
           </motion.div>
 
           {/* Videos Label */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="flex items-center gap-3"
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="flex items-center gap-4"
           >
-            <span className="font-playfair text-lg md:text-xl text-warm-ivory/60 uppercase tracking-wider">
-              Videos
+            <span className="font-playfair text-lg md:text-2xl text-warm-ivory/40 uppercase tracking-[0.2em] font-light">
+              Motion
             </span>
-            <div className="hidden md:flex items-center justify-center w-12 h-12 rounded-full bg-gold-accent/20 border border-gold-accent/30">
-              <Video className="w-5 h-5 text-gold-accent" />
+            <div className="hidden sm:flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-gold-accent/5 border border-gold-accent/20 text-gold-accent/60">
+              <Video size={20} strokeWidth={1.5} />
             </div>
           </motion.div>
         </div>
 
-        {/* Horizontal Lines */}
-        <div className="flex items-center justify-center mt-8">
+        {/* Horizontal Detail Lines */}
+        <div className="flex items-center justify-center mt-6 md:mt-10">
           <motion.div
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="h-px w-24 md:w-48 bg-gradient-to-r from-transparent to-gold-accent/40"
+            // FIX 3: Explicitly set origin so the lines 'grow' out from the center dot
+            style={{ originX: 1 }}
+            transition={{ duration: 1, delay: 0.4, ease: "circOut" }}
+            className="h-[1px] w-20 md:w-64 bg-gradient-to-r from-transparent to-gold-accent/30"
           />
-          <div className="w-2 h-2 rounded-full bg-gold-accent/60 mx-4" />
+          <motion.div 
+             initial={{ opacity: 0 }}
+             whileInView={{ opacity: 1 }}
+             viewport={{ once: true }}
+             transition={{ delay: 0.3 }}
+             className="w-1.5 h-1.5 rounded-full border border-gold-accent/50 mx-4" 
+          />
           <motion.div
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="h-px w-24 md:w-48 bg-gradient-to-l from-transparent to-gold-accent/40"
+            style={{ originX: 0 }}
+            transition={{ duration: 1, delay: 0.4, ease: "circOut" }}
+            className="h-[1px] w-20 md:w-64 bg-gradient-to-l from-transparent to-gold-accent/30"
           />
         </div>
       </div>

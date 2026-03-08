@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   motion,
   useAnimate,
@@ -11,26 +11,14 @@ const LoadingScreen = () => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
   const [scope, animate] = useAnimate();
-  const [isExiting, setIsExiting] = useState(false);
+
+  // Cleaned up the unused 'isExiting' state
 
   useEffect(() => {
     // Animate the counter from 0 to 100
     const controls = animate(count, 100, { duration: 2.2, ease: "easeInOut" });
     return () => controls.stop();
-  }, []);
-
-  // Panel Variants for the Split Effect
-  const panelVariants = {
-    initial: { scaleX: 1 },
-    exit: (direction) => ({
-      scaleX: 0,
-      transition: {
-        duration: 1.2,
-        ease: [0.22, 1, 0.36, 1], // Cinematic "circIn" feel
-        delay: 0.2, // Wait for content to fade slightly
-      },
-    }),
-  };
+  }, [animate, count]);
 
   // Content Variants
   const contentVariants = {
@@ -41,6 +29,7 @@ const LoadingScreen = () => {
     },
     exit: {
       opacity: 0,
+      scale: 0.95, // Added a slight scale-down as it exits for a smoother feel
       transition: { duration: 0.4, ease: "easeIn" },
     },
   };
@@ -58,22 +47,21 @@ const LoadingScreen = () => {
   return (
     <motion.div
       ref={scope}
-      className="fixed inset-0 z-[100] flex items-center justify-center pointer-events-none"
-      // The root container handles the presence, but visual background is children
+      // CRITICAL FIX: Removed pointer-events-none so it properly blocks interactions
+      className="fixed inset-0 z-[100] flex items-center justify-center"
     >
       {/* LEFT PANEL */}
       <motion.div
         className="absolute left-0 top-0 bottom-0 w-1/2 bg-warm-ivory origin-left"
         initial="initial"
         exit="exit"
-        custom="left"
         variants={{
           initial: { x: "0%" },
           exit: {
             x: "-100%",
             transition: {
               duration: 1.4,
-              ease: [0.77, 0, 0.175, 1],
+              ease: [0.77, 0, 0.175, 1], // Cinematic "circIn" feel
               delay: 0.1,
             },
           },
@@ -88,7 +76,6 @@ const LoadingScreen = () => {
         className="absolute right-0 top-0 bottom-0 w-1/2 bg-warm-ivory origin-right"
         initial="initial"
         exit="exit"
-        custom="right"
         variants={{
           initial: { x: "0%" },
           exit: {
@@ -104,7 +91,7 @@ const LoadingScreen = () => {
 
       {/* CENTER CONTENT */}
       <motion.div
-        className="relative z-10 flex flex-col items-center gap-8"
+        className="relative z-10 flex flex-col items-center gap-6 md:gap-8"
         variants={contentVariants}
         initial="initial"
         animate="animate"
@@ -115,12 +102,13 @@ const LoadingScreen = () => {
           <img
             src={logo}
             alt="Gift of Memories"
-            className="h-16 md:h-72 w-auto object-contain"
+            // FIX: Smoother responsive scaling so the logo isn't tiny on mobile
+            className="h-24 sm:h-32 md:h-56 lg:h-72 w-auto object-contain"
           />
         </motion.div>
 
         {/* Counter & Micro-copy */}
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-1 md:gap-2">
           <motion.div className="flex items-start">
             <span className="font-playfair text-3xl md:text-4xl text-charcoal-black font-light tracking-tight">
               <motion.span>{rounded}</motion.span>
@@ -134,14 +122,14 @@ const LoadingScreen = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.6 }}
             transition={{ delay: 0.5 }}
-            className="text-xs font-inter uppercase tracking-[0.2em] text-slate-gray"
+            className="text-[10px] md:text-xs font-inter uppercase tracking-[0.2em] text-slate-gray"
           >
             Curating Experience
           </motion.p>
         </div>
       </motion.div>
 
-      {/* Ambient Noise Overlay (Stays on top until split starts) */}
+      {/* Ambient Noise Overlay */}
       <motion.div
         className="absolute inset-0 bg-noise mix-blend-multiply opacity-[0.03] pointer-events-none"
         exit={{ opacity: 0 }}

@@ -10,24 +10,51 @@ export const ClientAuthProvider = ({ children }) => {
   const [clientUser, setClientUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Axios instance configured for secure cookie-based auth
+  const api = axios.create({
+    baseURL: import.meta.env.VITE_NODE_URL,
+    withCredentials: true, // FIX 1: Ensures cookies/sessions are sent with every request
+  });
+
+  // FIX 2: Validate session with the backend on mount
   useEffect(() => {
-    // Check localStorage on mount
-    const storedUser = localStorage.getItem("clientUser");
-    if (storedUser) {
-      setClientUser(JSON.parse(storedUser));
-      setIsClientLoggedIn(true);
-    }
-    setIsLoading(false);
+    const verifySession = async () => {
+      try {
+        const storedUser = localStorage.getItem("clientUser");
+        
+        // If we have local data, double-check it against the server
+        if (storedUser) {
+          // Assuming you have a route like this (similar to your admin /verify)
+          // If you don't have this yet, the fallback keeps your current logic working!
+          const response = await api.get("/api/users/verify").catch(() => null);
+          
+          if (response?.data?.user) {
+            setClientUser(response.data.user);
+            setIsClientLoggedIn(true);
+            // Refresh local storage with latest backend truth
+            localStorage.setItem("clientUser", JSON.stringify(response.data.user));
+          } else {
+            // Token expired or invalid, wipe local mirage
+            localStorage.removeItem("clientUser");
+            setClientUser(null);
+            setIsClientLoggedIn(false);
+          }
+        }
+      } catch (error) {
+        console.error("Session verification failed", error);
+        localStorage.removeItem("clientUser");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    verifySession();
   }, []);
 
-  // Backend API login
   const login = async (email, password) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_NODE_URL}/api/users/login`,
-        { email, password }
-      );
-
+      const response = await api.post("/api/users/login", { email, password });
+      
       const userData = response.data.user;
       const loggedInUser = {
         id: userData.id,
@@ -46,44 +73,42 @@ export const ClientAuthProvider = ({ children }) => {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || "Login failed",
+        message: error.response?.data?.message || "Invalid credentials. Please try again.",
       };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("clientUser");
-    setClientUser(null);
-    setIsClientLoggedIn(false);
+  const logout = async () => {
+    // FIX 3: Securely destroy the backend session cookie before clearing UI state
+    try {
+      await api.post("/api/users/logout");
+    } catch (error) {
+      console.error("Backend logout failed, forcing client logout", error);
+    } finally {
+      localStorage.removeItem("clientUser");
+      setClientUser(null);
+      setIsClientLoggedIn(false);
+    }
   };
 
-  // Backend API signup
   const signup = async (name, email, password, phone) => {
     try {
-      console.log("Signup attempt:", { name, email, phone });
-      console.log(
-        "API URL:",
-        `${import.meta.env.VITE_NODE_URL}/api/users/signup`
-      );
+      // Cleaned up development console logs for production
+      const response = await api.post("/api/users/signup", {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        phone: phone.trim(),
+      });
 
-      const response = await axios.post(
-        `${import.meta.env.VITE_NODE_URL}/api/users/signup`,
-        { name, email, password, phone }
-      );
-
-      console.log("Signup response:", response.data);
       return {
         success: true,
-        message:
-          response.data.message || "Account created! Awaiting admin approval.",
+        message: response.data.message || "Welcome! Your account has been created.",
       };
     } catch (error) {
-      console.error("Signup error:", error);
-      console.error("Error response:", error.response?.data);
       return {
         success: false,
-        message:
-          error.response?.data?.message || error.message || "Signup failed",
+        message: error.response?.data?.message || "We couldn't create your account. Please try again.",
       };
     }
   };

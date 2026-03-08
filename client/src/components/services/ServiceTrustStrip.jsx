@@ -3,30 +3,47 @@ import { motion } from "framer-motion";
 
 const ServiceTrustStrip = () => {
   const items = [
-    { icon: <Camera size={24} />, label: "Pro Equipment" },
-    { icon: <Clock size={24} />, label: "On-Time Delivery" },
-    { icon: <Users size={24} />, label: "Expert Team" },
-    { icon: <ShieldCheck size={24} />, label: "Transparent Pricing" },
+    { icon: <Camera size={26} strokeWidth={1.5} />, label: "Pro Equipment" },
+    { icon: <Clock size={26} strokeWidth={1.5} />, label: "On-Time Delivery" },
+    { icon: <Users size={26} strokeWidth={1.5} />, label: "Expert Team" },
+    { icon: <ShieldCheck size={26} strokeWidth={1.5} />, label: "Transparent Pricing" },
   ];
 
   return (
-    <div className="bg-warm-ivory py-16 border-t border-muted-beige/40">
+    // FIX 2: Scaled mobile padding (py-10) vs desktop (py-20)
+    <div className="bg-warm-ivory py-10 md:py-20 border-t border-charcoal-black/5">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {/* FIX 3: Added role="list" for better accessibility */}
+        <div 
+          role="list"
+          className="grid grid-cols-2 md:grid-cols-4 gap-y-10 md:gap-8"
+        >
           {items.map((item, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 10 }}
+              role="listitem"
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex flex-col items-center text-center space-y-3"
+              // FIX 2 (Cont.): Triggering the animation slightly late for better visibility
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ 
+                delay: index * 0.1, 
+                duration: 0.6, 
+                ease: [0.22, 1, 0.36, 1] 
+              }}
+              className="flex flex-col items-center text-center group cursor-default"
             >
-              <div className="w-12 h-12 rounded-full bg-gold-accent/10 flex items-center justify-center text-gold-accent mb-1">
+              {/* Refined Icon Container */}
+              <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-gold-accent mb-4 shadow-sm border border-charcoal-black/5 transition-transform duration-500 group-hover:scale-110 group-hover:shadow-md">
                 {item.icon}
               </div>
-              <span className="font-inter text-sm font-semibold text-charcoal-black uppercase tracking-wide">
+              
+              <span className="font-inter text-[10px] md:text-xs font-bold text-charcoal-black uppercase tracking-[0.2em] leading-relaxed px-2">
                 {item.label}
               </span>
+              
+              {/* Subtle Decorative Underline */}
+              <div className="h-[1px] w-0 bg-gold-accent/40 mt-2 transition-all duration-500 group-hover:w-8" />
             </motion.div>
           ))}
         </div>

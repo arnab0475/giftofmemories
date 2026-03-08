@@ -5,18 +5,18 @@ import axios from "axios";
 const ProductsHero = () => {
   const [heroData, setHeroData] = useState({
     title: "Our Products",
-    description:
-      "Curated photography products crafted to preserve your memories forever.",
+    description: "Curated photography products crafted to preserve your memories forever.",
     backgroundImage: "",
   });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/page-hero/get/shop`,
+          `${import.meta.env.VITE_NODE_URL}/api/page-hero/get/shop`
         );
-        setHeroData(response.data);
+        if (response.data) setHeroData(response.data);
       } catch (error) {
         console.error("Error fetching shop hero:", error);
       }
@@ -25,39 +25,55 @@ const ProductsHero = () => {
   }, []);
 
   return (
-    <div className="relative h-[40vh] min-h-[400px] w-full overflow-hidden flex items-center justify-center">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img
+    <section className="relative h-[45vh] min-h-[450px] w-full overflow-hidden bg-charcoal-black flex items-center justify-center">
+      {/* Background Image Container */}
+      <div className="absolute inset-0 z-0">
+        <motion.img
+          initial={{ scale: 1.1, opacity: 0 }}
+          animate={{ 
+            scale: 1, 
+            opacity: isLoaded ? 0.6 : 0 // Lower opacity for better text contrast
+          }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
           src={heroData.backgroundImage || "/shop-bg.jpg"}
           alt=""
-          aria-hidden="true"
+          onLoad={() => setIsLoaded(true)}
           className="h-full w-full object-cover"
         />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-[#0F0F0F] opacity-55"></div>
+        
+        {/* FIX 1: Sophisticated multi-layer gradient for guaranteed text legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-charcoal-black/80 via-transparent to-charcoal-black/90" />
+        <div className="absolute inset-0 bg-charcoal-black/20" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+      <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl md:text-5xl font-playfair font-bold text-warm-ivory mb-4"
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
         >
-          {heroData.title}
-        </motion.h1>
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-warm-ivory/90 text-lg font-inter max-w-2xl mx-auto"
-        >
-          {heroData.description}
-        </motion.p>
+          {/* Subtle line decoration */}
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: "50px" }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="h-[2px] bg-gold-accent mx-auto mb-6"
+          />
+
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-playfair font-bold text-warm-ivory mb-6 tracking-tight drop-shadow-lg">
+            {heroData.title}
+          </h1>
+          
+          <p className="text-warm-ivory/85 text-base md:text-xl font-inter max-w-2xl mx-auto leading-relaxed font-light px-4">
+            {heroData.description}
+          </p>
+        </motion.div>
       </div>
-    </div>
+
+      {/* FIX 2: Bottom decorative fade to blend with the product grid below */}
+      <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-warm-ivory to-transparent z-10" />
+    </section>
   );
 };
 

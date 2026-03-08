@@ -6,6 +6,7 @@ import {
   useMotionValue,
   useScroll,
   useTransform,
+  useSpring,
 } from "framer-motion";
 import { Check } from "lucide-react";
 import axios from "axios";
@@ -31,23 +32,23 @@ const skills = [
 
 const features = [
   "Printed Photograph provided",
-  "Printed Photograph provided",
-  "High Resolution Camera",
   "High Resolution Camera",
   "Experienced Photographer",
-  "Experienced Photographer",
+  "Premium Photo Albums",
+  "Drone Videography",
+  "Same Day Edits",
 ];
 
 const stats = [
   { value: 100, suffix: "%", label: "Customer Satisfaction" },
   { value: 350, suffix: "+", label: "Sessions Completed" },
-  { value: 50, suffix: "%", label: "Experienced Photographers" },
+  { value: 50, suffix: "+", label: "Expert Photographers" },
   { value: 250, suffix: "+", label: "Events Covered" },
 ];
 
 const ProgressBar = ({ name, level }) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   const progress = useMotionValue(0);
   const percentage = useTransform(progress, (v) => Math.round(v));
@@ -56,7 +57,6 @@ const ProgressBar = ({ name, level }) => {
   useEffect(() => {
     if (isInView) {
       progress.set(0);
-
       animate(progress, level, {
         duration: 1.6,
         ease: "easeOut",
@@ -65,22 +65,18 @@ const ProgressBar = ({ name, level }) => {
   }, [isInView, level, progress]);
 
   return (
-    <div ref={ref} className="mb-8">
+    <div ref={ref} className="mb-6 md:mb-8">
       <div className="flex justify-between items-end mb-2 font-inter">
-        <span className="text-lg font-bold">{name}</span>
-
-        <div className="flex items-baseline gap-0.5">
-          <motion.span className="text-sm font-bold opacity-80">
-            {percentage}
-          </motion.span>
-          <span className="text-sm font-bold opacity-80">%</span>
+        <span className="text-sm md:text-base font-bold text-charcoal-black">{name}</span>
+        <div className="flex items-baseline gap-0.5 text-gold-accent">
+          <motion.span className="text-xs md:text-sm font-bold">{percentage}</motion.span>
+          <span className="text-xs md:text-sm font-bold">%</span>
         </div>
       </div>
-
-      <div className="h-[2px] w-full bg-charcoal-black/10 rounded-full overflow-hidden">
+      <div className="h-1.5 w-full bg-charcoal-black/5 rounded-full overflow-hidden">
         <motion.div
           style={{ width }}
-          className="h-full bg-gradient-to-r from-warm-ivory/30 to-gold-accent"
+          className="h-full bg-gradient-to-r from-gold-accent/50 to-gold-accent rounded-full"
         />
       </div>
     </div>
@@ -89,7 +85,7 @@ const ProgressBar = ({ name, level }) => {
 
 const AnimatedNumber = ({ value, suffix }) => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   const number = useMotionValue(0);
   const display = useTransform(number, (v) => Math.floor(v));
@@ -97,12 +93,10 @@ const AnimatedNumber = ({ value, suffix }) => {
   useEffect(() => {
     if (isInView) {
       number.set(0);
-
-      animate(number, value * 1.25, {
+      animate(number, value * 1.1, {
         duration: 1,
         ease: "easeIn",
       }).then(() => {
-        // Snap back to final value
         animate(number, value, {
           duration: 0.6,
           ease: "easeOut",
@@ -121,21 +115,34 @@ const AnimatedNumber = ({ value, suffix }) => {
 
 const CombinedSections = () => {
   const containerRef = useRef(null);
+  const [scrollImages, setScrollImages] = useState(defaultScrollImages);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile to disable janky vertical parallax on small screens
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Smooth Parallax for Desktop
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"],
   });
 
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -150]);
-
-  const [scrollImages, setScrollImages] = useState(defaultScrollImages);
+  const rawY1 = useTransform(scrollYProgress, [0, 1], ["0%", "-15%"]);
+  const rawY2 = useTransform(scrollYProgress, [0, 1], ["10%", "-25%"]);
+  
+  const y1 = useSpring(rawY1, { stiffness: 100, damping: 30 });
+  const y2 = useSpring(rawY2, { stiffness: 100, damping: 30 });
 
   useEffect(() => {
     const fetchImages = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/homepage-gallery/section/scroll`,
+          `${import.meta.env.VITE_NODE_URL}/api/homepage-gallery/section/scroll`
         );
         if (response.data && response.data.length > 0) {
           setScrollImages(response.data.map((img) => img.imageUrl));
@@ -154,67 +161,66 @@ const CombinedSections = () => {
   return (
     <section
       ref={containerRef}
-      className="py-24 bg-warm-ivory text-charcoal-black relative overflow-hidden"
+      className="py-16 md:py-24 lg:py-32 bg-warm-ivory text-charcoal-black relative overflow-hidden"
     >
-      <div className="absolute top-0 right-0 w-full md:w-1/2 h-full bg-warm-ivory z-0 hidden lg:block border-l border-gold-accent/10" />
-      <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-gold-accent/5 rounded-full blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-full lg:w-1/2 h-full bg-white z-0 hidden lg:block border-l border-charcoal-black/5" />
+      <div className="absolute top-1/2 left-0 w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-gold-accent/5 rounded-full blur-[80px] md:blur-[120px] -translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-      <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 relative z-10">
-        {/* LEFT COLUMN: Content Stack */}
-        <div className="flex flex-col gap-32">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+        
+        {/* ---------------- LEFT COLUMN: CONTENT ---------------- */}
+        <div className="flex flex-col gap-16 lg:gap-24 pt-4 lg:pt-12">
+          
           {/* 1. About Section */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 40 }} // FIX: Changed from x: -30 to y: 40 (fade UP and IN)
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="inline-block px-4 py-2 rounded-full bg-gold-accent/40 border border-white/10 mb-8 backdrop-blur-sm">
-              <span className="text-charcoal-black text-xs font-inter uppercase tracking-widest">
+            <div className="inline-block px-4 py-2 rounded-full bg-gold-accent/10 border border-gold-accent/20 mb-6 md:mb-8">
+              <span className="text-gold-accent text-[10px] md:text-xs font-bold uppercase tracking-widest">
                 About Gift of Memories Studio
               </span>
             </div>
-            <h2 className="font-playfair text-5xl md:text-6xl font-bold leading-tight mb-8">
-              Leading Wedding <br /> Photography in Kolkata
+            <h2 className="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold leading-[1.15] mb-6 md:mb-8 text-charcoal-black">
+              Leading Wedding <br className="hidden sm:block" /> Photography in Kolkata
             </h2>
-            <p className="font-inter text-charcoal-black/70 text-lg leading-relaxed mb-12 max-w-xl">
+            <p className="font-inter text-slate-gray text-base md:text-lg leading-relaxed mb-10 md:mb-12 max-w-xl font-light">
               Gift of Memories specializes in candid and cinematic wedding
               photography in Kolkata, capturing timeless moments with creativity
               and elegance for couples across West Bengal.
             </p>
             <div className="max-w-lg">
               {skills.map((skill, index) => (
-                <ProgressBar
-                  key={index}
-                  name={skill.name}
-                  level={skill.level}
-                />
+                <ProgressBar key={index} name={skill.name} level={skill.level} />
               ))}
             </div>
           </motion.div>
 
           {/* 2. Why Choose Us Section */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <span className="text-charcoal-black font-inter text-sm font-bold uppercase tracking-widest block mb-6 px-4 border-l-2 border-charcoal-black">
+            <span className="text-charcoal-black font-inter text-xs md:text-sm font-bold uppercase tracking-widest block mb-4 md:mb-6 px-4 border-l-2 border-gold-accent">
               Why Choose Us
             </span>
-            <p className="font-inter text-charcoal-black/60 text-lg leading-relaxed mb-12 max-w-xl">
-              Gift of Memories delivers candid and cinematic wedding photography
-              in Patna with creativity, professionalism, and a personalized
+            <p className="font-inter text-slate-gray text-base md:text-lg leading-relaxed mb-8 md:mb-10 max-w-xl font-light">
+              We deliver candid and cinematic wedding photography
+              with creativity, professionalism, and a personalized
               touch to make your memories timeless.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4">
               {features.map((feature, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <div className="w-6 h-6 rounded-full bg-gold-accent/20 flex items-center justify-center flex-shrink-0 text-gold-accent">
-                    <Check size={14} strokeWidth={4} />
+                <div key={index} className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center flex-shrink-0 text-emerald-600">
+                    <Check size={12} strokeWidth={3} />
                   </div>
-                  <span className="font-inter font-bold text-sm tracking-wide text-charcoal-black">
+                  <span className="font-inter font-medium text-sm text-charcoal-black/80">
                     {feature}
                   </span>
                 </div>
@@ -224,81 +230,98 @@ const CombinedSections = () => {
 
           {/* 3. Team Stats Section */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="pb-10 lg:pb-0"
           >
-            <span className="text-charcoal-black font-inter text-sm font-bold uppercase tracking-widest block mb-6 px-4 border-l-2 border-charcoal-black">
-              Gift of Memories Team
+            <span className="text-charcoal-black font-inter text-xs md:text-sm font-bold uppercase tracking-widest block mb-4 md:mb-6 px-4 border-l-2 border-gold-accent">
+              Studio Metrics
             </span>
-            <p className="font-inter text-charcoal-black/60 text-lg leading-relaxed mb-16 max-w-xl">
-              At Gift of Memories, our team of passionate wedding photographers
-              and cinematographers in Patna work together to capture every
-              emotion, smile, and detail with creativity and perfection.
+            <p className="font-inter text-slate-gray text-base md:text-lg leading-relaxed mb-10 md:mb-12 max-w-xl font-light">
+              Our team of passionate photographers and cinematographers
+              work together to capture every emotion, smile, and detail with perfection.
             </p>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-12">
+            <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:gap-x-12 md:gap-y-12">
               {stats.map((stat, index) => (
-                <div
-                  key={index}
-                  className="border-b border-charcoal-black/10 pb-8"
-                >
-                  <h3 className="font-playfair text-5xl text-charcoal-black mb-2">
+                <div key={index} className="border-b border-charcoal-black/10 pb-6">
+                  <h3 className="font-playfair text-4xl md:text-5xl text-charcoal-black mb-2 font-bold">
                     <AnimatedNumber value={stat.value} suffix={stat.suffix} />
                   </h3>
-                  <p className="text-xs font-bold uppercase tracking-widest text-charcoal-black/70 mb-4">
+                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-gray leading-tight">
                     {stat.label}
                   </p>
-                  <div className="w-8 h-1 bg-gold-accent rounded-full" />
                 </div>
               ))}
             </div>
           </motion.div>
         </div>
 
-        {/* RIGHT COLUMN: Continuous Image Flow */}
-        <div className="hidden lg:block relative h-full">
-          <div className="sticky top-24 grid grid-cols-2 gap-4 h-screen">
-            {/* Column 1 of Images */}
+        {/* ---------------- RIGHT COLUMN: IMAGE GRID ---------------- */}
+        <div className="relative h-full">
+          {/* Desktop: Uses sticky + Framer Motion 'y' transform for parallax.
+            Mobile: Uses standard grid to prevent images from clipping off-screen.
+          */}
+          <div className="lg:sticky lg:top-24 grid grid-cols-2 gap-3 sm:gap-4 lg:h-[120vh] pb-10">
+            
+            {/* Column 1 */}
             <motion.div
-              style={{ y: y1 }}
-              className="space-y-4 flex flex-col pt-12"
+              style={{ y: isMobile ? 0 : y1 }}
+              className="space-y-3 sm:space-y-4 flex flex-col pt-0 lg:pt-12"
             >
               {col1Images.map((src, index) => (
-                <div
+                <motion.div
+                  initial={isMobile ? { opacity: 0, y: 30 } : false}
+                  whileInView={isMobile ? { opacity: 1, y: 0 } : false}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
                   key={`col1-${index}`}
+                  // FIX: Replaced fixed heights with responsive Aspect Ratios
                   className={`${
-                    index % 3 === 0 ? "h-64" : index % 3 === 1 ? "h-80" : "h-96"
-                  } rounded-3xl overflow-hidden shrink-0`}
+                    index % 3 === 0 ? "aspect-[3/4]" : index % 3 === 1 ? "aspect-[4/5]" : "aspect-square"
+                  } rounded-2xl md:rounded-[2rem] overflow-hidden shrink-0 shadow-lg border border-charcoal-black/5 bg-warm-ivory`}
                 >
                   <img
                     src={src}
-                    className="w-full h-full object-cover transition-all duration-500"
-                    alt="Gallery"
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    alt="Gallery Memory"
+                    loading="lazy"
                   />
-                </div>
+                </motion.div>
               ))}
             </motion.div>
 
-            {/* Column 2 of Images */}
-            <motion.div style={{ y: y2 }} className="space-y-4 flex flex-col">
+            {/* Column 2 */}
+            <motion.div 
+              style={{ y: isMobile ? 0 : y2 }} 
+              className="space-y-3 sm:space-y-4 flex flex-col"
+            >
               {col2Images.map((src, index) => (
-                <div
+                <motion.div
+                  initial={isMobile ? { opacity: 0, y: 30 } : false}
+                  whileInView={isMobile ? { opacity: 1, y: 0 } : false}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
                   key={`col2-${index}`}
+                  // FIX: Off-set aspect ratios to create a staggered masonry look
                   className={`${
-                    index % 3 === 0 ? "h-96" : index % 3 === 1 ? "h-64" : "h-80"
-                  } rounded-3xl overflow-hidden shrink-0`}
+                    index % 3 === 0 ? "aspect-[4/5]" : index % 3 === 1 ? "aspect-square" : "aspect-[3/4]"
+                  } rounded-2xl md:rounded-[2rem] overflow-hidden shrink-0 shadow-lg border border-charcoal-black/5 bg-warm-ivory`}
                 >
                   <img
                     src={src}
-                    className="w-full h-full object-cover transition-all duration-500"
-                    alt="Gallery"
+                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    alt="Gallery Memory"
+                    loading="lazy"
                   />
-                </div>
+                </motion.div>
               ))}
             </motion.div>
+
           </div>
         </div>
+
       </div>
     </section>
   );

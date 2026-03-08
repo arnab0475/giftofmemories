@@ -2,7 +2,11 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
+
+// Existing Route Imports
 import adminRouter from "./Routes/AdminAuth.js";
 import ServicesRouter from "./Routes/Services.js";
 import GalleryRouter from "./Routes/Gallery.js";
@@ -22,8 +26,29 @@ import HomepageGalleryRouter from "./Routes/HomepageGallery.js";
 import PageVideoRouter from "./Routes/PageVideo.js";
 import ProductCollectionRouter from "./Routes/ProductCollectionRouter.js";
 import FAQRouter from "./Routes/FAQ.js";
+
+// --- NEW: WhatsApp & Booking Imports ---
+import BookingRouter from "./Routes/Booking.js"; // The new router for bookings/templates
+import "./whatsapp/cron.js"; // Initializes the background cron jobs automatically
+import { startClient } from "./whatsapp/whatsapp.js"; // WhatsApp client logic
+
 dotenv.config();
+
+// ES Module fix for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
+
+// --- NEW: Global Error Handlers ---
+// Prevents the entire Node server from crashing if Puppeteer/WhatsApp throws an unexpected error
+process.on('unhandledRejection', err => {
+  console.error('✗ Unhandled promise rejection:', err);
+});
+process.on('uncaughtException', err => {
+  console.error('✗ Uncaught exception:', err);
+});
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -39,7 +64,14 @@ app.use(
   }),
 );
 app.use(express.urlencoded({ extended: true }));
+
+// --- NEW: Serve Uploads Directory ---
+// Makes the uploaded WhatsApp images accessible to your frontend if needed
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 await connectDB();
+
+// Existing API Routes
 app.use("/api/admin", adminRouter);
 app.use("/api/services", ServicesRouter);
 app.use("/api/gallery", GalleryRouter);
@@ -60,6 +92,13 @@ app.use("/api/page-videos", PageVideoRouter);
 app.use("/api/product-collections", ProductCollectionRouter);
 app.use("/api/faq", FAQRouter);
 app.use("/api/faqs", FAQRouter);
+
+// --- NEW: WhatsApp Booking API Route ---
+app.use("/api/booking", BookingRouter); 
+
+// --- NEW: Start WhatsApp Client ---
+startClient();
+
 app.listen(process.env.PORT, () => {
   console.log("Server is running on port", process.env.PORT);
 });

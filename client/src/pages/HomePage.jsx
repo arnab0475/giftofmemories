@@ -40,7 +40,7 @@ const HomePage = () => {
     const fetchHomepageSettings = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/homepage-settings/get-settings`,
+          `${import.meta.env.VITE_NODE_URL}/api/homepage-settings/get-settings`
         );
         setHomepageSettings(response.data);
       } catch (error) {
@@ -54,7 +54,7 @@ const HomePage = () => {
     const fetchPackages = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/services/packages-with-services`,
+          `${import.meta.env.VITE_NODE_URL}/api/services/packages-with-services`
         );
         setPackages(response.data);
       } catch (error) {
@@ -67,69 +67,70 @@ const HomePage = () => {
   }, []);
 
   return (
-    <>
+    // STRICT OVERFLOW CONTROL: Prevents horizontal scrolling on mobile devices
+    <div className="overflow-x-hidden bg-charcoal-black selection:bg-gold-accent selection:text-charcoal-black">
+      
+      {/* ---------------- HERO SECTION ---------------- */}
       <Hero />
 
+      {/* ---------------- PRODUCTS SECTION ---------------- */}
       {homepageSettings.showProducts && (
         <RevealOnScroll>
-          {/* Products Section - Featured First */}
           <section
             id="products"
-            className="py-24 relative overflow-hidden"
+            className="py-20 md:py-32 relative overflow-hidden"
             style={{
               background: `linear-gradient(135deg, #faf8f5 0%, #f5f0e8 50%, #faf8f5 100%)`,
             }}
           >
             {/* Top Gold Border Accent */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold-accent to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-accent/50 to-transparent" />
 
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-[0.04]">
+            {/* Subtle Dotted Background Pattern */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
               <div
                 className="w-full h-full"
                 style={{
                   backgroundImage: `radial-gradient(circle at 1px 1px, #C9A24D 1px, transparent 0)`,
-                  backgroundSize: "40px 40px",
+                  backgroundSize: "32px 32px",
                 }}
               />
             </div>
 
-            {/* Decorative Elements */}
-            <div className="absolute top-20 left-10 w-80 h-80 bg-gold-accent/15 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-10 w-96 h-96 bg-gold-accent/15 rounded-full blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold-accent/5 rounded-full blur-3xl" />
+            {/* Soft Glow Elements */}
+            <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
+            <div className="absolute top-20 left-10 w-64 md:w-80 h-64 md:h-80 bg-gold-accent/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-20 right-10 w-64 md:w-96 h-64 md:h-96 bg-gold-accent/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="container mx-auto px-6 md:px-12 relative z-10">
-              {/* Featured Badge */}
-              <div className="flex justify-center mb-8">
-                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gold-accent/10 border border-gold-accent/30 rounded-full">
-                  <span className="w-2 h-2 bg-gold-accent rounded-full animate-pulse" />
-                  <span className="text-gold-accent font-inter text-xs uppercase tracking-[0.2em] font-bold">
-                    {homepageSettings.productsSectionBadge ||
-                      "Featured Collection"}
+            <div className="container mx-auto px-4 sm:px-6 md:px-12 relative z-10">
+              
+              {/* Eyebrow Badge */}
+              <div className="flex justify-center mb-6 md:mb-8">
+                <div className="inline-flex items-center gap-2.5 md:gap-3 px-5 py-2.5 md:px-6 md:py-3 bg-gold-accent/10 border border-gold-accent/30 rounded-full shadow-sm">
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gold-accent rounded-full animate-pulse" />
+                  <span className="text-gold-accent font-inter text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold">
+                    {homepageSettings.productsSectionBadge || "Featured Collection"}
                   </span>
-                  <span className="w-2 h-2 bg-gold-accent rounded-full animate-pulse" />
+                  <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-gold-accent rounded-full animate-pulse" />
                 </div>
               </div>
 
-              {/* Header */}
-              <div className="text-center max-w-3xl mx-auto mb-16">
-                <h2 className="font-playfair text-5xl md:text-7xl text-charcoal-black mb-6">
+              {/* Section Header */}
+              <div className="text-center max-w-3xl mx-auto mb-12 md:mb-20 px-2">
+                <h2 className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-charcoal-black mb-6 leading-[1.15]">
                   {(homepageSettings.productsSectionTitle || "Premium Products")
                     .split(" ")
                     .slice(0, -1)
                     .join(" ")}{" "}
-                  <span className="italic text-gold-accent relative">
+                  <span className="italic text-gold-accent relative inline-block">
                     {
-                      (
-                        homepageSettings.productsSectionTitle ||
-                        "Premium Products"
-                      )
+                      (homepageSettings.productsSectionTitle || "Premium Products")
                         .split(" ")
                         .slice(-1)[0]
                     }
+                    {/* Decorative underline */}
                     <svg
-                      className="absolute -bottom-2 left-0 w-full"
+                      className="absolute -bottom-1 md:-bottom-2 left-0 w-full"
                       viewBox="0 0 200 8"
                       fill="none"
                     >
@@ -142,25 +143,26 @@ const HomePage = () => {
                     </svg>
                   </span>
                 </h2>
-                <p className="font-inter text-slate-gray text-lg md:text-xl leading-relaxed font-light max-w-2xl mx-auto">
+                <p className="font-inter text-slate-gray text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed font-light max-w-2xl mx-auto">
                   {homepageSettings.productsSectionDescription ||
                     "Transform your cherished moments into timeless keepsakes. Discover our handcrafted albums, gallery-quality prints, and bespoke merchandise designed to last generations."}
                 </p>
               </div>
 
-              {/* Products Grid */}
+              {/* Dynamic Products Grid Component */}
               <ProductCategoryGrid />
 
-              <div className="text-center mt-14">
+              {/* Call to Action Button */}
+              <div className="text-center mt-12 md:mt-16">
                 <a
                   href="/shop"
-                  className="group relative inline-flex items-center gap-3 px-12 py-5 bg-gold-accent text-white font-inter text-sm font-bold uppercase tracking-widest hover:bg-charcoal-black transition-all duration-500 shadow-[0_10px_40px_rgba(201,162,77,0.4)] hover:shadow-[0_15px_50px_rgba(26,26,26,0.3)] hover:scale-105"
+                  className="group relative inline-flex items-center gap-3 px-8 md:px-12 py-4 md:py-5 bg-gold-accent text-white font-inter text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-charcoal-black transition-all duration-500 shadow-[0_10px_30px_rgba(201,162,77,0.3)] hover:shadow-[0_15px_40px_rgba(26,26,26,0.2)] hover:scale-[1.02] rounded-sm"
                 >
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                   Explore Shop
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5 transition-transform group-hover:translate-x-2"
+                    className="w-4 h-4 md:w-5 md:h-5 transition-transform group-hover:translate-x-1.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -177,22 +179,24 @@ const HomePage = () => {
             </div>
 
             {/* Bottom Gold Border Accent */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold-accent to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-accent/50 to-transparent" />
           </section>
         </RevealOnScroll>
       )}
 
+      {/* ---------------- SERVICES SECTION ---------------- */}
       {homepageSettings.showServices && (
         <RevealOnScroll>
-          {/* Services Section with Category Grid */}
-          <section id="services" className="py-20 bg-warm-ivory relative">
-            <div className="container mx-auto px-6 md:px-12">
+          <section id="services" className="py-20 md:py-32 bg-warm-ivory relative overflow-hidden">
+            <div className="container mx-auto px-4 sm:px-6 md:px-12 relative z-10">
+              
               {/* Header */}
-              <div className="text-center max-w-3xl mx-auto mb-16">
-                <span className="inline-block text-gold-accent font-inter text-xs uppercase tracking-[0.3em] mb-4 font-bold">
+              <div className="text-center max-w-3xl mx-auto mb-12 md:mb-20 px-2">
+                <span className="inline-block text-gold-accent font-inter text-[10px] md:text-xs uppercase tracking-[0.3em] mb-4 font-bold">
                   {homepageSettings.servicesSectionBadge || "What We Do"}
                 </span>
-                <h2 className="font-playfair text-4xl md:text-6xl text-charcoal-black mb-6">
+                
+                <h2 className="font-playfair text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-charcoal-black mb-6 leading-[1.15]">
                   {(homepageSettings.servicesSectionTitle || "Our Services")
                     .split(" ")
                     .slice(0, -1)
@@ -205,27 +209,29 @@ const HomePage = () => {
                     }
                   </span>
                 </h2>
-                <p className="font-inter text-slate-gray text-lg leading-relaxed font-light">
+                
+                <p className="font-inter text-slate-gray text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed font-light max-w-2xl mx-auto">
                   {homepageSettings.servicesSectionDescription ||
                     "From intimate weddings to stunning fashion editorials, our team brings creativity and technical excellence to every project, capturing life's most precious moments."}
                 </p>
               </div>
 
-              {/* Service Grid */}
+              {/* Dynamic Service Grid Component */}
               <ServiceCategoryGrid
                 packages={packages}
                 isLoading={isLoadingServices}
               />
 
-              <div className="text-center mt-12">
+              {/* Call to Action Button */}
+              <div className="text-center mt-12 md:mt-16">
                 <a
                   href="/services"
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-transparent border border-gold-accent text-charcoal-black font-inter text-sm font-semibold uppercase tracking-widest hover:bg-gold-accent hover:text-white transition-all duration-300"
+                  className="group inline-flex items-center gap-3 px-8 md:px-10 py-4 border border-gold-accent text-charcoal-black font-inter text-[10px] md:text-xs font-bold uppercase tracking-widest hover:bg-gold-accent hover:text-white transition-all duration-300 rounded-sm hover:shadow-lg"
                 >
                   View All Services
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5 transition-transform group-hover:translate-x-1"
+                    className="w-4 h-4 transition-transform group-hover:translate-x-1"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -244,12 +250,13 @@ const HomePage = () => {
         </RevealOnScroll>
       )}
 
-      {homepageSettings.showHomeVideo &&
-        homepageSettings.homeVideos?.length > 0 && (
-          <RevealOnScroll>
-            <HomeVideoSection videos={homepageSettings.homeVideos} />
-          </RevealOnScroll>
-        )}
+      {/* ---------------- OPTIONAL BLOCKS ---------------- */}
+      
+      {homepageSettings.showHomeVideo && homepageSettings.homeVideos?.length > 0 && (
+        <RevealOnScroll>
+          <HomeVideoSection videos={homepageSettings.homeVideos} />
+        </RevealOnScroll>
+      )}
 
       {homepageSettings.showGallery && (
         <RevealOnScroll>
@@ -257,6 +264,7 @@ const HomePage = () => {
         </RevealOnScroll>
       )}
 
+      {/* Note: Gallery is usually heavy, rendering without RevealOnScroll ensures it computes its layout properly */}
       {homepageSettings.showStackedGallery && <Gallery />}
 
       {homepageSettings.showScrollGallery && (
@@ -271,10 +279,12 @@ const HomePage = () => {
         </RevealOnScroll>
       )}
 
+      {/* ---------------- FOOTER CALL TO ACTION ---------------- */}
       <RevealOnScroll>
         <HomeCTA />
       </RevealOnScroll>
-    </>
+      
+    </div>
   );
 };
 
