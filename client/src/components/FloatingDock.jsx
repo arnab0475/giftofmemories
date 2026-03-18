@@ -28,7 +28,7 @@ const MobileIconContainer = ({ title, icon, href }) => {
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={() => setIsHovered(true)}
       onTouchEnd={() => setTimeout(() => setIsHovered(false), 1500)}
-      className="relative shrink-0"
+      className="relative shrink-0 flex items-center justify-center"
     >
       <motion.div
         animate={{
@@ -36,24 +36,26 @@ const MobileIconContainer = ({ title, icon, href }) => {
           y: isHovered ? -8 : 0,
         }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        // Scaled down to w-9 h-9 on mobile so 7 items can fit without overflowing
-        className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-gray-100 hover:bg-gold-accent/20"
+        // Added text-charcoal-black so the icons are dark and crisp against the light background
+        className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-gray-100 hover:bg-gold-accent/20 text-charcoal-black transition-colors"
       >
         <motion.div
           animate={{ scale: isHovered ? 1.1 : 1 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className="h-4 w-4 sm:h-5 sm:w-5"
+          // THE FIX: [&>svg] forces any icon passed in to perfectly scale to the 20x20px container
+          className="flex items-center justify-center h-5 w-5 sm:h-6 sm:w-6 [&>svg]:w-full [&>svg]:h-full"
         >
           {icon}
         </motion.div>
       </motion.div>
+      
       <AnimatePresence>
         {isHovered && (
           <motion.span
             initial={{ opacity: 0, y: 5, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}
             exit={{ opacity: 0, y: 5, x: "-50%" }}
-            className="absolute -top-8 left-1/2 whitespace-nowrap rounded-md bg-charcoal-black px-2 py-1 text-[10px] sm:text-xs text-white pointer-events-none drop-shadow-md"
+            className="absolute -top-8 left-1/2 whitespace-nowrap rounded-md bg-charcoal-black px-2 py-1 text-[10px] sm:text-xs text-white pointer-events-none drop-shadow-md z-50"
           >
             {title}
           </motion.span>
@@ -70,8 +72,7 @@ const FloatingDockMobile = ({ items, className }) => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
       className={cn(
-        // Reduced gap-2 to gap-1.5, added max-w-[95vw] to prevent edge bleeding
-        "flex md:hidden items-center gap-1.5 sm:gap-2 rounded-full bg-white/90 backdrop-blur-md px-3 py-2 sm:py-3 shadow-lg border border-gray-200 max-w-[95vw] overflow-x-auto no-scrollbar",
+        "flex md:hidden items-center justify-center gap-2 sm:gap-3 rounded-full bg-white/90 backdrop-blur-md px-4 py-3 shadow-2xl border border-gray-200 max-w-[95vw] overflow-x-auto no-scrollbar",
         className,
       )}
     >
@@ -149,7 +150,7 @@ function IconContainer({ mouseX, title, icon, href }) {
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 dark:bg-neutral-800"
+        className="relative flex aspect-square items-center justify-center rounded-full bg-gray-200 text-charcoal-black transition-colors hover:bg-gold-accent/20"
       >
         <AnimatePresence>
           {hovered && (
@@ -157,7 +158,7 @@ function IconContainer({ mouseX, title, icon, href }) {
               initial={{ opacity: 0, y: 10, x: "-50%" }}
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 2, x: "-50%" }}
-              className="absolute -top-8 left-1/2 w-fit rounded-md border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs whitespace-pre text-neutral-700 dark:border-neutral-900 dark:bg-neutral-800 dark:text-white pointer-events-none drop-shadow-md"
+              className="absolute -top-10 left-1/2 w-fit rounded-md border border-gray-200 bg-charcoal-black px-3 py-1.5 text-xs whitespace-pre text-white z-50 pointer-events-none drop-shadow-md"
             >
               {title}
             </motion.div>
@@ -165,7 +166,7 @@ function IconContainer({ mouseX, title, icon, href }) {
         </AnimatePresence>
         <motion.div
           style={{ width: widthIcon, height: heightIcon }}
-          className="flex items-center justify-center"
+          className="flex items-center justify-center [&>svg]:w-full [&>svg]:h-full"
         >
           {icon}
         </motion.div>

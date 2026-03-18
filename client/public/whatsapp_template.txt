@@ -1,3 +1,0 @@
-Hello!
-I want to place an order for *{{order_type}}*.
-Please guide me further.

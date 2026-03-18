@@ -1,354 +1,88 @@
-import { useState, useEffect, useRef } from "react";
-import { X, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { servicesData } from "../data/servicesData";
+import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/images/logo-negative-gom.png";
 import { useClientAuth } from "../context/ClientAuthContext";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isClientLoggedIn, logout } = useClientAuth();
-  const navigate = useNavigate();
-
-  // Search State
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  
-  // FIX 1: Ref attached to the entire nav so clicking the mobile input doesn't trigger a close
-  const navRef = useRef(null);
-
   const location = useLocation();
-  const isServiceDetails =
-    location.pathname.startsWith("/services/") &&
-    location.pathname !== "/services";
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Search Logic
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setSearchResults([]);
-      return;
-    }
-
-    const filtered = servicesData.filter(
-      (service) =>
-        service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.category.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-    setSearchResults(filtered);
-  }, [searchQuery]);
-
-  // Click outside to close search
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // If the click is outside the entire navbar, close the search
-      if (navRef.current && !navRef.current.contains(event.target)) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside, { passive: true });
-    
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-    };
-  }, []);
-
-  // Close search on route change
-  useEffect(() => {
-    setIsSearchOpen(false);
-    setSearchQuery("");
-  }, [location.pathname]);
+  // Close menu on route change
+  useEffect(() => setIsMenuOpen(false), [location.pathname]);
 
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },
     { name: "Shop", path: "/shop" },
     { name: "Gallery", path: "/gallery" },
-    { name: "Blog", path: "/blog" },
+    { name: "Journal", path: "/blog" },
     { name: "About", path: "/about" },
   ];
 
   return (
-    <nav
-      ref={navRef}
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
-        isScrolled || isSearchOpen
-          ? "bg-warm-ivory/95 backdrop-blur-md shadow-sm py-4"
-          : "bg-transparent py-6"
-      }`}
-      style={
-        !isScrolled && !isServiceDetails && !isSearchOpen
-          ? { textShadow: "0 1px 8px rgba(0,0,0,0.25)" }
-          : {}
-      }
-    >
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${
+      isScrolled || isMenuOpen ? "bg-charcoal-black/95 backdrop-blur-md py-3 shadow-lg" : "bg-transparent py-6"
+    }`}>
       <div className="container mx-auto px-6 md:px-12 flex items-center justify-between">
-        {/* Logo */}
-        <Link
-          to="/"
-          className={`font-playfair text-2xl md:text-3xl font-bold tracking-tighter transition-colors duration-300 flex items-center gap-3 ${
-            !isScrolled && !isServiceDetails && !isSearchOpen
-              ? "text-warm-ivory"
-              : "text-charcoal-black"
-          }`}
-        >
-          <img
-            src={logo}
-            alt="Gift of Memories"
-            className="h-10 md:h-12 w-auto object-contain"
-          />
-          <span className="leading-none">
+        <Link to="/" className="flex items-center gap-3 z-50">
+          <img src={logo} alt="Gift of Memories" className="h-10 md:h-12 w-auto" />
+          <span className="font-playfair text-xl font-bold text-warm-ivory hidden sm:inline">
             Gift of Memories<span className="text-gold-accent">.</span>
           </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-8">
+        {/* Desktop Links */}
+        <div className="hidden lg:flex items-center space-x-10">
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.path}
-              className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 ${
-                location.pathname === link.path
-                  ? "text-gold-accent"
-                  : !isScrolled && !isServiceDetails && !isSearchOpen
-                    ? "text-warm-ivory/90 hover:text-gold-accent"
-                    : "text-charcoal-black/80 hover:text-gold-accent"
-              }`}
-            >
+            <Link key={link.name} to={link.path} className="text-[11px] font-inter uppercase tracking-[0.25em] font-bold text-warm-ivory/80 hover:text-gold-accent transition-colors">
               {link.name}
             </Link>
           ))}
-
-          {/* Client Auth Buttons */}
           {isClientLoggedIn ? (
-            <button
-              onClick={logout}
-              className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 mr-4 ${
-                !isScrolled && !isServiceDetails && !isSearchOpen
-                  ? "text-warm-ivory/90 hover:text-gold-accent"
-                  : "text-charcoal-black/80 hover:text-gold-accent"
-              }`}
-            >
-              Logout
-            </button>
+            <button onClick={logout} className="text-[11px] font-inter uppercase tracking-[0.25em] font-bold text-gold-accent">Logout</button>
           ) : (
-            <Link
-              to="/login"
-              className={`font-inter text-sm uppercase tracking-widest transition-colors duration-300 mr-4 ${
-                !isScrolled && !isServiceDetails && !isSearchOpen
-                  ? "text-warm-ivory/90 hover:text-gold-accent"
-                  : "text-charcoal-black/80 hover:text-gold-accent"
-              }`}
-            >
-              Login
-            </Link>
+            <Link to="/login" className="text-[11px] font-inter uppercase tracking-[0.25em] font-bold text-warm-ivory/80">Login</Link>
           )}
-
-          {/* Desktop Search Bar */}
-          <div className="relative">
-            {isSearchOpen ? (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "300px" }}
-                exit={{ opacity: 0, width: 0 }}
-                className="flex items-center bg-white/50 backdrop-blur-md rounded-full border border-gold-accent/50 overflow-hidden"
-              >
-                <input
-                  type="text"
-                  placeholder="Search services..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full px-4 py-2 bg-transparent focus:outline-none text-sm placeholder-gray-500 ${
-                    !isScrolled && !isServiceDetails
-                      ? "text-warm-ivory"
-                      : "text-charcoal-black"
-                  }`}
-                  autoFocus
-                />
-                <button
-                  onClick={() => {
-                    setIsSearchOpen(false);
-                    setSearchQuery("");
-                  }}
-                  className="px-3 text-gold-accent hover:text-gold-accent/80"
-                >
-                  <X size={18} />
-                </button>
-              </motion.div>
-            ) : (
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className={`transition-colors duration-300 ${
-                  !isScrolled && !isServiceDetails
-                    ? "text-warm-ivory/90 hover:text-gold-accent"
-                    : "text-charcoal-black/80 hover:text-gold-accent"
-                }`}
-              >
-                <Search size={22} />
-              </button>
-            )}
-
-            {/* Desktop Search Results Dropdown */}
-            <AnimatePresence>
-              {isSearchOpen && searchQuery && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full right-0 mt-4 w-80 bg-white rounded-lg shadow-xl overflow-hidden border border-gray-100"
-                >
-                  {searchResults.length > 0 ? (
-                    <div className="py-2">
-                      <h3 className="px-4 py-2 text-xs font-inter uppercase tracking-widest text-gray-400 border-b border-gray-100 mb-1">
-                        Services Found
-                      </h3>
-                      {searchResults.map((service) => (
-                        <Link
-                          key={service.id}
-                          to={`/services/${service.id}`}
-                          onClick={() => {
-                            setIsSearchOpen(false);
-                            setSearchQuery("");
-                          }}
-                          className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors group"
-                        >
-                          <img
-                            src={service.image}
-                            alt={service.title}
-                            className="w-12 h-12 object-cover rounded-md mr-3 group-hover:opacity-80 transition-opacity"
-                          />
-                          <div>
-                            <p className="font-playfair font-medium text-charcoal-black group-hover:text-gold-accent transition-colors">
-                              {service.title}
-                            </p>
-                            <p className="text-xs text-gray-500 font-inter truncate w-48">
-                              {service.category}
-                            </p>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="px-4 py-6 text-center text-gray-500 font-inter text-sm">
-                      No services found matching "{searchQuery}"
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <Link
-            to="/contact"
-            className={`px-6 py-2.5 font-inter text-sm uppercase tracking-widest transition-colors duration-300 ${
-              !isScrolled && !isServiceDetails && !isSearchOpen
-                ? "bg-gold-accent text-charcoal-black hover:bg-warm-ivory hover:text-gold-accent border border-warm-ivory"
-                : "bg-charcoal-black text-warm-ivory hover:bg-gold-accent hover:text-charcoal-black"
-            }`}
-          >
+          <Link to="/contact" className="px-8 py-3 bg-gold-accent text-charcoal-black text-[10px] font-inter font-black uppercase tracking-widest rounded-full hover:bg-white transition-all">
             Book Now
           </Link>
         </div>
 
-        {/* Mobile Search Icon Only */}
-        <div className="flex items-center md:hidden gap-4">
-          <button
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className={`transition-colors duration-300 ${
-              !isScrolled && !isServiceDetails && !isSearchOpen
-                ? "text-warm-ivory/90 hover:text-gold-accent"
-                : "text-charcoal-black/80 hover:text-gold-accent"
-            }`}
-          >
-            {isSearchOpen ? <X size={24} /> : <Search size={24} />}
-          </button>
-        </div>
+        {/* Hamburger Button */}
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="lg:hidden text-warm-ivory z-50 p-2">
+          {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </div>
 
-      {/* Mobile Search Overlay */}
+      {/* Mobile slide-down menu */}
       <AnimatePresence>
-        {isSearchOpen && (
-          <motion.div
-            className="md:hidden absolute top-full left-0 w-full bg-white p-4 shadow-lg border-t border-gray-100"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+        {isMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }} 
+            animate={{ opacity: 1, height: "100vh" }} 
+            exit={{ opacity: 0, height: 0 }}
+            className="absolute top-0 left-0 w-full bg-charcoal-black z-40 flex flex-col justify-center items-center overflow-hidden"
           >
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search services..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                // Removed autoFocus on mobile to prevent jarring keyboard popups until the user is ready
-                className="w-full px-4 py-3 pr-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:border-gold-accent text-charcoal-black text-base"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-charcoal-black"
-                >
-                  <X size={18} />
-                </button>
-              )}
+            <div className="flex flex-col gap-8 text-center">
+              {navLinks.map((link) => (
+                <Link key={link.name} to={link.path} className="text-2xl font-playfair font-bold text-warm-ivory hover:text-gold-accent">
+                  {link.name}
+                </Link>
+              ))}
+              <Link to="/contact" className="mt-4 px-10 py-4 bg-gold-accent text-charcoal-black font-bold uppercase tracking-widest rounded-full">
+                Book a Session
+              </Link>
             </div>
-
-            {/* Mobile Results */}
-            {searchQuery && (
-              <div className="mt-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                {searchResults.length > 0 ? (
-                  <div className="pb-2">
-                    <h3 className="text-xs font-inter uppercase tracking-widest text-gray-400 mb-3 px-2">
-                      Matches
-                    </h3>
-                    {searchResults.map((service) => (
-                      <Link
-                        key={service.id}
-                        to={`/services/${service.id}`}
-                        onClick={() => {
-                          setIsSearchOpen(false);
-                          setSearchQuery("");
-                          // FIX 2: Removed setIsMobileMenuOpen(false) to prevent fatal crash
-                        }}
-                        className="flex items-center p-2 mb-2 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <img
-                          src={service.image}
-                          alt={service.title}
-                          className="w-12 h-12 object-cover rounded-md mr-4"
-                        />
-                        <div>
-                          <p className="font-playfair font-medium text-charcoal-black text-sm">
-                            {service.title}
-                          </p>
-                          <p className="text-xs text-gray-500 font-inter mt-0.5">
-                            {service.category}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm text-center py-6">
-                    No results for "{searchQuery}"
-                  </p>
-                )}
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>

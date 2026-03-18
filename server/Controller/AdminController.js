@@ -1,8 +1,8 @@
 import { Service } from "../Model/Service.js";
 import { Gallery } from "../Model/Gallery.js";
 import { Enquiry } from "../Model/Enquiry.js";
-import { Reminder } from "../Model/Reminder.js";
-
+// Removed the deleted Reminder import
+import { BookingReminder } from "../Model/BookingReminder.js"; 
 import nodemailer from "nodemailer";
 
 export const getMetrics = async (req, res) => {
@@ -10,13 +10,15 @@ export const getMetrics = async (req, res) => {
     const servicesCount = await Service.countDocuments();
     const galleryCount = await Gallery.countDocuments();
     const enquiriesCount = await Enquiry.countDocuments();
-    const remindersCount = await Reminder.countDocuments();
+    
+    // Updated to count the new BookingReminder model
+    const remindersCount = await BookingReminder.countDocuments();
 
     res.status(200).json({
       services: servicesCount,
       gallery: galleryCount,
       enquiries: enquiriesCount,
-      reminders: remindersCount,
+      reminders: remindersCount, // This now reflects active WhatsApp reminders
     });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });

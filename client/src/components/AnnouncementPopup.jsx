@@ -15,25 +15,21 @@ const AnnouncementPopup = () => {
     const fetchPopup = async () => {
       try {
         const response = await axios.get(
-          `${import.meta.env.VITE_NODE_URL}/api/pop/popup`,
+          `${import.meta.env.VITE_NODE_URL}/api/pop/popup`
         );
         const data = response.data;
 
         if (data && data._id) {
-          // Check if this specific popup has been seen in this session
-          const seenPopup = sessionStorage.getItem(`popup_seen_${data._id}`);
-
-          // FIX 1: Actually stop the popup from showing if they've seen it!
-          if (seenPopup) return; 
+          // Anti-spam check (Commented out for easy testing)
+          // const seenPopup = sessionStorage.getItem(`popup_seen_${data._id}`);
+          // if (seenPopup) return; 
 
           if (!data.image && !data.message) {
-            data.message =
-              "Welcome! This is a placeholder for your announcement. Please update it in the Admin Panel.";
+            data.message = "Welcome! This is a placeholder for your announcement. Please update it in the Admin Panel.";
           }
 
           setPopupData(data);
           
-          // Wait for the specified delay before showing
           setTimeout(() => {
             setIsVisible(true);
           }, data.delay || 3000);
@@ -48,22 +44,20 @@ const AnnouncementPopup = () => {
 
   const handleClose = () => {
     setIsVisible(false);
-    if (popupData?._id) {
-      sessionStorage.setItem(`popup_seen_${popupData._id}`, "true");
-    }
+    // Anti-spam save (Commented out for easy testing)
+    // if (popupData?._id) {
+    //   sessionStorage.setItem(`popup_seen_${popupData._id}`, "true");
+    // }
   };
 
   return (
     <AnimatePresence>
-      {/* FIX 2: AnimatePresence requires the direct child to be a motion component to exit properly */}
       {isVisible && popupData && (
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          // FIX 3: Clicking the dark backdrop now closes the modal
           onClick={handleClose}
-          // Bumped z-index to 120 so it completely clears your Loading Screen and Navbar
           className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-6 bg-charcoal-black/70 backdrop-blur-sm"
         >
           <motion.div
@@ -71,27 +65,18 @@ const AnnouncementPopup = () => {
             animate={{ scale: 1, y: 0 }}
             exit={{ scale: 0.95, y: 20 }}
             transition={{ type: "spring", damping: 30, stiffness: 400 }}
-            // Prevents clicks inside the popup from bubbling up to the backdrop and closing it
             onClick={(e) => e.stopPropagation()}
             className="relative w-full max-w-[600px] overflow-hidden rounded-2xl shadow-2xl bg-charcoal-black"
           >
-            {/* Close Button */}
             <button
               onClick={handleClose}
               className="absolute top-4 right-4 p-2 bg-black/40 hover:bg-black/60 backdrop-blur-md rounded-full text-white/90 hover:text-white transition-all duration-300 z-50 border border-white/20"
-              aria-label="Close popup"
             >
               <X size={20} />
             </button>
 
-            {/* Clickable Container if link exists */}
             {popupData.link ? (
-              <a
-                href={popupData.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block group relative cursor-pointer"
-              >
+              <a href={popupData.link} target="_blank" rel="noopener noreferrer" className="block group relative cursor-pointer">
                 <PopupContent data={popupData} />
               </a>
             ) : (
@@ -108,31 +93,22 @@ const AnnouncementPopup = () => {
 
 const PopupContent = ({ data }) => {
   const handleWhatsAppClick = (e) => {
-    // Prevent the parent <a> tag (Learn More) from also triggering when WhatsApp is clicked
     e.preventDefault();
     e.stopPropagation();
-    const message = encodeURIComponent(
-      "Hi! I saw your announcement and would like to know more about your services.",
-    );
+    const message = encodeURIComponent("Hi! I saw your announcement and would like to know more about your services.");
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
   };
 
   return (
     <>
       {data.image ? (
-        <img
-          src={data.image}
-          alt="Announcement"
-          // Added object-top so faces/important details aren't cut off if the image is tall
-          className="w-full h-auto max-h-[70vh] object-cover object-top" 
-        />
+        <img src={data.image} alt="Announcement" className="w-full h-auto max-h-[70vh] object-cover object-top" />
       ) : (
         <div className="w-full h-64 bg-warm-ivory flex items-center justify-center">
           <p className="text-gray-400 font-inter text-sm tracking-widest uppercase">No Image</p>
         </div>
       )}
 
-      {/* Bottom Section with Message and WhatsApp Button */}
       <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black via-black/80 to-transparent pt-20 pb-6 px-6 md:px-8">
         {data.message && (
           <p className="text-white font-playfair text-xl md:text-3xl font-medium leading-tight tracking-tight drop-shadow-lg">
@@ -140,22 +116,16 @@ const PopupContent = ({ data }) => {
           </p>
         )}
 
-        {/* Actions Row */}
         <div className="mt-4 md:mt-6 flex items-center gap-4">
-          
-          {/* WhatsApp Button */}
           <button
             onClick={handleWhatsAppClick}
-            aria-label="Contact on WhatsApp"
-            className="flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white p-3 md:p-3.5 rounded-full transition-all duration-300 shadow-lg shadow-[#25D366]/20 hover:shadow-xl hover:scale-105"
+            className="flex items-center justify-center bg-[#25D366] hover:bg-[#128C7E] text-white p-3 md:p-3.5 rounded-full transition-all duration-300 shadow-lg hover:scale-105"
           >
             <IconBrandWhatsapp size={24} />
           </button>
 
-          {/* Learn More Link */}
           {data.link && (
-            // FIX 4: Mobile fix! Opacity is 100 on mobile (md:opacity-0), revealing on hover only for desktop
-            <div className="flex items-center gap-2 text-gold-accent text-xs md:text-sm font-bold uppercase tracking-widest opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md">
+            <div className="flex items-center gap-2 text-gold-accent text-xs md:text-sm font-bold uppercase tracking-widest transition-opacity duration-300 drop-shadow-md">
               <span>Learn More</span>
               <ExternalLink size={14} />
             </div>

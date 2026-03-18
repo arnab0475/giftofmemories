@@ -34,8 +34,8 @@ const AdminShopPage = () => {
     name: "", description: "", price: "", category: "", popularity: "",
     isBestseller: false, oldPrice: "", tag: "",
   });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+ const [mediaFiles, setMediaFiles] = useState([]);
+const [mediaPreview, setMediaPreview] = useState([]);
 
   // Form state for categories
   const [categoryFormData, setCategoryFormData] = useState({
@@ -84,7 +84,9 @@ const AdminShopPage = () => {
       name: "", description: "", price: "", category: categories.length > 0 ? categories[0]._id : "",
       popularity: "", isBestseller: false, oldPrice: "", tag: "",
     });
-    setImageFile(null); setImagePreview(null); setEditingProduct(null);
+    setMediaFiles([]);
+setMediaPreview([]);
+ setEditingProduct(null);
   };
 
   const handleOpenModal = (product = null) => {
@@ -96,7 +98,7 @@ const AdminShopPage = () => {
         isBestseller: product.isBestseller || false, oldPrice: product.oldPrice ? product.oldPrice.toString() : "",
         tag: product.tag || "none",
       });
-      setImagePreview(product.image);
+    setMediaPreview(product.media || []);
     } else {
       resetForm();
     }
@@ -108,13 +110,14 @@ const AdminShopPage = () => {
     resetForm();
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
+const handleMediaChange = (e) => {
+  const files = Array.from(e.target.files);
+
+  setMediaFiles(files);
+
+  const previews = files.map((file) => URL.createObjectURL(file));
+  setMediaPreview(previews);
+};
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -124,7 +127,7 @@ const AdminShopPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!editingProduct && !imageFile) return toast.error("Product image is required");
+    if (!editingProduct && mediaFiles.length === 0) return toast.error("Product media is required");
     if (!formData.name || !formData.description || !formData.price || !formData.category) {
       return toast.error("Please fill all required fields");
     }
@@ -140,7 +143,9 @@ const AdminShopPage = () => {
       data.append("category", formData.category);
       data.append("popularity", formData.popularity || "0");
       data.append("isBestseller", formData.isBestseller);
-      if (imageFile) data.append("image", imageFile);
+     mediaFiles.forEach((file) => {
+  data.append("media", file);
+});
 
       if (editingProduct) {
         await axios.put(`${import.meta.env.VITE_NODE_URL}/api/shop/update-product/${editingProduct._id}`, data, {
@@ -410,7 +415,7 @@ const AdminShopPage = () => {
                           }`}
                         >
                           <div className="relative aspect-[4/5] bg-warm-ivory overflow-hidden group">
-                            <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                            <img src={product.media?.[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                             
                             {/* Badges - Scaled for mobile */}
                             <div className="absolute top-2 left-2 md:top-3 md:left-3 flex flex-col gap-1.5 md:gap-2">
@@ -561,16 +566,33 @@ const AdminShopPage = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-charcoal-black ml-1">Product Image {!editingProduct && <span className="text-red-500">*</span>}</label>
                   <div className="flex items-center gap-4 md:gap-6">
-                    {imagePreview && (
-                      <div className="w-24 h-24 md:w-28 md:h-32 rounded-xl overflow-hidden shadow-sm shrink-0 border border-charcoal-black/5">
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <label className={`flex-1 border-2 border-dashed rounded-xl p-4 md:p-6 flex flex-col items-center justify-center cursor-pointer transition-all h-24 md:h-32 ${imagePreview ? 'border-charcoal-black/10 hover:border-gold-accent hover:bg-warm-ivory/20' : 'border-gold-accent/30 bg-gold-accent/5 hover:border-gold-accent'}`}>
+                   {mediaPreview.length > 0 && (
+  <div className="flex gap-3 flex-wrap">
+    {mediaPreview.map((file, index) => (
+      <div
+        key={index}
+        className="w-24 h-24 md:w-28 md:h-32 rounded-xl overflow-hidden border border-charcoal-black/5"
+      >
+        {file.includes(".mp4") || file.includes(".webm") ? (
+          <video src={file} className="w-full h-full object-cover" />
+        ) : (
+          <img src={file} className="w-full h-full object-cover" />
+        )}
+      </div>
+    ))}
+  </div>
+)}
+                    <label className={`flex-1 border-2 border-dashed rounded-xl p-4 md:p-6 flex flex-col items-center justify-center cursor-pointer transition-all h-24 md:h-32 ${mediaPreview ? 'border-charcoal-black/10 hover:border-gold-accent hover:bg-warm-ivory/20' : 'border-gold-accent/30 bg-gold-accent/5 hover:border-gold-accent'}`}>
                       <Upload size={20} className="text-gold-accent mb-2 md:w-6 md:h-6" />
-                      <span className="text-xs md:text-sm font-bold text-charcoal-black">{imageFile ? "Change Image" : "Upload Image"}</span>
+                      <span className="text-xs md:text-sm font-bold text-charcoal-black">{mediaFiles ? "Change Image" : "Upload Image"}</span>
                       <span className="text-[8px] md:text-[10px] font-bold uppercase tracking-widest text-slate-gray mt-1 text-center">JPG, PNG (Max 10MB)</span>
-                      <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                      <input
+  type="file"
+  accept="image/*,video/*"
+  multiple
+  onChange={handleMediaChange}
+  className="hidden"
+/>
                     </label>
                   </div>
                 </div>

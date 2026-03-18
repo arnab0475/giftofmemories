@@ -23,8 +23,10 @@ const BookingForm = () => {
     formData.append('reminders', JSON.stringify(defaultReminders));
 
     try {
-      // Make sure this URL matches your backend port!
-      const response = await fetch('http://localhost:3000/api/booking/bookings', {
+      // FIX: Using the dynamic environment variable instead of localhost
+      const API_URL = import.meta.env.VITE_NODE_URL;
+      
+      const response = await fetch(`${API_URL}/api/booking/bookings`, {
         method: 'POST',
         body: formData
       });
