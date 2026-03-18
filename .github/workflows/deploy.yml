@@ -1,0 +1,87 @@
+name: 🚀 Auto Deploy GiftOfMemories
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # ✅ Checkout repo
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # ✅ Setup Node
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    # ✅ Build Frontend (important)
+    - name: Build Frontend
+      run: |
+        cd client
+        npm install
+        npm run build
+
+    # ✅ Setup SSH
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+    # ✅ Deploy to VPS
+    - name: Deploy to VPS
+      run: |
+        ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+
+        echo "🚀 Starting Deployment..."
+
+        # Go to project
+        cd /var/www/giftofmemories
+
+        # Pull latest code
+        git pull origin main
+
+        # ======================
+        # 🔥 FRONTEND FIX (IMPORTANT)
+        # ======================
+        cd client
+        npm install
+        npm run build
+
+        # Remove old dist (avoid conflict)
+        rm -rf /var/www/giftofmemories/dist
+
+        # Copy new build to nginx root
+        cp -r dist /var/www/giftofmemories/
+
+        echo "✅ Frontend Deployed"
+
+        # ======================
+        # 🔥 BACKEND
+        # ======================
+        cd ../server
+        npm install
+
+        # Restart backend safely
+        pm2 restart gift-api || pm2 start server.js --name gom-backend
+
+        pm2 save
+
+        echo "✅ Backend Running"
+
+        # ======================
+        # 🔥 NGINX RESTART
+        # ======================
+        systemctl restart nginx
+
+        echo "🎉 Deployment Completed Successfully!"
+
+        EOF
